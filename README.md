@@ -1,1 +1,105 @@
 # diary-workout-tracker-backend
+
+![Workflow](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/actions/workflows/ci.yml/badge.svg)
+![Workflow](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/actions/workflows/cd.yml/badge.svg)
+
+### Описание
+Научись бегать.
+
+### Технологии
+
+[![Nginx](https://img.shields.io/badge/Nginx-Latest-blue?style=flat&logo=nginx&logoColor=white)](https://nginx.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Latest-blue?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Swagger](https://img.shields.io/badge/Swagger-Latest-blue?style=flat&logo=swagger&logoColor=white)](https://swagger.io/)
+[![Docker](https://img.shields.io/badge/Docker-Latest-blue?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+-----
+[![Python](https://img.shields.io/badge/Python-%5E3.11-blue?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-%5E5.0.2-blue?style=flat&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Django Rest Framework](https://img.shields.io/badge/DjangoRestFramework-%5E3.14.0-blue?style=flat)](https://pypi.org/project/djangorestframework/)
+---
+[![Ruff](https://img.shields.io/badge/Ruff-%5E0.2.1-blue?style=flat)](https://pypi.org/project/ruff/)
+[![Pytest](https://img.shields.io/badge/Pytest-%5E8.0.0-blue?style=flat&logo=pytest&logoColor=white)](https://pypi.org/project/pytest/)
+
+## Запуск проекта
+
+### Настройка и запуск локально для разработки
+Проект использует [Poetry](https://python-poetry.org/) как инструмент управления зависимостями.
+1. Клонировать репозиторий.
+    ```bash
+    git clone git@github.com:Diary-workout-tracker/diary-workout-tracker-backend.git
+    cd diary-workout-tracker-backend
+    ```
+2. Создание и активация виртуального окружения при помощи [poetry](https://python-poetry.org/docs/#installation)
+    ```bash
+    poetry env use python
+    poetry install
+    poetry shell
+    poetry self add poetry-plugin-export
+    ```
+> **Примечание:** версия python должна быть ^3.11.
+
+3. Инициализация [pre-commit](#технологии).
+   ```bash
+   poetry run pre-commit install
+   ```
+4. Создайте и заполните файл `.env` согласно шаблону [.env.example](https://github.com/MySelf-Estate/myself-estate/blob/develop/.env.example)
+5. Запуск необходимый сервисов для работы приложения.
+    ```bash
+    docker  compose  --env-file  .env  -f  infra/docker-compose.yml  up  -d
+    ```
+> TODO: нет структуры
+
+6. Применить миграции базы данных.
+    ```bash
+    poetry run backend/manager.py migrate
+    ```
+7. Запустить приложения.
+Приложение состоит из нескольких микросервисо, каждый из которых запускается отдельно
+    ```bash
+    poetry run backend/manager.py runserver
+    ```
+
+
+## Дополниельные сведения для разработчика
+
+
+## Полезные материалы
+<details>
+  <summary><h3>Команды poetry</h3></summary>
+
+- Создание нового проекта: `poetry new new_project`
+- Установка зависимостей: `poetry install`
+- Запуск виртуального окружения: `poetry shell`
+- Внедрение Poetry в уже имеющийся проект: `poetry init`
+- Обновление зависимостей: `poetry update`
+- Добавление новой библиотеки: `poetry add <имя_библиотеки>`
+- Удаление зависимости: `poetry remove <имя_библиотеки>`
+- Просмотр зависимостей: `poetry show`
+- Запуск из виртуального окружения: `poetry run <команда>`
+
+</details>
+
+<details>
+  <summary><h3>Команды pre-commit</h3></summary>
+
+  **Важно** С использованием poetry, выполнение команд из виртуального окружения происходит через `poetry run <команда>`.
+- Установить pre-commit в проекте: `pre-commit install`
+- Запустить проверку всех хуков: `pre-commit run -a`
+- Запустить конкретный хук: `poetry run pre-commit run <имя-хука>`
+- Деактивировать автоматическое выполнение хуков перед коммитом: `poetry run pre-commit uninstall`
+- Обновить pre-commit хуки: `poetry run pre-commit autoupdate`
+
+</details>
+
+
+## Разработчики
+
+### Бесcменный лидер
+[Струнникова Елизавета](https://github.com/Luna-luns)
+
+### Команда
+[Оганин Петр](https://github.com/necroshizo)
+[Шапиро Алексей](https://github.com/holohup)
+[Шлемин Сергей](https://github.com/fluid1408)
+[Яременко Владислав](https://github.com/VladislavYar)
+[Ястребов Владислав ](https://github.com/blakkheart)
