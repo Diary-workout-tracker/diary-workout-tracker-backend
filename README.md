@@ -99,7 +99,11 @@
 
 ### Команда
 [Оганин Петр](https://github.com/necroshizo)
+
 [Шапиро Алексей](https://github.com/holohup)
+
 [Шлемин Сергей](https://github.com/fluid1408)
+
 [Яременко Владислав](https://github.com/VladislavYar)
+
 [Ястребов Владислав ](https://github.com/blakkheart)
