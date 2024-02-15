@@ -7,35 +7,35 @@ on:
 
 jobs:
   check_code:
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          python-version: ['3.11', '3.12']
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        - name: Set up Python ${{ matrix.python-version }}
-          uses: actions/setup-python@v5
-          with:
-            python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r backend/requirements.txt
-            pip install ruff
-            pip install pytest
-            pip install pytest-django
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install ruff
+          pip install pytest
+          pip install pytest-django
 
-        - name: Configure Linters
-          run: echo "Configuring Linters" && cp pyproject.toml $HOME/pyproject.toml
+      - name: Configure Linters
+        run: echo "Configuring Linters" && cp ./backend/pyproject.toml $HOME/pyproject.toml
 
-        - name: Run linters for ${{ matrix.python-version }}
-          run: |
-            ruff check --output-format=github backend\
+      - name: Run linters for ${{ matrix.python-version }}
+        run: |
+          ruff check --output-format=github backend\
 
-        - name: Run pytest for ${{ matrix.python-version }}
-          run: |
-            pytest test\
+      - name: Run pytest for ${{ matrix.python-version }}
+        run: |
+          pytest test\

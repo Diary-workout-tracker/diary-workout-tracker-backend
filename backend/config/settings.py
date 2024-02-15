@@ -10,7 +10,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 
 DEBUG = True
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default=["*"])
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
 
 
 INSTALLED_APPS = [
@@ -61,10 +61,10 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
 	"default": {
 		"ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.sqlite3"),
-		"NAME": os.getenv("DB_NAME", default=BASE_DIR / "db.sqlite3"),
+		"NAME": os.getenv("POSTGRES_DB", default=BASE_DIR / "db.sqlite3"),
 		"USER": os.getenv("POSTGRES_USER", default="user"),
 		"PASSWORD": os.getenv("POSTGRES_PASSWORD", default="password"),
-		"HOST": os.getenv("DB_HOST", default="127.0.0.1"),
+		"HOST": os.getenv("DB_HOST", default=""),
 		"PORT": os.getenv("DB_PORT", default=5432),
 	}
 }
