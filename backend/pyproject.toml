@@ -10,7 +10,7 @@ authors = [
     "Яременко Владислав <vlad.yaremenko.98@yandex.ru>",
     "Ястребов Владислав <blakkheart66@gmail.com>",
 ]
-readme = "README.md"
+readme = "../README.md"
 
 [tool.ruff]
 exclude = [
