@@ -8,15 +8,13 @@ volumes:
 services:
   db:
     image: postgres:16.2
-    env_file:
-      - path: ./infra/.env
+    env_file: ./infra/.env
     volumes:
       - pg_data:/var/lib/postgresql/data
 
   backend:
     build: ./backend/
-    env_file:
-      - path: ./infra/.env
+    env_file: ./infra/.env
     depends_on:
       - db
     volumes:
