@@ -30,7 +30,7 @@ jobs:
           pip install pytest-django
 
       - name: Configure Linters
-        run: echo "Configuring Linters" && cp pyproject.toml $HOME/backend/pyproject.toml
+        run: echo "Configuring Linters" && cp /backend/pyproject.toml $HOME/pyproject.toml
 
       - name: Run linters for ${{ matrix.python-version }}
         run: |
