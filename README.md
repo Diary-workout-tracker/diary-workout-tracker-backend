@@ -4,7 +4,7 @@
 ![Workflow](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/actions/workflows/cd.yml/badge.svg)
 
 ### Описание
-Научись бегать.
+Научись бегать за 100 дней.
 
 ### Технологии
 
