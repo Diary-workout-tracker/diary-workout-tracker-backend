@@ -30,10 +30,23 @@
     cd diary-workout-tracker-backend
     ```
 2. Создание и активация виртуального окружения при помощи [poetry](https://python-poetry.org/docs/#installation)
+
+    2.1 Создание отдельного окружения
     ```bash
-    poetry env use python
-    poetry install
+    python -m venv venv
+    source venv/Scripts/activate
+    ```
+    для Linux и macOS
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+
+    2.2 Использование poetry
+    ```bash
+    pip install poetry
     poetry shell
+    poetry install
     poetry self add poetry-plugin-export
     ```
 > **Примечание:** версия python должна быть ^3.11.
@@ -42,21 +55,20 @@
    ```bash
    poetry run pre-commit install
    ```
-4. Создайте и заполните файл `.env` согласно шаблону [.env.example](https://github.com/MySelf-Estate/myself-estate/blob/develop/.env.example)
+4. Создайте и заполните файл `.env` согласно шаблону [.env.example](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/blob/develop/infra/.env.example)
 5. Запуск необходимый сервисов для работы приложения.
     ```bash
-    docker  compose  --env-file  .env  -f  infra/docker-compose.yml  up  -d
+    docker compose up -d
     ```
-> TODO: нет структуры
-
+> TODO: нет пока отдельной структуры
 6. Применить миграции базы данных.
     ```bash
-    poetry run backend/manager.py migrate
+    poetry run backend/manage.py migrate
     ```
 7. Запустить приложения.
 Приложение состоит из нескольких микросервисо, каждый из которых запускается отдельно
     ```bash
-    poetry run backend/manager.py runserver
+    poetry run backend/manage.py runserver
     ```
 
 
@@ -94,10 +106,8 @@
 
 ## Разработчики
 
-### Бесcменный лидер
 [Струнникова Елизавета](https://github.com/Luna-luns)
 
-### Команда
 [Оганин Петр](https://github.com/necroshizo)
 
 [Шапиро Алексей](https://github.com/holohup)
