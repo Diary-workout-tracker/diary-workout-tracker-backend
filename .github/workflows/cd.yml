@@ -62,7 +62,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          password: ${{ secrets.SSH_PASSPHRASE }}
           source: "docker-compose.production.yml"
           target: "/home/diary-workout-tracker"
       - name: Executing remote ssh commands to deploy
@@ -70,7 +70,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          password: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd /home/diary-workout-tracker/
             sudo docker compose -f docker-compose.production.yml pull
