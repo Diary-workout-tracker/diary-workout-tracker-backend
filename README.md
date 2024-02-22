@@ -56,21 +56,13 @@
    poetry run pre-commit install
    ```
 4. Создайте и заполните файл `.env` согласно шаблону [.env.example](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/blob/develop/infra/.env.example)
-5. Запуск необходимый сервисов для работы приложения.
+5. Выполнить команду Make в консоли.
     ```bash
-    docker compose up -d
+    make project-init # при первом запуске
     ```
-> TODO: нет пока отдельной структуры
-6. Применить миграции базы данных.
     ```bash
-    poetry run backend/manage.py migrate
+    make project-start # при последующих запусках
     ```
-7. Запустить приложения.
-Приложение состоит из нескольких микросервисо, каждый из которых запускается отдельно
-    ```bash
-    poetry run backend/manage.py runserver
-    ```
-
 
 ## Дополниельные сведения для разработчика
 
@@ -103,6 +95,20 @@
 
 </details>
 
+<details>
+  <summary><h3>Команды make</h3></summary>
+
+- Удаление Volumes: `make clear-volumes`
+- Запуск контейнеров: `make start-containers`
+- Выполнить миграции Django: `make migrate`
+- Собрать статику Django: `make collectstatic`
+- Создать супер пользователя: `make createsuperuser`
+- Инициализировать проект: `make project-init`
+- Запустить проект: `make project-start`
+- Остановить проект: `make project-stop`
+
+</details>
+
 
 ## Разработчики
 
@@ -116,4 +122,4 @@
 
 [Яременко Владислав](https://github.com/VladislavYar)
 
-[Ястребов Владислав ](https://github.com/blakkheart)
+[Ястребов Владислав](https://github.com/blakkheart)
