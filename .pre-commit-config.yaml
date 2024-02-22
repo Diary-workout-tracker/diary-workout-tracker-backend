@@ -24,9 +24,9 @@ repos:
       entry: python backend/manage.py spectacular --file docs/schema.yml
       types: [python]
 
-    # - id: pytest
-    #   name: Check pytest
-    #   entry: pytest test/
-    #   language: system
-    #   pass_filenames: false
-    #   types: [python]
+    - id: pytest
+      name: Check pytest
+      entry: pytest test/
+      language: system
+      pass_filenames: false
+      types: [python]
