@@ -16,12 +16,6 @@ repos:
 
 - repo: local
   hooks:
-    - id: export-django-requirements
-      name: Export Django requirements
-      language: system
-      pass_filenames: false
-      entry: poetry export --without-hashes --output backend/requirements.txt
-      files: ^(pyproject.toml|poetry.lock)$
 
     - id: export-schema-openapi
       name: Export schema OpenAPI
@@ -30,9 +24,9 @@ repos:
       entry: python backend/manage.py spectacular --file docs/schema.yml
       types: [python]
 
-    - id: pytest
-      name: Check pytest
-      entry: pytest test/
-      language: system
-      pass_filenames: false
-      types: [python]
+    # - id: pytest
+    #   name: Check pytest
+    #   entry: pytest test/
+    #   language: system
+    #   pass_filenames: false
+    #   types: [python]

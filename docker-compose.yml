@@ -11,17 +11,25 @@ services:
     env_file: ./infra/.env
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   backend:
     build: ./backend/
     env_file: ./infra/.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    command:
+        ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi"]
     volumes:
       - media:/app/media
       - static:/backend_static
 
-  gateway:
+  nginx:
     build: ./infra/
     depends_on:
       - backend

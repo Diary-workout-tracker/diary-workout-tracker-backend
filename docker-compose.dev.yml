@@ -1,0 +1,19 @@
+version: '3'
+
+volumes:
+  pg_data:
+
+services:
+
+  db:
+    image: postgres:16.2
+    env_file: ./infra/.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    ports:
+      - "127.0.0.1:5432:5432"
