@@ -20,6 +20,10 @@
 [![Ruff](https://img.shields.io/badge/Ruff-%5E0.2.1-blue?style=flat)](https://pypi.org/project/ruff/)
 [![Pytest](https://img.shields.io/badge/Pytest-%5E8.0.0-blue?style=flat&logo=pytest&logoColor=white)](https://pypi.org/project/pytest/)
 
+## Структура базы данных
+
+[ER-диаграмма](docs/ER_models.svg)
+
 ## Запуск проекта
 
 ### Настройка и запуск локально для разработки
