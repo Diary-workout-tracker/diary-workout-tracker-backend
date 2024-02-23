@@ -27,6 +27,7 @@ INSTALLED_APPS = [
 	"drf_spectacular",
 	# app
 	"api.apps.ApiConfig",
+	"users.apps.UsersConfig",
 ]
 
 MIDDLEWARE = [
@@ -85,6 +86,7 @@ AUTH_PASSWORD_VALIDATORS = [
 	},
 ]
 
+AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "ru-RU"
 
@@ -116,3 +118,7 @@ SPECTACULAR_SETTINGS = {
 	"VERSION": "1.0.0",
 	"SERVE_INCLUDE_SCHEMA": False,
 }
+
+# access restore code
+
+ACCESS_RESTORE_CODE_TTL_SECONDS = 300

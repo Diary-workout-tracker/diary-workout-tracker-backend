@@ -152,7 +152,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this пользователь.
+        description: A unique integer value identifying this user.
         required: true
       tags:
       - users
@@ -172,7 +172,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this пользователь.
+        description: A unique integer value identifying this user.
         required: true
       tags:
       - users
@@ -187,6 +187,7 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/User'
+        required: true
       security:
       - jwtAuth: []
       responses:
@@ -203,7 +204,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this пользователь.
+        description: A unique integer value identifying this user.
         required: true
       tags:
       - users
@@ -234,7 +235,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this пользователь.
+        description: A unique integer value identifying this user.
         required: true
       tags:
       - users
@@ -299,6 +300,7 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/User'
+        required: true
       security:
       - jwtAuth: []
       responses:
@@ -368,6 +370,60 @@ paths:
               schema:
                 $ref: '#/components/schemas/SendEmailReset'
           description: ''
+  /api/v1/users/reset_email/:
+    post:
+      operationId: users_reset_email_create
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendEmailReset'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailReset'
+          description: ''
+  /api/v1/users/reset_email_confirm/:
+    post:
+      operationId: users_reset_email_confirm_create
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UsernameResetConfirm'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsernameResetConfirm'
+          description: ''
   /api/v1/users/reset_password/:
     post:
       operationId: users_reset_password_create
@@ -422,59 +478,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/PasswordResetConfirm'
           description: ''
-  /api/v1/users/reset_username/:
+  /api/v1/users/set_email/:
     post:
-      operationId: users_reset_username_create
+      operationId: users_set_email_create
       tags:
       - users
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendEmailReset'
+              $ref: '#/components/schemas/SetUsername'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/SendEmailReset'
+              $ref: '#/components/schemas/SetUsername'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/SendEmailReset'
+              $ref: '#/components/schemas/SetUsername'
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SendEmailReset'
-          description: ''
-  /api/v1/users/reset_username_confirm/:
-    post:
-      operationId: users_reset_username_confirm_create
-      tags:
-      - users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UsernameResetConfirm'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/UsernameResetConfirm'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/UsernameResetConfirm'
-        required: true
-      security:
-      - jwtAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UsernameResetConfirm'
+                $ref: '#/components/schemas/SetUsername'
           description: ''
   /api/v1/users/set_password/:
     post:
@@ -501,32 +529,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SetPassword'
-          description: ''
-  /api/v1/users/set_username/:
-    post:
-      operationId: users_set_username_create
-      tags:
-      - users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetUsername'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SetUsername'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SetUsername'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SetUsername'
           description: ''
 components:
   schemas:
@@ -556,20 +558,21 @@ components:
     PatchedUser:
       type: object
       properties:
-        email:
-          type: string
-          format: email
-          title: Адрес электронной почты
-          maxLength: 254
-        id:
-          type: integer
-          readOnly: true
         username:
           type: string
-          readOnly: true
           title: Имя пользователя
           description: Обязательное поле. Не более 150 символов. Только буквы, цифры
             и символы @/./+/-/_.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
     SendEmailReset:
       type: object
       properties:
@@ -593,20 +596,18 @@ components:
       properties:
         current_password:
           type: string
-        new_username:
+        new_email:
           type: string
-          title: Имя пользователя
-          description: Обязательное поле. Не более 150 символов. Только буквы, цифры
-            и символы @/./+/-/_.
-          pattern: ^[\w.@+-]+$
-          maxLength: 150
+          format: email
+          title: Email address
+          maxLength: 254
       required:
       - current_password
-      - new_username
+      - new_email
     TokenObtainPair:
       type: object
       properties:
-        username:
+        email:
           type: string
           writeOnly: true
         password:
@@ -620,9 +621,9 @@ components:
           readOnly: true
       required:
       - access
+      - email
       - password
       - refresh
-      - username
     TokenRefresh:
       type: object
       properties:
@@ -646,31 +647,6 @@ components:
     User:
       type: object
       properties:
-        email:
-          type: string
-          format: email
-          title: Адрес электронной почты
-          maxLength: 254
-        id:
-          type: integer
-          readOnly: true
-        username:
-          type: string
-          readOnly: true
-          title: Имя пользователя
-          description: Обязательное поле. Не более 150 символов. Только буквы, цифры
-            и символы @/./+/-/_.
-      required:
-      - id
-      - username
-    UserCreate:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          title: Адрес электронной почты
-          maxLength: 254
         username:
           type: string
           title: Имя пользователя
@@ -678,6 +654,33 @@ components:
             и символы @/./+/-/_.
           pattern: ^[\w.@+-]+$
           maxLength: 150
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+      required:
+      - email
+      - id
+      - username
+    UserCreate:
+      type: object
+      properties:
+        username:
+          type: string
+          title: Имя пользователя
+          description: Обязательное поле. Не более 150 символов. Только буквы, цифры
+            и символы @/./+/-/_.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
         id:
           type: integer
           readOnly: true
@@ -685,21 +688,20 @@ components:
           type: string
           writeOnly: true
       required:
+      - email
       - id
       - password
       - username
     UsernameResetConfirm:
       type: object
       properties:
-        new_username:
+        new_email:
           type: string
-          title: Имя пользователя
-          description: Обязательное поле. Не более 150 символов. Только буквы, цифры
-            и символы @/./+/-/_.
-          pattern: ^[\w.@+-]+$
-          maxLength: 150
+          format: email
+          title: Email address
+          maxLength: 254
       required:
-      - new_username
+      - new_email
   securitySchemes:
     jwtAuth:
       type: http
