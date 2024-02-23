@@ -24,4 +24,3 @@ WORKDIR /app
 COPY ./poetry.lock ./pyproject.toml /app/
 RUN poetry install $(test "$DJANGO_ENV" == production && echo "--only=main") --no-interaction --no-ansi
 COPY . .
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi"]

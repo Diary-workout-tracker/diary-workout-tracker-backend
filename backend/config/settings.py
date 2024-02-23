@@ -2,9 +2,12 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+path_to_env = os.path.join(BASE_DIR, "..", "infra", ".env")
+
+load_dotenv(path_to_env)
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 
@@ -66,6 +69,7 @@ DATABASES = {
 		"PASSWORD": os.getenv("POSTGRES_PASSWORD", default="password"),
 		"HOST": os.getenv("DB_HOST", default=""),
 		"PORT": os.getenv("DB_PORT", default=5432),
+		"PG_USER": os.getenv("PG_USER", default="user"),
 	}
 }
 
