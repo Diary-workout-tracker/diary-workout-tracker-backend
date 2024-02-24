@@ -65,7 +65,7 @@ class Achievement(models.Model):
 		unique_together = ("name", "stars")
 
 	def __str__(self):
-		return f"{self.name} - {self.difficulty_level}"
+		return f"{self.name} - {self.stars}"
 
 
 class UserAchievement(models.Model):
