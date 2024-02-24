@@ -119,6 +119,13 @@ SPECTACULAR_SETTINGS = {
 	"SERVE_INCLUDE_SCHEMA": False,
 }
 
+CACHES = {
+	"default": {
+		"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+		"LOCATION": "diary-localmemcache",
+	}
+}
+
 # access restore code
 
 ACCESS_RESTORE_CODE_TTL_SECONDS = 300
