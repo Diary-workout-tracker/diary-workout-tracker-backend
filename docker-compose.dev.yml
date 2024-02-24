@@ -6,7 +6,7 @@ volumes:
 services:
 
   db:
-    image: postgres:16.2
+    image: postgres:16-alpine
     env_file: ./infra/.env
     restart: always
     volumes:
@@ -18,4 +18,4 @@ services:
       retries: 3
       start_period: 3s
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"

@@ -29,6 +29,7 @@ INSTALLED_APPS = [
 	"drf_spectacular",
 	# app
 	"api.apps.ApiConfig",
+	"runing.apps.RuningConfig",
 ]
 
 MIDDLEWARE = [
