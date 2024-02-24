@@ -123,32 +123,32 @@ class Training(models.Model):
 		help_text=_("Маршрут тренировки."),
 		db_comment=_("Маршрут тренировки."),
 	)
-	distance = models.IntegerField(
+	distance = models.PositiveSmallIntegerField(
 		verbose_name=_("Дистанция (в метрах)"),
 		help_text=_("Пройденная дистанция в метрах."),
 		db_comment=_("Пройденная дистанция в метрах."),
 	)
-	max_speed = models.IntegerField(
+	max_speed = models.PositiveSmallIntegerField(
 		verbose_name=_("Максимальная скорость"),
 		help_text=_("Максимальная достигнутая скорость во время тренировки."),
 		db_comment=_("Максимальная достигнутая скорость во время тренировки."),
 	)
-	avg_speed = models.IntegerField(
+	avg_speed = models.PositiveSmallIntegerField(
 		verbose_name=_("Средняя скорость"),
 		help_text=_("Средняя скорость за всю тренировку."),
 		db_comment=_("Средняя скорость за всю тренировку."),
 	)
-	# calories = models.IntegerField(
+	# calories = models.PositiveSmallIntegerField(
 	#     verbose_name=_('Калории'),
 	#     help_text=_('Количество сожженных калорий во время тренировки.'),
 	#     db_comment=_('Количество сожженных калорий во время тренировки.')
 	# )
-	# avg_puls = models.IntegerField(
+	# avg_puls = models.PositiveSmallIntegerField(
 	#     verbose_name=_('Средний пульс'),
 	#     help_text=_('Средний пульс во время тренировки.'),
 	#     db_comment=_('Средний пульс во время тренировки.')
 	# )
-	# height_difference = models.IntegerField(
+	# height_difference = models.PositiveSmallIntegerField(
 	#     verbose_name=_('Перепад высот'),
 	#     help_text=_('Разница в высоте во время тренировки.'),
 	#     db_comment=_('Разница в высоте во время тренировки.')
