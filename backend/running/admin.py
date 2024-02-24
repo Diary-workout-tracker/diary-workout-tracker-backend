@@ -6,6 +6,8 @@ from .models import Achievement, Day, Training
 
 @admin.register(Achievement)
 class AchievementAdmin(admin.ModelAdmin):
+	"""Отображение в админ панели Достижений."""
+
 	list_display = (
 		"name",
 		"description",
@@ -30,26 +32,30 @@ class AchievementAdmin(admin.ModelAdmin):
 
 @admin.register(Day)
 class DayAdmin(admin.ModelAdmin):
+	"""Отображение в админ панели Дней тренеровки."""
+
 	list_display = (
 		"day_number",
 		"motivation_phrase",
 		"training_info",
 		"training_time",
-		"temp",
+		"pace",
 	)
 	search_fields = (
 		"motivation_phrase",
 		"training_info",
-		"temp",
+		"pace",
 	)
 	list_filter = (
 		"training_time",
-		"temp",
+		"pace",
 	)
 
 
 @admin.register(Training)
 class TrainingAdmin(admin.ModelAdmin):
+	"""Отображение в админ панели Тренеровок."""
+
 	list_display = (
 		"training_date",
 		"completed",

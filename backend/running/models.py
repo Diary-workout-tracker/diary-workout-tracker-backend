@@ -6,6 +6,8 @@ User = get_user_model()
 
 
 class Day(models.Model):
+	"""Модель, представляющая день в плане тренировок."""
+
 	day_number = models.PositiveSmallIntegerField(  # XXX: уточнить будут ли разные тренеровки
 		primary_key=True, verbose_name=_("Номер дня"), db_comment=_("Уникальный номер дня в программе тренировок.")
 	)
@@ -16,7 +18,7 @@ class Day(models.Model):
 		verbose_name=_("Описание тренировки"), max_length=255, db_comment=_("Краткое описание содержания тренировки.")
 	)
 	training_time = models.IntegerField(verbose_name=_("Время тренировки"))  # TODO: время же
-	temp = models.CharField(
+	pace = models.CharField(
 		verbose_name=_("Темп тренировки"),
 		max_length=255,
 	)  # TODO: это что "с включением 5 минут ускорений (интервалы)"
@@ -30,6 +32,8 @@ class Day(models.Model):
 
 
 class Achievement(models.Model):
+	"""Модель, представляющая достижения."""
+
 	icon = models.ImageField(
 		verbose_name=_("Иконка достижения"),
 		upload_to="achievement_icons/",
@@ -69,6 +73,8 @@ class Achievement(models.Model):
 
 
 class UserAchievement(models.Model):
+	"""Модель, представляющая связь достижений с пользователем."""
+
 	achievement_date = models.DateTimeField(
 		verbose_name=_("Дата получения достижения"),
 		auto_now_add=True,
@@ -99,6 +105,8 @@ class UserAchievement(models.Model):
 
 
 class Training(models.Model):
+	"""Модель, представляющая завершенные тренеровки."""
+
 	training_date = models.DateTimeField(
 		verbose_name=_("Дата тренировки"),
 		help_text=_("Дата и время проведения тренировки."),
