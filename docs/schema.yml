@@ -21,6 +21,80 @@ paths:
               schema:
                 Health: OK
           description: ''
+  /api/v1/me/:
+    get:
+      operationId: me_retrieve
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+          description: ''
+    patch:
+      operationId: me_partial_update
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomUser'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+          description: ''
+    delete:
+      operationId: me_destroy
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomTokenObtain'
+          description: ''
   /api/v1/user/:
     post:
       operationId: user_create
@@ -50,85 +124,45 @@ paths:
           description: ''
 components:
   schemas:
+    CustomTokenObtain:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          writeOnly: true
+        code:
+          type: string
+          writeOnly: true
+          maxLength: 4
+          minLength: 4
+      required:
+      - code
+      - email
     CustomUser:
       type: object
       description: Serializer for the custom User model.
       properties:
-        id:
-          type: integer
-          readOnly: true
         email:
           type: string
           format: email
-        last_login:
-          type: string
-          format: date-time
-          nullable: true
-          title: Последний вход
-        is_superuser:
-          type: boolean
-          title: Статус суперпользователя
-          description: Указывает, что пользователь имеет все права без явного их назначения.
-        first_name:
-          type: string
-          title: Имя
-          maxLength: 150
-        last_name:
-          type: string
-          title: Фамилия
-          maxLength: 150
-        is_staff:
-          type: boolean
-          title: Статус персонала
-          description: Отметьте, если пользователь может входить в административную
-            часть сайта.
-        is_active:
-          type: boolean
-          title: Активный
-          description: Отметьте, если пользователь должен считаться активным. Уберите
-            эту отметку вместо удаления учётной записи.
-        date_joined:
-          type: string
-          format: date-time
-          title: Дата регистрации
         name:
           type: string
           title: Full name
           maxLength: 150
-        password:
-          type: string
-          nullable: true
-          maxLength: 128
-        last_completed_training_number:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: 0
-          format: int64
-          title: Last completed training
-        amount_of_skips:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: 0
-          format: int64
-          title: Last completed training
-        groups:
-          type: array
-          items:
-            type: integer
-            title: Группы
-          title: Группы
-          description: Группы, к которым принадлежит данный пользователь. Пользователь
-            получит все права, указанные в каждой из его/её групп.
-        user_permissions:
-          type: array
-          items:
-            type: integer
-            title: Права пользователя
-          title: Права пользователя
-          description: Индивидуальные права данного пользователя.
       required:
       - email
-      - id
+    PatchedCustomUser:
+      type: object
+      description: Serializer for the custom User model.
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          title: Full name
+          maxLength: 150
   securitySchemes:
     jwtAuth:
       type: http

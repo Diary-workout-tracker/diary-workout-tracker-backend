@@ -23,7 +23,6 @@ INSTALLED_APPS = [
 	# lib
 	"rest_framework",
 	"rest_framework.authtoken",
-	"djoser",
 	"drf_spectacular",
 	# app
 	"api.apps.ApiConfig",
