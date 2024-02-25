@@ -10,11 +10,11 @@ import pytest
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+CLIENT = APIClient()
 
 
 def user_register_post_response(payload):
-    client = APIClient()
-    return client.post(reverse("user-register"), payload, format="json")
+    return CLIENT.post(reverse("user-register"), payload, format="json")
 
 
 @pytest.mark.django_db
