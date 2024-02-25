@@ -10,7 +10,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from backend.utils import authcode
 from ..utils_tests.authcode_tests import DummyMailSend
-from django.core.cache import cache
 
 User = get_user_model()
 CLIENT = APIClient()
@@ -73,4 +72,6 @@ def test_email_is_sent_upon_registering(patched_dummy_sender):
 def test_sent_code_is_correct(patched_dummy_sender):
     payload = {"email": "test2@testuser.com"}
     user_register_post_response(payload)
-    assert patched_dummy_sender.code == cache.get(payload["email"])
+    registered_user = User.objects.get(email=payload["email"])
+    auth_code = authcode.AuthCode(registered_user)
+    assert auth_code.code_is_valid(patched_dummy_sender.code)
