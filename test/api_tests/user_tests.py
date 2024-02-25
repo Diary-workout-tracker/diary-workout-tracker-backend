@@ -8,6 +8,9 @@ from rest_framework.test import APIClient
 from django.urls import reverse
 import pytest
 from django.contrib.auth import get_user_model
+from backend.utils import authcode
+from ..utils_tests.authcode_tests import DummyMailSend
+from django.core.cache import cache
 
 User = get_user_model()
 CLIENT = APIClient()
@@ -15,6 +18,19 @@ CLIENT = APIClient()
 
 def user_register_post_response(payload):
     return CLIENT.post(reverse("user-register"), payload, format="json")
+
+
+@pytest.fixture
+def patched_dummy_sender(monkeypatch):
+    sender = DummyMailSend()
+
+    def fake_send_auth_code(user) -> None:
+        auth_code = authcode.AuthCode(user)
+        auth_code.set_sender(sender)
+        auth_code.create_code()
+
+    monkeypatch.setattr("api.v1.views.send_auth_code", fake_send_auth_code)
+    return sender
 
 
 @pytest.mark.django_db
@@ -41,3 +57,20 @@ def test_cannot_register_if_a_user_already_exists(client):
     User.objects.create(email=payload["email"])
     response = user_register_post_response(payload)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_email_is_sent_upon_registering(patched_dummy_sender):
+    assert patched_dummy_sender.mail_sent is False
+    assert patched_dummy_sender.mail_address is None
+    payload = {"email": "test@testuser.com"}
+    user_register_post_response(payload)
+    assert patched_dummy_sender.mail_sent is True
+    assert patched_dummy_sender.mail_address == payload["email"]
+
+
+@pytest.mark.django_db
+def test_sent_code_is_correct(patched_dummy_sender):
+    payload = {"email": "test2@testuser.com"}
+    user_register_post_response(payload)
+    assert patched_dummy_sender.code == cache.get(payload["email"])

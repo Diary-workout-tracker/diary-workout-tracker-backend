@@ -8,10 +8,12 @@ class DummyMailSend(MailSender):
     def __init__(self):
         self.mail_sent = False
         self.code = None
+        self.mail_address = None
 
-    def send_mail(self, _mail, code):
+    def send_code(self, mail_address, code):
         self.mail_sent = True
         self.code = code
+        self.mail_address = mail_address
 
 
 @pytest.fixture

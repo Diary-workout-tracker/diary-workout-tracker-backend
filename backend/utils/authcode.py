@@ -35,7 +35,7 @@ class AuthCode:
 	def _send_code(self) -> None:
 		if not self._sender:
 			raise ValidationError("Cannot send code: sender not set.")
-		self._sender.send_mail(self._user.email, self.code)
+		self._sender.send_code(self._user.email, self.code)
 
 	def set_sender(self, sender: MailSender) -> None:
 		self._sender = sender
