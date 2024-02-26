@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Achievement, Day, Training
+from .models import Achievement, Day, History, Stage
 
 
 @admin.register(Achievement)
@@ -37,22 +37,27 @@ class DayAdmin(admin.ModelAdmin):
 	list_display = (
 		"day_number",
 		"motivation_phrase",
-		"training_info",
-		"training_time",
-		"pace",
+		"show_workout",
+		"workout_info",
 	)
+	filter_horizontal = ("workout",)
 	search_fields = (
 		"motivation_phrase",
-		"training_info",
-		"pace",
+		"workout_info",
 	)
-	list_filter = (
-		"training_time",
-		"pace",
-	)
+	list_filter = ("day_number",)
+
+	@admin.display(description="Тренеровка")
+	def show_workout(self, obj: Day) -> str:
+		stage_column: list = []
+		for workout in obj.workout.all():
+			minutes = round(workout.duration.total_seconds() // 60)
+			text = dict(Stage.TYPE)[workout.pace]
+			stage_column.append(f"{str(minutes)}-{text}")
+		return ", ".join(stage_column)
 
 
-@admin.register(Training)
+@admin.register(History)
 class TrainingAdmin(admin.ModelAdmin):
 	"""Отображение в админ панели Тренеровок."""
 
@@ -68,4 +73,11 @@ class TrainingAdmin(admin.ModelAdmin):
 		"completed",
 		"training_day",
 	)
-	search_fields = ("training_day__day_number",)
+	search_fields = ("training_day",)
+
+
+@admin.register(Stage)
+class StageAdmin(admin.ModelAdmin):
+	list_display = ("duration", "pace")
+	list_filter = ("pace",)
+	search_fields = ("duration", "pace")

@@ -5,29 +5,62 @@ from django.utils.translation import gettext_lazy as _
 User = get_user_model()
 
 
+class Stage(models.Model):
+	"""Модель, представляющая этап тренеровки."""
+
+	PACE_CHOICES = (
+		("Walk", _("Ходьба")),
+		("Run", _("Бег")),
+	)
+	duration = models.DurationField(verbose_name=_("Время упражнения"))
+	pace = models.CharField(
+		verbose_name=_("Вид нагрузки"),
+		max_length=20,
+		choices=PACE_CHOICES,
+		db_comment=_("Вид нагрузки упражнения."),
+		help_text=_("Вид нагрузки упражнения."),
+	)
+
+	class Meta:
+		verbose_name = _("Этап")
+		verbose_name_plural = _("Этапы")
+
+	def __str__(self) -> str:
+		return f"{self.duration} {self.pace}"
+
+
 class Day(models.Model):
 	"""Модель, представляющая день в плане тренировок."""
 
 	day_number = models.PositiveSmallIntegerField(  # XXX: уточнить будут ли разные тренеровки
-		primary_key=True, verbose_name=_("Номер дня"), db_comment=_("Уникальный номер дня в программе тренировок.")
+		primary_key=True,
+		verbose_name=_("Номер дня"),
+		help_text=_("Номер дня."),
+		db_comment=_("Уникальный номер дня в программе тренировок."),
 	)
 	motivation_phrase = models.CharField(  # XXX: будут ли совпадать с другими или индивидуальны
-		verbose_name=_("Мотивационная фраза"), max_length=255, db_comment=_("Мотивационная фраза на дне тренеровки.")
+		verbose_name=_("Мотивационная фраза"),
+		max_length=150,
+		help_text=_("Мотивационная фраза"),
+		db_comment=_("Мотивационная фраза на дне тренеровки."),
 	)
-	training_info = models.CharField(  # TODO: придумать разбиение, а то как учитывать
-		verbose_name=_("Описание тренировки"), max_length=255, db_comment=_("Краткое описание содержания тренировки.")
+	workout = models.ManyToManyField(
+		Stage,
+		related_name="day",
+		verbose_name=_("Тренеровка"),
 	)
-	training_time = models.IntegerField(verbose_name=_("Время тренировки"))  # TODO: время же
-	pace = models.CharField(
-		verbose_name=_("Темп тренировки"),
-		max_length=255,
-	)  # TODO: это что "с включением 5 минут ускорений (интервалы)"
+	workout_info = models.CharField(
+		verbose_name=_("Описание тренеровки"),
+		max_length=100,
+		help_text=_("Описание тренеровки."),
+		db_comment=_("Описание тренеровки дополнительно к этапам"),
+	)  # XXX: это что "с включением 5 минут ускорений (интервалы)"
 
 	class Meta:
 		verbose_name = _("День")
 		verbose_name_plural = _("Дни")
 
-	def __str__(self):
+	def __str__(self) -> str:
 		return f"{_('День')} {self.day_number}"
 
 
@@ -37,11 +70,12 @@ class Achievement(models.Model):
 	icon = models.ImageField(
 		verbose_name=_("Иконка достижения"),
 		upload_to="achievement_icons/",
+		db_comment=_("Название достижения."),
 		help_text=_("Иконка, представляющая достижение."),
 	)
 	name = models.CharField(
 		verbose_name=_("Название достижения"),
-		max_length=255,
+		max_length=150,
 		help_text=_("Название достижения."),
 		db_comment=_("Название достижения."),
 	)
@@ -68,7 +102,7 @@ class Achievement(models.Model):
 		verbose_name_plural = _("Достижения")
 		unique_together = ("name", "stars")
 
-	def __str__(self):
+	def __str__(self) -> str:
 		return f"{self.name} - {self.stars}"
 
 
@@ -100,19 +134,19 @@ class UserAchievement(models.Model):
 		verbose_name = _("Достижение пользователя")
 		verbose_name_plural = _("Достижения пользователей")
 
-	def __str__(self):
+	def __str__(self) -> str:
 		return f"{self.user.username} - {self.achievement.name}"
 
 
-class Training(models.Model):
-	"""Модель, представляющая завершенные тренеровки."""
+class History(models.Model):
+	"""Модель, представляющая записанную тренеровку."""
 
 	training_date = models.DateTimeField(
 		verbose_name=_("Дата тренировки"),
 		help_text=_("Дата и время проведения тренировки."),
 		db_comment=_("Дата, когда пользователь получил достижение."),
 	)
-	completed = models.BooleanField(  # XXX: нужен ли
+	completed = models.BooleanField(  # XXX: нужен ли, если в конце тренеровки данные
 		default=False,
 		verbose_name=_("Завершено"),
 		help_text=_("Показывает, завершена ли тренировка или нет."),
@@ -122,11 +156,10 @@ class Training(models.Model):
 		Day,
 		on_delete=models.CASCADE,
 		verbose_name=_("День тренировки"),
-		help_text=_("День, к которому относится тренировка."),
+		help_text=_("День тренировки."),
 		db_comment=_("День, к которому относится тренировка."),
 	)
-	route = models.CharField(
-		max_length=255,
+	route = models.TimeField(
 		verbose_name=_("Маршрут"),
 		help_text=_("Маршрут тренировки."),
 		db_comment=_("Маршрут тренировки."),
@@ -146,26 +179,11 @@ class Training(models.Model):
 		help_text=_("Средняя скорость за всю тренировку."),
 		db_comment=_("Средняя скорость за всю тренировку."),
 	)
-	# calories = models.PositiveSmallIntegerField(
-	#     verbose_name=_('Калории'),
-	#     help_text=_('Количество сожженных калорий во время тренировки.'),
-	#     db_comment=_('Количество сожженных калорий во время тренировки.')
-	# )
-	# avg_puls = models.PositiveSmallIntegerField(
-	#     verbose_name=_('Средний пульс'),
-	#     help_text=_('Средний пульс во время тренировки.'),
-	#     db_comment=_('Средний пульс во время тренировки.')
-	# )
-	# height_difference = models.PositiveSmallIntegerField(
-	#     verbose_name=_('Перепад высот'),
-	#     help_text=_('Разница в высоте во время тренировки.'),
-	#     db_comment=_('Разница в высоте во время тренировки.')
-	# )
 
 	class Meta:
 		ordering = ("training_date",)
 		verbose_name = _("Тренировка ")
 		verbose_name_plural = _("Тренировки")
 
-	def __str__(self):
+	def __str__(self) -> str:
 		return f"{_('Тренировка')} {self.id}"
