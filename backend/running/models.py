@@ -68,6 +68,7 @@ class Achievement(models.Model):
 		max_length=100,
 		help_text=_("Название достижения."),
 		db_comment=_("Название достижения."),
+		unique=True,
 	)
 	description = models.TextField(
 		verbose_name=_("Описание достижения"),
@@ -87,10 +88,9 @@ class Achievement(models.Model):
 	)
 
 	class Meta:
-		ordering = ("title", "stars")
+		ordering = ("title",)
 		verbose_name = _("Достижение")
 		verbose_name_plural = _("Достижения")
-		unique_together = ("title", "stars")
 
 	def __str__(self) -> str:
 		return f"{self.title} - {self.stars}"
