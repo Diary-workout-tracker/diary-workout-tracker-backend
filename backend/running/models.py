@@ -51,7 +51,7 @@ class Achievement(models.Model):
 	)
 	title = models.CharField(
 		verbose_name=_("Название достижения"),
-		max_length=150,
+		max_length=100,
 		help_text=_("Название достижения."),
 		db_comment=_("Название достижения."),
 	)
@@ -95,15 +95,21 @@ class UserAchievement(models.Model):
 		User,
 		on_delete=models.CASCADE,
 		verbose_name=_("Пользователь"),
+		related_name="user_achievements",
 		help_text=_("Пользователь, который получил достижение."),
 		db_comment=_("Пользователь, который получил достижение."),
+		null=False,
+		blank=False,
 	)
 	achievement_id = models.ForeignKey(
 		Achievement,
 		on_delete=models.CASCADE,
 		verbose_name=_("Достижение"),
+		related_name="user_achievements",
 		help_text=_("Достижение, полученное пользователем."),
 		db_comment=_("Достижение, полученное пользователем."),
+		null=False,
+		blank=False,
 	)
 
 	class Meta:
@@ -132,8 +138,11 @@ class History(models.Model):
 		Day,
 		on_delete=models.CASCADE,
 		verbose_name=_("День тренировки"),
+		related_name="historis",
 		help_text=_("День тренировки."),
 		db_comment=_("День, к которому относится тренировка."),
+		null=False,
+		blank=False,
 	)
 	route = models.TimeField(
 		verbose_name=_("Маршрут"),
