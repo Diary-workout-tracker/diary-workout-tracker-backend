@@ -5,34 +5,10 @@ from django.utils.translation import gettext_lazy as _
 User = get_user_model()
 
 
-class Stage(models.Model):
-	"""Модель, представляющая этап тренеровки."""
-
-	PACE_CHOICES = (
-		("Walk", _("Ходьба")),
-		("Run", _("Бег")),
-	)
-	duration = models.DurationField(verbose_name=_("Время упражнения"))
-	pace = models.CharField(
-		verbose_name=_("Вид нагрузки"),
-		max_length=20,
-		choices=PACE_CHOICES,
-		db_comment=_("Вид нагрузки упражнения."),
-		help_text=_("Вид нагрузки упражнения."),
-	)
-
-	class Meta:
-		verbose_name = _("Этап")
-		verbose_name_plural = _("Этапы")
-
-	def __str__(self) -> str:
-		return f"{self.duration} {self.pace}"
-
-
 class Day(models.Model):
 	"""Модель, представляющая день в плане тренировок."""
 
-	day_number = models.PositiveSmallIntegerField(  # XXX: уточнить будут ли разные тренеровки
+	day_number = models.PositiveSmallIntegerField(
 		primary_key=True,
 		verbose_name=_("Номер дня"),
 		help_text=_("Номер дня."),
@@ -44,17 +20,17 @@ class Day(models.Model):
 		help_text=_("Мотивационная фраза"),
 		db_comment=_("Мотивационная фраза на дне тренеровки."),
 	)
-	workout = models.ManyToManyField(
-		Stage,
-		related_name="day",
-		verbose_name=_("Тренеровка"),
+	workout = models.JSONField(
+		verbose_name=_("Этапы тренеровки"),
+		help_text=_("Описанные этапы тренеровки в json."),
+		db_comment=_("Описанные этапы тренеровки"),
 	)
 	workout_info = models.CharField(
 		verbose_name=_("Описание тренеровки"),
 		max_length=100,
 		help_text=_("Описание тренеровки."),
 		db_comment=_("Описание тренеровки дополнительно к этапам"),
-	)  # XXX: это что "с включением 5 минут ускорений (интервалы)"
+	)
 
 	class Meta:
 		verbose_name = _("День")
@@ -73,7 +49,7 @@ class Achievement(models.Model):
 		db_comment=_("Название достижения."),
 		help_text=_("Иконка, представляющая достижение."),
 	)
-	name = models.CharField(
+	title = models.CharField(
 		verbose_name=_("Название достижения"),
 		max_length=150,
 		help_text=_("Название достижения."),
@@ -97,13 +73,13 @@ class Achievement(models.Model):
 	)
 
 	class Meta:
-		ordering = ("name", "stars")
+		ordering = ("title", "stars")
 		verbose_name = _("Достижение")
 		verbose_name_plural = _("Достижения")
-		unique_together = ("name", "stars")
+		unique_together = ("title", "stars")
 
 	def __str__(self) -> str:
-		return f"{self.name} - {self.stars}"
+		return f"{self.title} - {self.stars}"
 
 
 class UserAchievement(models.Model):
@@ -115,14 +91,14 @@ class UserAchievement(models.Model):
 		help_text=_("Дата, когда пользователь получил достижение."),
 		db_comment=_("Дата, когда пользователь получил достижение."),
 	)
-	user = models.ForeignKey(
+	user_id = models.ForeignKey(
 		User,
 		on_delete=models.CASCADE,
 		verbose_name=_("Пользователь"),
 		help_text=_("Пользователь, который получил достижение."),
 		db_comment=_("Пользователь, который получил достижение."),
 	)
-	achievement = models.ForeignKey(
+	achievement_id = models.ForeignKey(
 		Achievement,
 		on_delete=models.CASCADE,
 		verbose_name=_("Достижение"),
@@ -135,7 +111,7 @@ class UserAchievement(models.Model):
 		verbose_name_plural = _("Достижения пользователей")
 
 	def __str__(self) -> str:
-		return f"{self.user.username} - {self.achievement.name}"
+		return f"{self.user_id.username} - {self.achievement_id.title}"
 
 
 class History(models.Model):

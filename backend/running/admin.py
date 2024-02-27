@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Achievement, Day, History, Stage
+from .models import Achievement, Day, History, UserAchievement
 
 
 @admin.register(Achievement)
@@ -9,14 +9,14 @@ class AchievementAdmin(admin.ModelAdmin):
 	"""Отображение в админ панели Достижений."""
 
 	list_display = (
-		"name",
+		"title",
 		"description",
 		"show_icon",
 		"stars",
 		"reward_points",
 	)
 	search_fields = (
-		"name",
+		"title",
 		"description",
 	)
 	list_filter = (
@@ -26,7 +26,8 @@ class AchievementAdmin(admin.ModelAdmin):
 
 	@admin.display(description="Превью иконки")
 	def show_icon(self, obj: Achievement) -> str:
-		images_column: str = format_html('<img src="{}" style="max-height: 100px;">', obj.image.url)
+		"""Отображение превью иконки достижения"""
+		images_column: str = format_html('<img src="{}" style="max-height: 100px;">', obj.icon.url)
 		return images_column
 
 
@@ -38,27 +39,32 @@ class DayAdmin(admin.ModelAdmin):
 		"day_number",
 		"motivation_phrase",
 		"show_workout",
-		"workout_info",
 	)
-	filter_horizontal = ("workout",)
-	search_fields = (
-		"motivation_phrase",
-		"workout_info",
-	)
+	search_fields = ("motivation_phrase",)
 	list_filter = ("day_number",)
 
 	@admin.display(description="Тренеровка")
 	def show_workout(self, obj: Day) -> str:
+		"""
+		Отображения поля для админки
+		Пример заполнения:
+		{
+		  "workout":
+		        [
+		          {"duration": 15, "pace": "бег"},
+		          {"duration": 10, "pace": "ходьба]"}
+		        ]
+		}
+		"""
 		stage_column: list = []
-		for workout in obj.workout.all():
-			minutes = round(workout.duration.total_seconds() // 60)
-			text = dict(Stage.TYPE)[workout.pace]
-			stage_column.append(f"{str(minutes)}-{text}")
+		data = obj.workout["workout"]
+		for workout in data:
+			stage_column.append(f"{str(workout['duration'])}-{workout['pace']}")
 		return ", ".join(stage_column)
 
 
 @admin.register(History)
-class TrainingAdmin(admin.ModelAdmin):
+class HistoryAdmin(admin.ModelAdmin):
 	"""Отображение в админ панели Тренеровок."""
 
 	list_display = (
@@ -76,8 +82,17 @@ class TrainingAdmin(admin.ModelAdmin):
 	search_fields = ("training_day",)
 
 
-@admin.register(Stage)
-class StageAdmin(admin.ModelAdmin):
-	list_display = ("duration", "pace")
-	list_filter = ("pace",)
-	search_fields = ("duration", "pace")
+@admin.register(UserAchievement)
+class UserAchievementAdmin(admin.ModelAdmin):
+	"""Отображение в админ панели Тренеровок."""
+
+	list_display = (
+		"user_id",
+		"achievement_id",
+		"achievement_date",
+	)
+	search_fields = (
+		"user_id__username",
+		"achievement_id__title",
+		"achievement_id__description",
+	)
