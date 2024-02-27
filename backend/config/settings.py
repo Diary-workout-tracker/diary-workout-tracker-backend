@@ -14,6 +14,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 DEBUG = True
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
+# ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
@@ -28,7 +29,8 @@ INSTALLED_APPS = [
 	"rest_framework.authtoken",
 	"drf_spectacular",
 	# app
-	"api.apps.ApiConfig",
+	"api",
+	"running",
 ]
 
 MIDDLEWARE = [

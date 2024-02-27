@@ -6,7 +6,7 @@ info:
 paths:
   /api/v1/health/:
     get:
-      operationId: api_v1_health_retrieve
+      operationId: health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:

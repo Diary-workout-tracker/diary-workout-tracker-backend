@@ -1,4 +1,4 @@
-# Команды для prod
+cdd# Команды для prod
 clear-volumes-prod: # Удаление Volumes
 	docker compose -f docker-compose.production.yml down --volumes
 
