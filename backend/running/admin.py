@@ -1,7 +1,19 @@
 from django.contrib import admin
+from django.contrib.admin import ModelAdmin, register
 from django.utils.html import format_html
 
-from .models import Achievement, Day, History, UserAchievement
+
+from .models import Achievement, Day, History, MotivationalPhrase, RecreationPhrase, UserAchievement
+
+
+@register(MotivationalPhrase)
+class MotivationalPhraseAdmin(ModelAdmin):
+	list_display = ("text",)
+
+
+@register(RecreationPhrase)
+class RecreationPhraseAdmin(ModelAdmin):
+	list_display = ("text",)
 
 
 @admin.register(Achievement)

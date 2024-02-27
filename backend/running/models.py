@@ -5,6 +5,20 @@ from django.utils.translation import gettext_lazy as _
 User = get_user_model()
 
 
+class MotivationalPhrase(models.Model):
+	text = models.TextField()
+
+	def __str__(self):
+		return self.text
+
+
+class RecreationPhrase(models.Model):
+	text = models.TextField()
+
+	def __str__(self):
+		return self.text
+
+
 class Day(models.Model):
 	"""Модель, представляющая день в плане тренировок."""
 
@@ -144,7 +158,7 @@ class History(models.Model):
 		null=False,
 		blank=False,
 	)
-	route = models.TimeField(
+	route = models.JSONField(
 		verbose_name=_("Маршрут"),
 		help_text=_("Маршрут тренировки."),
 		db_comment=_("Маршрут тренировки."),
