@@ -3,12 +3,14 @@
 # TODO заполнения модели данными из полей при регистрации.
 
 
-from rest_framework import status
-from rest_framework.test import APIClient
-from django.urls import reverse
 import pytest
 from django.contrib.auth import get_user_model
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APIClient
+
 from backend.utils import authcode
+
 from ..utils_tests.authcode_tests import DummyMailSend
 
 User = get_user_model()
@@ -34,7 +36,7 @@ def patched_dummy_sender(monkeypatch):
 
 @pytest.mark.django_db
 def test_user_is_registered():
-    payload = {"email": "test@testuser.com"}
+    payload = {"email": "test@testuser.com", "name": "Woody Woodpecker"}
     response = user_register_post_response(payload)
     assert response.status_code == status.HTTP_201_CREATED
     assert User.objects.last().email == payload["email"]
@@ -46,7 +48,9 @@ def test_user_is_registered():
 )
 @pytest.mark.django_db
 def test_incorrect_email_doesnt_pass_validation(incorrect_email):
-    response = user_register_post_response({"email": incorrect_email})
+    response = user_register_post_response(
+        {"email": incorrect_email, "name": "Shlomo A"}
+    )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -62,7 +66,7 @@ def test_cannot_register_if_a_user_already_exists(client):
 def test_email_is_sent_upon_registering(patched_dummy_sender):
     assert patched_dummy_sender.mail_sent is False
     assert patched_dummy_sender.mail_address is None
-    payload = {"email": "test@testuser.com"}
+    payload = {"email": "test@testuser.com", "name": "email tester"}
     user_register_post_response(payload)
     assert patched_dummy_sender.mail_sent is True
     assert patched_dummy_sender.mail_address == payload["email"]
@@ -70,7 +74,7 @@ def test_email_is_sent_upon_registering(patched_dummy_sender):
 
 @pytest.mark.django_db
 def test_sent_code_is_correct(patched_dummy_sender):
-    payload = {"email": "test2@testuser.com"}
+    payload = {"email": "test2@testuser.com", "name": "Code Tester"}
     user_register_post_response(payload)
     registered_user = User.objects.get(email=payload["email"])
     auth_code = authcode.AuthCode(registered_user)

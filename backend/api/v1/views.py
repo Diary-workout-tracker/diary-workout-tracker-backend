@@ -1,13 +1,13 @@
-from drf_spectacular.utils import extend_schema
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny
-from .serializers import CustomUserSerializer, CustomTokenObtainSerializer
-from utils import authcode, mailsender
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from utils import authcode, mailsender
+
+from .serializers import CustomTokenObtainSerializer, UserSerializer
 
 User = get_user_model()
 
@@ -18,8 +18,9 @@ def send_auth_code(user) -> None:
 	auth_code.create_code()
 
 
-@permission_classes((AllowAny,))
 class HealthCheckView(APIView):
+	permission_classes = (AllowAny,)
+
 	@extend_schema(
 		summary="Проверка работы",
 		description="Проверка работы АПИ",
@@ -30,9 +31,9 @@ class HealthCheckView(APIView):
 		return Response({"Health": "OK"})
 
 
-@permission_classes((AllowAny,))
 class RegisterUserView(APIView):
-	serializer_class = CustomUserSerializer
+	serializer_class = UserSerializer
+	permission_classes = (AllowAny,)
 
 	def post(self, request, format=None):
 		serializer = self.serializer_class(data=request.data)
@@ -43,9 +44,9 @@ class RegisterUserView(APIView):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@permission_classes((AllowAny,))
 class TokenRefreshView(APIView):
 	serializer_class = CustomTokenObtainSerializer
+	permission_classes = (AllowAny,)
 
 	def post(self, request, format=None):
 		serializer = self.serializer_class(data=request.data)
@@ -56,7 +57,7 @@ class TokenRefreshView(APIView):
 
 
 class MyInfoView(APIView):
-	serializer_class = CustomUserSerializer
+	serializer_class = UserSerializer
 
 	def get(self, request, *args, **kwargs):
 		user = request.user

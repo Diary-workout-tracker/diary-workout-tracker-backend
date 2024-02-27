@@ -1,17 +1,20 @@
-from django.contrib.auth import get_user_model
-from rest_framework.exceptions import ValidationError
-from django.core.cache import cache
-from .mailsender import MailSender
+from secrets import SystemRandom
+
 from django.conf import settings
-import random
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from rest_framework.exceptions import ValidationError
+
+from .mailsender import MailSender
 
 User = get_user_model()
+SEC_RANDOM = SystemRandom()
 
 
 class AuthCode:
 	"""Класс обслуживает одноразовый код для восстановления доступа.
 	Умеет генерировать код, отправлять его на е-мейл, проверять валидность,
-	 у класса настраивается отправщик емейлов."""
+	у класса настраивается отправщик сообщений."""
 
 	def __init__(self, user) -> None:
 		if not isinstance(user, User):
@@ -26,8 +29,9 @@ class AuthCode:
 	def code_is_valid(self, code: int) -> bool:
 		return code == self.code
 
+	@classmethod
 	def _generate_code(self) -> str:
-		return str(random.randint(0, 9999)).zfill(4)
+		return "".join([str(SEC_RANDOM.randint(0, 9)) for _ in range(4)])
 
 	def _store_code(self, code: str) -> None:
 		cache.set(self._user.email, code, settings.ACCESS_RESTORE_CODE_TTL_SECONDS)

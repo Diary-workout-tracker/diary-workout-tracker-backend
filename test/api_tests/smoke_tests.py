@@ -1,5 +1,5 @@
-from rest_framework import status
 from django.urls import reverse
+from rest_framework import status
 
 
 def test_health_check_works(client):

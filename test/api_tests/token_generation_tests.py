@@ -1,10 +1,12 @@
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
-from backend.utils import authcode
-from ..utils_tests.authcode_tests import DummyMailSend
+from django.urls import reverse
 from rest_framework import status
 from rest_framework_simplejwt.tokens import AccessToken
+
+from backend.utils import authcode
+
+from ..utils_tests.authcode_tests import DummyMailSend
 
 User = get_user_model()
 URL = reverse("token-refresh")

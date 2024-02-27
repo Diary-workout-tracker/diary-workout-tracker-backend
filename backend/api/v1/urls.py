@@ -1,7 +1,8 @@
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from .views import HealthCheckView, RegisterUserView, TokenRefreshView, MyInfoView
 from django.urls import path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
+
+from .views import HealthCheckView, MyInfoView, RegisterUserView, TokenRefreshView
 
 router = DefaultRouter()
 

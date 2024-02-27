@@ -1,7 +1,8 @@
+import pytest
+from rest_framework.exceptions import ValidationError
+
 from backend.utils.authcode import AuthCode
 from backend.utils.mailsender import MailSender
-from rest_framework.exceptions import ValidationError
-import pytest
 
 
 class DummyMailSend(MailSender):

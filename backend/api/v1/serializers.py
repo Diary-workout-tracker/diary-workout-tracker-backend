@@ -1,21 +1,37 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.shortcuts import get_object_or_404
+
+from users.models import GENDER_CHOICES
 from utils.authcode import AuthCode
 
 User = get_user_model()
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
 	"""Serializer for the custom User model."""
 
 	email = serializers.EmailField(validators=(UniqueValidator(queryset=User.objects.all()),))
+	name = serializers.CharField()
+	gender = serializers.ChoiceField(choices=GENDER_CHOICES, allow_blank=True, required=False)
+	height_cm = serializers.IntegerField(allow_null=True, required=False)
+	weight_kg = serializers.FloatField(allow_null=True, required=False)
+	last_completed_training_number = serializers.IntegerField(read_only=True)
+	amount_of_skips = serializers.IntegerField(read_only=True)
 
 	class Meta:
 		model = User
-		fields = ("email", "name")
+		fields = (
+			"email",
+			"name",
+			"gender",
+			"height_cm",
+			"weight_kg",
+			"last_completed_training_number",
+			"amount_of_skips",
+		)
 
 
 class CustomTokenObtainSerializer(serializers.Serializer):
