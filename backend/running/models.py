@@ -28,22 +28,16 @@ class Day(models.Model):
 		help_text=_("Номер дня."),
 		db_comment=_("Уникальный номер дня в программе тренировок."),
 	)
-	motivation_phrase = models.CharField(  # XXX: будут ли совпадать с другими или индивидуальны
-		verbose_name=_("Мотивационная фраза"),
-		max_length=150,
-		help_text=_("Мотивационная фраза"),
-		db_comment=_("Мотивационная фраза на дне тренеровки."),
-	)
 	workout = models.JSONField(
-		verbose_name=_("Этапы тренеровки"),
-		help_text=_("Описанные этапы тренеровки в json."),
-		db_comment=_("Описанные этапы тренеровки"),
+		verbose_name=_("Этапы тренировки"),
+		help_text=_("Описанные этапы тренировки в json."),
+		db_comment=_("Описанные этапы тренировки"),
 	)
 	workout_info = models.CharField(
-		verbose_name=_("Описание тренеровки"),
+		verbose_name=_("Описание тренировки"),
 		max_length=100,
-		help_text=_("Описание тренеровки."),
-		db_comment=_("Описание тренеровки дополнительно к этапам"),
+		help_text=_("Описание тренировки."),
+		db_comment=_("Описание тренировки дополнительно к этапам"),
 	)
 
 	class Meta:
@@ -135,14 +129,14 @@ class UserAchievement(models.Model):
 
 
 class History(models.Model):
-	"""Модель, представляющая записанную тренеровку."""
+	"""Модель, представляющая записанную тренировку."""
 
 	training_date = models.DateTimeField(
 		verbose_name=_("Дата тренировки"),
 		help_text=_("Дата и время проведения тренировки."),
 		db_comment=_("Дата, когда пользователь получил достижение."),
 	)
-	completed = models.BooleanField(  # XXX: нужен ли, если в конце тренеровки данные
+	completed = models.BooleanField(  # XXX: нужен ли, если в конце тренировки данные
 		default=False,
 		verbose_name=_("Завершено"),
 		help_text=_("Показывает, завершена ли тренировка или нет."),
@@ -157,6 +151,12 @@ class History(models.Model):
 		db_comment=_("День, к которому относится тренировка."),
 		null=False,
 		blank=False,
+	)
+	motivation_phrase = models.CharField(
+		verbose_name=_("Мотивационная фраза"),
+		max_length=150,
+		help_text=_("Мотивационная фраза"),
+		db_comment=_("Мотивационная фраза на дне тренировки."),
 	)
 	route = models.JSONField(
 		verbose_name=_("Маршрут"),

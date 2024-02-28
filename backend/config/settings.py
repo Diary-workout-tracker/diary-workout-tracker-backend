@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,7 +30,8 @@ INSTALLED_APPS = [
 	"drf_spectacular",
 	# app
 	"api.apps.ApiConfig",
-	"running.apps.RuningConfig",
+	"running.apps.RunningConfig",
+	"users.apps.UsersConfig",
 ]
 
 MIDDLEWARE = [
@@ -90,6 +91,7 @@ AUTH_PASSWORD_VALIDATORS = [
 	},
 ]
 
+AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "ru-RU"
 
@@ -109,9 +111,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
 	"DEFAULT_PERMISSION_CLASSES": [
-		"rest_framework.permissions.AllowAny",
+		"rest_framework.permissions.IsAuthenticated",
 	],
 	"DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+	"DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
 }
 
 SPECTACULAR_SETTINGS = {
@@ -120,3 +123,14 @@ SPECTACULAR_SETTINGS = {
 	"VERSION": "1.0.0",
 	"SERVE_INCLUDE_SCHEMA": False,
 }
+
+CACHES = {
+	"default": {
+		"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+		"LOCATION": "diary-localmemcache",
+	}
+}
+
+# access restore code
+
+ACCESS_RESTORE_CODE_TTL_SECONDS = 300

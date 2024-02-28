@@ -1,18 +1,17 @@
 from django.contrib import admin
-from django.contrib.admin import ModelAdmin, register
 from django.utils.html import format_html
 
 
 from .models import Achievement, Day, History, MotivationalPhrase, RecreationPhrase, UserAchievement
 
 
-@register(MotivationalPhrase)
-class MotivationalPhraseAdmin(ModelAdmin):
+@admin.register(MotivationalPhrase)
+class MotivationalPhraseAdmin(admin.ModelAdmin):
 	list_display = ("text",)
 
 
-@register(RecreationPhrase)
-class RecreationPhraseAdmin(ModelAdmin):
+@admin.register(RecreationPhrase)
+class RecreationPhraseAdmin(admin.ModelAdmin):
 	list_display = ("text",)
 
 
@@ -45,17 +44,15 @@ class AchievementAdmin(admin.ModelAdmin):
 
 @admin.register(Day)
 class DayAdmin(admin.ModelAdmin):
-	"""Отображение в админ панели Дней тренеровки."""
+	"""Отображение в админ панели Дней тренировки."""
 
 	list_display = (
 		"day_number",
-		"motivation_phrase",
 		"show_workout",
 	)
-	search_fields = ("motivation_phrase",)
 	list_filter = ("day_number",)
 
-	@admin.display(description="Тренеровка")
+	@admin.display(description="Тренировка")
 	def show_workout(self, obj: Day) -> str:
 		"""
 		Отображения поля для админки
@@ -77,11 +74,12 @@ class DayAdmin(admin.ModelAdmin):
 
 @admin.register(History)
 class HistoryAdmin(admin.ModelAdmin):
-	"""Отображение в админ панели Тренеровок."""
+	"""Отображение в админ панели Тренировок."""
 
 	list_display = (
 		"training_date",
 		"completed",
+		"motivation_phrase",
 		"training_day",
 		"distance",
 		"max_speed",
@@ -91,12 +89,15 @@ class HistoryAdmin(admin.ModelAdmin):
 		"completed",
 		"training_day",
 	)
-	search_fields = ("training_day",)
+	search_fields = (
+		"training_day",
+		"motivation_phrase",
+	)
 
 
 @admin.register(UserAchievement)
 class UserAchievementAdmin(admin.ModelAdmin):
-	"""Отображение в админ панели Тренеровок."""
+	"""Отображение в админ панели Тренировок."""
 
 	list_display = (
 		"user_id",
