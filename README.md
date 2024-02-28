@@ -20,6 +20,10 @@
 [![Ruff](https://img.shields.io/badge/Ruff-%5E0.2.1-blue?style=flat)](https://pypi.org/project/ruff/)
 [![Pytest](https://img.shields.io/badge/Pytest-%5E8.0.0-blue?style=flat&logo=pytest&logoColor=white)](https://pypi.org/project/pytest/)
 
+## Структура базы данных
+
+![ER-диаграмма](docs/ER_model.svg)
+
 ## Запуск проекта
 
 ### Настройка и запуск локально для разработки
@@ -56,21 +60,13 @@
    poetry run pre-commit install
    ```
 4. Создайте и заполните файл `.env` согласно шаблону [.env.example](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/blob/develop/infra/.env.example)
-5. Запуск необходимый сервисов для работы приложения.
+5. Выполнить команду Make в консоли.
     ```bash
-    docker compose up -d
+    make project-init # при первом запуске
     ```
-> TODO: нет пока отдельной структуры
-6. Применить миграции базы данных.
     ```bash
-    poetry run backend/manage.py migrate
+    make project-start # при последующих запусках
     ```
-7. Запустить приложения.
-Приложение состоит из нескольких микросервисо, каждый из которых запускается отдельно
-    ```bash
-    poetry run backend/manage.py runserver
-    ```
-
 
 ## Дополниельные сведения для разработчика
 
@@ -103,6 +99,21 @@
 
 </details>
 
+<details>
+  <summary><h3>Команды make</h3></summary>
+
+- Удаление Volumes: `make clear-volumes-dev`
+- Запуск контейнеров: `make start-containers-dev`
+- Выполнить миграции Django: `make migrate-dev`
+- Собрать статику Django: `make collectstatic-dev`
+- Создать супер пользователя: `make createsuperuser-dev`
+- Запуск сервера: `make start-server-dev`
+- Инициализировать проект: `make project-init-dev`
+- Запустить проект: `make project-start-dev`
+- Остановить контейнеры: `make containers-stop-dev`
+
+</details>
+
 
 ## Разработчики
 
@@ -116,4 +127,4 @@
 
 [Яременко Владислав](https://github.com/VladislavYar)
 
-[Ястребов Владислав ](https://github.com/blakkheart)
+[Ястребов Владислав](https://github.com/blakkheart)
