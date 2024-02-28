@@ -56,7 +56,6 @@ psycopg2-binary = "^2.9.9"
 djangorestframework-simplejwt = "^5.3.1"
 psycopg2 = "^2.9.9"
 psycopg = "^3.1.18"
-djangorestframework-simplejwt = "^5.3.1"
 
 
 [tool.poetry.group.dev.dependencies]

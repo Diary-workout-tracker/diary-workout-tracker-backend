@@ -3,7 +3,6 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-<<<<<<< HEAD
 from rest_framework.views import APIView
 
 from utils import authcode, mailsender
@@ -17,13 +16,8 @@ def send_auth_code(user) -> None:
 	auth_code = authcode.AuthCode(user)
 	auth_code.set_sender(mailsender.DefaultMailSender())
 	auth_code.create_code()
-=======
-from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny
->>>>>>> 93bca32 (poetry, pyproject.toml, djoser, simplejwt conflicts)
 
 
-@permission_classes((AllowAny,))
 class HealthCheckView(APIView):
 	permission_classes = (AllowAny,)
 
