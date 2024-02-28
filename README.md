@@ -62,10 +62,10 @@
 4. Создайте и заполните файл `.env` согласно шаблону [.env.example](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/blob/develop/infra/.env.example)
 5. Выполнить команду Make в консоли.
     ```bash
-    make project-init # при первом запуске
+    make project-init-dev # при первом запуске
     ```
     ```bash
-    make project-start # при последующих запусках
+    make project-start-dev # при последующих запусках
     ```
 
 ## Дополниельные сведения для разработчика
