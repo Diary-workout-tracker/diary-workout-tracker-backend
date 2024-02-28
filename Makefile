@@ -1,4 +1,4 @@
-cdd# Команды для prod
+# Команды для prod
 clear-volumes-prod: # Удаление Volumes
 	docker compose -f docker-compose.production.yml down --volumes
 
@@ -28,10 +28,10 @@ project-stop-prod: # Остановить проект
 
 # Команды для dev
 clear-volumes-dev: # Удаление Volumes
-	docker compose -f docker-compose.dev.yml down --volumes
+	docker compose -f docker-compose.dev.yml --env-file ./infra/.env down --volumes
 
 start-containers-dev: # Запуск контейнеров
-	docker compose -f docker-compose.dev.yml up -d;
+	docker compose -f docker-compose.dev.yml --env-file ./infra/.env up -d;
 	@sleep 3;
 
 start-server-dev: # Запуск сервера
@@ -53,4 +53,4 @@ project-start-dev: # Запустить проект
 	make start-containers start-server-dev
 
 containers-stop-dev: # Остановить контейнеры
-	docker compose -f docker-compose.dev.yml down;
+	docker compose -f docker-compose.dev.yml  --env-file ./infra/.env down;
