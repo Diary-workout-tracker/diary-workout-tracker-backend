@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: Live докумениация сервиса
 paths:
-  /api/v1/health/:
+  /api/v1/v1/health/:
     get:
       operationId: health_retrieve
       description: Проверка работы АПИ

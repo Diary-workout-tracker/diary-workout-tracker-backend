@@ -161,11 +161,8 @@ cython_debug/
 
 # ruff
 .ruff_cache/
-<<<<<<< HEAD
-=======
 
 # poetry files specific to OS
 poetry.lock
 
 static/
->>>>>>> e7d4d41 (Переделал Makefile, поченил docker-compose для прода, добавил в gitignore статику, чуть переделал README под реалии проекта)
