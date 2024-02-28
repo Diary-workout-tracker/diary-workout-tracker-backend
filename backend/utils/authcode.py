@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
-
 from .mailsender import MailSender
 
 User = get_user_model()
@@ -21,6 +20,7 @@ class AuthCode:
 			raise ValidationError(f"{user} is not a User instance")
 		self._sender = None
 		self._user = user
+		self._code = None
 
 	def create_code(self) -> None:
 		self._store_code(self._generate_code())
