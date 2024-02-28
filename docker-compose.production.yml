@@ -25,7 +25,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      command:
+    command:
         ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi"]
     volumes:
       - media:/app/media
