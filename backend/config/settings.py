@@ -3,7 +3,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 path_to_env = os.path.join(BASE_DIR, "..", "infra", ".env")
