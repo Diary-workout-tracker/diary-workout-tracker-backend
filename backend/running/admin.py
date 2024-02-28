@@ -61,14 +61,14 @@ class DayAdmin(admin.ModelAdmin):
 		  "workout":
 		        [
 		          {"duration": 15, "pace": "бег"},
-		          {"duration": 10, "pace": "ходьба]"}
+		          {"duration": 10, "pace": "ходьба"}
 		        ]
 		}
 		"""
 		stage_column: list = []
 		data = obj.workout["workout"]
 		for workout in data:
-			stage_column.append(f"{str(workout['duration'])}-{workout['pace']}")
+			stage_column.append(f"{workout['duration']}-{workout['pace']}")
 		return ", ".join(stage_column)
 
 

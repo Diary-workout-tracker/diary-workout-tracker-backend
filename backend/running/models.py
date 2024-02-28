@@ -76,7 +76,7 @@ class Achievement(models.Model):
 	)
 	reward_points = models.PositiveSmallIntegerField(
 		verbose_name=_("Заморозк"),
-		default=1,
+		default=0,
 		help_text=_("Количество заморозок за достижение."),
 		db_comment=_("Количество заморозок за достижение."),
 	)
