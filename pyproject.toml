@@ -40,7 +40,7 @@ docstring-code-format = true
 
 
 [tool.pytest.ini_options]
-pythonpath = "."
+pythonpath = "backend"
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = "tests.py test_*.py *_tests.py"
 
@@ -53,8 +53,6 @@ python-dotenv = "^1.0.1"
 drf-spectacular = "^0.27.1"
 gunicorn = "^21.2.0"
 psycopg2-binary = "^2.9.9"
-psycopg2 = "^2.9.9"
-psycopg = "^3.1.18"
 
 
 [tool.poetry.group.dev.dependencies]
