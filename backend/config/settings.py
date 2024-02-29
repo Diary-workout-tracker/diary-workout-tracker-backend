@@ -30,6 +30,7 @@ INSTALLED_APPS = [
 	"drf_spectacular",
 	# app
 	"api.apps.ApiConfig",
+	"running.apps.RunningConfig",
 	"users.apps.UsersConfig",
 ]
 

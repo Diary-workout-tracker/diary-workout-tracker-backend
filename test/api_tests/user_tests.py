@@ -18,64 +18,62 @@ CLIENT = APIClient()
 
 
 def user_register_post_response(payload):
-    return CLIENT.post(reverse("user-register"), payload, format="json")
+	return CLIENT.post(reverse("user-register"), payload, format="json")
 
 
 @pytest.fixture
 def patched_dummy_sender(monkeypatch):
-    sender = DummyMailSend()
+	sender = DummyMailSend()
 
-    def fake_send_auth_code(user) -> None:
-        auth_code = authcode.AuthCode(user)
-        auth_code.set_sender(sender)
-        auth_code.create_code()
+	def fake_send_auth_code(user) -> None:
+		auth_code = authcode.AuthCode(user)
+		auth_code.set_sender(sender)
+		auth_code.create_code()
 
-    monkeypatch.setattr("api.v1.views.send_auth_code", fake_send_auth_code)
-    return sender
+	monkeypatch.setattr("api.v1.views.send_auth_code", fake_send_auth_code)
+	return sender
 
 
 @pytest.mark.django_db
 def test_user_is_registered():
-    payload = {"email": "test@testuser.com", "name": "Woody Woodpecker"}
-    response = user_register_post_response(payload)
-    assert response.status_code == status.HTTP_201_CREATED
-    assert User.objects.last().email == payload["email"]
+	payload = {"email": "test@testuser.com", "name": "Woody Woodpecker"}
+	response = user_register_post_response(payload)
+	assert response.status_code == status.HTTP_201_CREATED
+	assert User.objects.last().email == payload["email"]
 
 
 @pytest.mark.parametrize(
-    "incorrect_email",
-    ("test#testuser.com", "test@test@test.ru", "test.ru", "שלום@test.ru", "admin"),
+	"incorrect_email",
+	("test#testuser.com", "test@test@test.ru", "test.ru", "שלום@test.ru", "admin"),
 )
 @pytest.mark.django_db
 def test_incorrect_email_doesnt_pass_validation(incorrect_email):
-    response = user_register_post_response(
-        {"email": incorrect_email, "name": "Shlomo A"}
-    )
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+	response = user_register_post_response({"email": incorrect_email, "name": "Shlomo A"})
+	assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.django_db
 def test_cannot_register_if_a_user_already_exists(client):
-    payload = {"email": "test@testuser.com"}
-    User.objects.create(email=payload["email"])
-    response = user_register_post_response(payload)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+	payload = {"email": "test@testuser.com"}
+	User.objects.create(email=payload["email"])
+	response = user_register_post_response(payload)
+	assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.django_db
 def test_email_is_sent_upon_registering(patched_dummy_sender):
-    assert patched_dummy_sender.mail_sent is False
-    assert patched_dummy_sender.mail_address is None
-    payload = {"email": "test@testuser.com", "name": "email tester"}
-    user_register_post_response(payload)
-    assert patched_dummy_sender.mail_sent is True
-    assert patched_dummy_sender.mail_address == payload["email"]
+	assert patched_dummy_sender.mail_sent is False
+	assert patched_dummy_sender.mail_address is None
+	payload = {"email": "test@testuser.com", "name": "email tester"}
+	user_register_post_response(payload)
+	assert patched_dummy_sender.mail_sent is True
+	assert patched_dummy_sender.mail_address == payload["email"]
 
 
 @pytest.mark.django_db
 def test_sent_code_is_correct(patched_dummy_sender):
-    payload = {"email": "test2@testuser.com", "name": "Code Tester"}
-    user_register_post_response(payload)
-    registered_user = User.objects.get(email=payload["email"])
-    auth_code = authcode.AuthCode(registered_user)
-    assert auth_code.code_is_valid(patched_dummy_sender.code)
+	payload = {"email": "test2@testuser.com", "name": "Code Tester"}
+	user_register_post_response(payload)
+	registered_user = User.objects.get(email=payload["email"])
+	auth_code = authcode.AuthCode(registered_user)
+	assert auth_code.code_is_valid(patched_dummy_sender.code)
