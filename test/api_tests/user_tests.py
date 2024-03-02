@@ -38,7 +38,6 @@ def patched_dummy_sender(monkeypatch):
 def test_user_with_only_email_provided_is_registered():
 	payload = {"email": "test@testuser.com"}
 	response = user_register_post_response(payload)
-	print(response.data)
 	assert response.status_code == status.HTTP_201_CREATED
 	assert User.objects.last().email == payload["email"]
 
