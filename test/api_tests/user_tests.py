@@ -35,9 +35,10 @@ def patched_dummy_sender(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_user_is_registered():
-	payload = {"email": "test@testuser.com", "name": "Woody Woodpecker"}
+def test_user_with_only_email_provided_is_registered():
+	payload = {"email": "test@testuser.com"}
 	response = user_register_post_response(payload)
+	print(response.data)
 	assert response.status_code == status.HTTP_201_CREATED
 	assert User.objects.last().email == payload["email"]
 
@@ -49,6 +50,11 @@ def test_user_is_registered():
 @pytest.mark.django_db
 def test_incorrect_email_doesnt_pass_validation(incorrect_email):
 	response = user_register_post_response({"email": incorrect_email, "name": "Shlomo A"})
+	assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_user_cannot_be_registered_without_a_email():
+	response = user_register_post_response({"name": "King George IV"})
 	assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 

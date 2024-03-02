@@ -17,7 +17,7 @@ class User(AbstractUser):
 	REQUIRED_FIELDS = ()
 	username = None
 	email = models.EmailField("email address", unique=True, max_length=254)
-	name = models.CharField("full name", max_length=150)
+	name = models.CharField("full name", max_length=150, blank=True, null=True)
 	password = models.CharField("password", max_length=128, null=True)
 	gender = models.CharField("gender", max_length=2, choices=GENDER_CHOICES, default="NS")
 	height_cm = models.PositiveSmallIntegerField("height in cm", null=True, blank=True)
