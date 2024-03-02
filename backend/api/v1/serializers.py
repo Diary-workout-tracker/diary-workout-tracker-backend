@@ -11,7 +11,7 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-	"""Serializer for the custom User model."""
+	"""Сериализатор кастомного пользователя."""
 
 	email = serializers.EmailField(validators=(UniqueValidator(queryset=User.objects.all()),))
 	name = serializers.CharField()
@@ -51,4 +51,4 @@ class CustomTokenObtainSerializer(serializers.Serializer):
 				"access": str(refresh.access_token),
 			}
 		else:
-			raise serializers.ValidationError({"detail": "Invalid or expired code"})
+			raise serializers.ValidationError({"detail": "Неверный или устаревший код"})
