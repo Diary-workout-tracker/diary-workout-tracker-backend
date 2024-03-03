@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-
+from datetime import timedelta
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -116,6 +116,14 @@ REST_FRAMEWORK = {
 	],
 	"DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 	"DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+	"DEFAULT_THROTTLE_CLASSES": [
+		"rest_framework.throttling.UserRateThrottle",
+		"rest_framework.throttling.AnonRateThrottle",
+	],
+	"DEFAULT_THROTTLE_RATES": {
+		"user": "10000/day",
+		"anon": "1000/day",
+	},
 }
 
 SPECTACULAR_SETTINGS = {
@@ -135,3 +143,9 @@ CACHES = {
 # access restore code
 
 ACCESS_RESTORE_CODE_TTL_SECONDS = 300
+
+ACCESS_RESTORE_CODE_THROTTLING = {
+	"duration": timedelta(minutes=10),
+	"num_requests": 5,
+	"cooldown": timedelta(minutes=5),
+}
