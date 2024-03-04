@@ -68,6 +68,17 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/resend_code/:
+    post:
+      operationId: resend_code_create
+      tags:
+      - resend_code
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
   /api/v1/token/refresh/:
     post:
       operationId: token_refresh_create

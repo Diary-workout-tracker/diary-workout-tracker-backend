@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -8,6 +9,7 @@ from rest_framework.views import APIView
 from utils import authcode, mailsender
 
 from .serializers import CustomTokenObtainSerializer, UserSerializer
+from .throttling import CodeRequestThrottle
 
 User = get_user_model()
 
@@ -42,6 +44,16 @@ class RegisterUserView(APIView):
 			send_auth_code(User.objects.get(email=request.data["email"]))
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResendCodeView(APIView):
+	permission_classes = (AllowAny,)
+	throttle_classes = (CodeRequestThrottle,)
+
+	def post(self, request):
+		user = get_object_or_404(User, email=request.data.get("email"))
+		send_auth_code(user)
+		return Response({"result": "Код создан и отправлен"}, status=status.HTTP_201_CREATED)
 
 
 class TokenRefreshView(APIView):

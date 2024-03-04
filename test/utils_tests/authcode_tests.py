@@ -64,7 +64,3 @@ def test_correct_code_is_valid(authcode):
 @pytest.mark.parametrize("invalid_code", (None, "00000", "0000", "0", False, 123, 3.15, {"a": "b"}))
 def test_incorrect_code_after_generation_is_invalid(authcode, invalid_code):
 	assert not authcode.code_is_valid(invalid_code)
-
-
-# def test_code_generation_is_determined_by_the_settings():
-#     pass

@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-
 from .models import Achievement, Day, History, MotivationalPhrase, RecreationPhrase, UserAchievement
 
 
