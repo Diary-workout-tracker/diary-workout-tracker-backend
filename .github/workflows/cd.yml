@@ -2,7 +2,7 @@ name: Workflow For Build and Deploy
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   build_backend_and_push_to_docker_hub:
@@ -59,7 +59,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          password: ${{ secrets.SSH_PASSPHRASE }}
+          key: ${{ secrets.SSH_KEY }}
           source: "docker-compose.production.yml"
           target: "/home/diary-workout-tracker"
       - name: Executing remote ssh commands to deploy
@@ -67,9 +67,9 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          password: ${{ secrets.SSH_PASSPHRASE }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/diary-workout-tracker/
+            cd /home/diary-training/
             sudo docker compose -f docker-compose.production.yml pull
             sudo docker compose -f docker-compose.production.yml down
             sudo docker compose -f docker-compose.production.yml up -d

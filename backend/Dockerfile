@@ -21,6 +21,6 @@ ENV DJANGO_ENV=${DJANGO_ENV} \
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
 WORKDIR /app
-COPY ./poetry.lock ./pyproject.toml /app/
+COPY ./pyproject.toml /app/
 RUN poetry install $(test "$DJANGO_ENV" == production && echo "--only=main") --no-interaction --no-ansi
 COPY . .
