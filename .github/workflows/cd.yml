@@ -3,9 +3,7 @@ name: Workflow For Build and Deploy
 on:
   workflow_run:
     workflows: [Quality check]
-    branches: [develop]
-    types:
-      - completed
+    types: [completed]
 
 jobs:
   build_backend_and_push_to_docker_hub:
