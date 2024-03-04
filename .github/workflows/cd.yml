@@ -1,13 +1,15 @@
 name: Workflow For Build and Deploy
 
 on:
-  workflow_run:
-    workflows: [Quality check]
-    types: [completed]
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   build_backend_and_push_to_docker_hub:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Push docker image of backend to DockerHub
     runs-on: ubuntu-latest
     steps:
@@ -28,7 +30,6 @@ jobs:
           tags: blakkheart/diary_backend:latest
 
   build_gateway_and_push_to_docker_hub:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Push docker image of gateway to DockerHub
     runs-on: ubuntu-latest
     steps:
