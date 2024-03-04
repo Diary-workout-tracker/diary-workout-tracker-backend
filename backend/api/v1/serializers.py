@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 	"""Сериализатор кастомного пользователя."""
 
 	email = serializers.EmailField(validators=(UniqueValidator(queryset=User.objects.all()),))
-	name = serializers.CharField()
+	name = serializers.CharField(required=False)
 	gender = serializers.ChoiceField(choices=GENDER_CHOICES, allow_blank=True, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
 	weight_kg = serializers.FloatField(allow_null=True, required=False)

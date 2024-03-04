@@ -17,6 +17,7 @@ class User(AbstractUser):
 	USERNAME_FIELD = "email"
 	REQUIRED_FIELDS = ()
 	username = None
+
 	email = models.EmailField(_("Адрес электронной почты"), unique=True, max_length=254)
 	name = models.CharField(_("Полное имя"), max_length=150)
 	password = models.CharField(_("Пароль"), max_length=128, null=True)

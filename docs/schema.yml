@@ -208,7 +208,6 @@ components:
       - amount_of_skips
       - email
       - last_completed_training_number
-      - name
   securitySchemes:
     jwtAuth:
       type: http
