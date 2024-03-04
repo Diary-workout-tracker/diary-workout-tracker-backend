@@ -19,9 +19,9 @@ def code_user():
 @pytest.fixture
 def alternative_throttling_settings():
 	settings.ACCESS_RESTORE_CODE_THROTTLING = {
-		"duration": timedelta(milliseconds=50),
+		"duration": timedelta(milliseconds=100),
 		"num_requests": 3,
-		"cooldown": timedelta(milliseconds=50),
+		"cooldown": timedelta(milliseconds=100),
 	}
 
 
