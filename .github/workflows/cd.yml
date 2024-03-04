@@ -1,14 +1,15 @@
 name: Workflow For Build and Deploy
+
 on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
+  workflow_run:
+    workflows: [Quality check]
+    branches: [develop]
+    types:
+      - completed
 
 jobs:
   build_backend_and_push_to_docker_hub:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Push docker image of backend to DockerHub
     runs-on: ubuntu-latest
     steps:
@@ -29,6 +30,7 @@ jobs:
           tags: blakkheart/diary_backend:latest
 
   build_gateway_and_push_to_docker_hub:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Push docker image of gateway to DockerHub
     runs-on: ubuntu-latest
     steps:
@@ -64,7 +66,7 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "docker-compose.production.yml"
-          target: "/home/diary-workout-tracker"
+          target: "/home/diary-training"
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
