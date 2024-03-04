@@ -9,6 +9,8 @@ User = get_user_model()
 
 @admin.register(User)
 class CustomUserAdmin(admin.ModelAdmin):
+	"""Админка для юзера."""
+
 	fieldsets = (
 		(None, {"fields": ("email",)}),
 		("Personal info", {"fields": ("name",)}),

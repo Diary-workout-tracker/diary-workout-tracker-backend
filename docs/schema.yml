@@ -154,7 +154,7 @@ components:
         * `NS` - Not Set
     PatchedUser:
       type: object
-      description: Serializer for the custom User model.
+      description: Сериализатор кастомного пользователя.
       properties:
         email:
           type: string
@@ -180,7 +180,7 @@ components:
           readOnly: true
     User:
       type: object
-      description: Serializer for the custom User model.
+      description: Сериализатор кастомного пользователя.
       properties:
         email:
           type: string

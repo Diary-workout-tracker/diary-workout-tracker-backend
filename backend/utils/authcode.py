@@ -18,7 +18,7 @@ class AuthCode:
 
 	def __init__(self, user) -> None:
 		if not isinstance(user, User):
-			raise ValidationError(f"{user} is not a User instance")
+			raise ValidationError(f"Класс {user} не User")
 		self._sender = None
 		self._user = user
 
@@ -38,7 +38,7 @@ class AuthCode:
 
 	def _send_code(self) -> None:
 		if not self._sender:
-			raise ValidationError("Cannot send code: sender not set.")
+			raise ValidationError("Невозможно отправить код: отправщик не установлен.")
 		self._sender.send_code(self._user.email, self.code)
 
 	def set_sender(self, sender: MailSender) -> None:

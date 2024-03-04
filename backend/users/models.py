@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .managers import CustomUserManager
 
@@ -11,25 +12,26 @@ GENDER_CHOICES = (
 
 
 class User(AbstractUser):
-	"""Custom User model."""
+	"""Модель пользователя."""
 
 	USERNAME_FIELD = "email"
 	REQUIRED_FIELDS = ()
 	username = None
-	email = models.EmailField("email address", unique=True, max_length=254)
-	name = models.CharField("full name", max_length=150, blank=True, null=True)
-	password = models.CharField("password", max_length=128, null=True)
-	gender = models.CharField("gender", max_length=2, choices=GENDER_CHOICES, default="NS")
-	height_cm = models.PositiveSmallIntegerField("height in cm", null=True, blank=True)
-	weight_kg = models.FloatField("weight in kg", null=True, blank=True)
-	last_completed_training_number = models.PositiveSmallIntegerField("last completed training", default=0)
-	amount_of_skips = models.PositiveSmallIntegerField("amount of skips available", default=5)
+
+	email = models.EmailField(_("Адрес электронной почты"), unique=True, max_length=254)
+	name = models.CharField(_("Полное имя"), max_length=150)
+	password = models.CharField(_("Пароль"), max_length=128, null=True)
+	gender = models.CharField(_("Пол"), max_length=2, choices=GENDER_CHOICES, default="NS")
+	height_cm = models.PositiveSmallIntegerField(_("Рост в см"), null=True, blank=True)
+	weight_kg = models.FloatField(_("Вес в кг"), null=True, blank=True)
+	last_completed_training_number = models.PositiveSmallIntegerField(_("Последняя завершенная тренировка"), default=0)
+	amount_of_skips = models.PositiveSmallIntegerField(_("Количество доступных пропусков/заморозок"), default=5)
 
 	objects = CustomUserManager()
 
 	class Meta:
-		verbose_name = "user"
-		verbose_name_plural = "users"
+		verbose_name = _("пользователь")
+		verbose_name_plural = _("пользователи")
 
 	def __str__(self) -> str:
 		return self.email
