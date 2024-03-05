@@ -1,5 +1,8 @@
 import pytest
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework_simplejwt.tokens import AccessToken
@@ -21,6 +24,19 @@ def get_authcode_for_user(_user):
 
 
 @pytest.fixture
+def throttling_num_requests_patch():
+	"""Функция нужна, чтобы обойти троттлинг в тестах при генерации кода.
+	Тестов много, поэтому при стандартных настройках троттлинга тесты проходят не все.
+	"""
+
+	settings.ACCESS_RESTORE_CODE_THROTTLING = {
+		"duration": timedelta(milliseconds=100),
+		"num_requests": 10,
+		"cooldown": timedelta(milliseconds=100),
+	}
+
+
+@pytest.fixture
 def get_users_token(client, user):
 	payload = {"email": user.email, "code": get_authcode_for_user(user)}
 	return client.post(URL, payload, format="json")
@@ -37,7 +53,7 @@ def test_correct_code_yields_token(get_users_token):
 
 
 @pytest.mark.django_db
-def test_incorrect_code_yields_exception(client, user):
+def test_incorrect_code_yields_exception(client, user, throttling_num_requests_patch):
 	payload = {"email": user.email, "code": "abcx"}
 	response = client.post(URL, payload, format="json")
 	assert response.status_code == status.HTTP_400_BAD_REQUEST

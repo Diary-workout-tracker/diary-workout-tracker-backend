@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from utils import authcode, mailsender
 
 from .serializers import CustomTokenObtainSerializer, UserSerializer
-from .throttling import CodeRequestThrottle
+from .throttling import DurationCooldownRequestThrottle
 
 User = get_user_model()
 
@@ -48,7 +48,7 @@ class RegisterUserView(APIView):
 
 class ResendCodeView(APIView):
 	permission_classes = (AllowAny,)
-	throttle_classes = (CodeRequestThrottle,)
+	throttle_classes = (DurationCooldownRequestThrottle,)
 
 	def post(self, request):
 		user = get_object_or_404(User, email=request.data.get("email"))
@@ -58,6 +58,7 @@ class ResendCodeView(APIView):
 
 class TokenRefreshView(APIView):
 	serializer_class = CustomTokenObtainSerializer
+	throttle_classes = (DurationCooldownRequestThrottle,)
 	permission_classes = (AllowAny,)
 
 	def post(self, request, format=None):
