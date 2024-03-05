@@ -4,9 +4,25 @@ info:
   version: 1.0.0
   description: Live докумениация сервиса
 paths:
+  /api/v1/achivment/:
+    get:
+      operationId: api_v1_achivment_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserAchievement'
+          description: ''
   /api/v1/health/:
     get:
-      operationId: health_retrieve
+      operationId: api_v1_health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:
@@ -23,9 +39,9 @@ paths:
           description: ''
   /api/v1/me/:
     get:
-      operationId: me_retrieve
+      operationId: api_v1_me_retrieve
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -36,9 +52,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: me_partial_update
+      operationId: api_v1_me_partial_update
       tags:
-      - me
+      - api
       requestBody:
         content:
           application/json:
@@ -60,9 +76,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     delete:
-      operationId: me_destroy
+      operationId: api_v1_me_destroy
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -70,9 +86,9 @@ paths:
           description: No response body
   /api/v1/resend_code/:
     post:
-      operationId: resend_code_create
+      operationId: api_v1_resend_code_create
       tags:
-      - resend_code
+      - api
       security:
       - jwtAuth: []
       - {}
@@ -81,9 +97,9 @@ paths:
           description: No response body
   /api/v1/token/refresh/:
     post:
-      operationId: token_refresh_create
+      operationId: api_v1_token_refresh_create
       tags:
-      - token
+      - api
       requestBody:
         content:
           application/json:
@@ -108,9 +124,9 @@ paths:
           description: ''
   /api/v1/user/:
     post:
-      operationId: user_create
+      operationId: api_v1_user_create
       tags:
-      - user
+      - api
       requestBody:
         content:
           application/json:
@@ -135,6 +151,38 @@ paths:
           description: ''
 components:
   schemas:
+    Achievement:
+      type: object
+      description: Сериализатор достижения.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        icon:
+          type: string
+          format: uri
+          title: Иконка достижения
+          description: Иконка, представляющая достижение.
+        title:
+          type: string
+          title: Название достижения
+          description: Название достижения.
+          maxLength: 100
+        description:
+          type: string
+          title: Описание достижения
+          description: Описание достижения.
+        reward_points:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Заморозк
+          description: Количество заморозок за достижение.
+      required:
+      - description
+      - icon
+      - id
+      - title
     BlankEnum:
       enum:
       - ''
@@ -219,6 +267,20 @@ components:
       - amount_of_skips
       - email
       - last_completed_training_number
+    UserAchievement:
+      type: object
+      properties:
+        achievement:
+          $ref: '#/components/schemas/Achievement'
+        achievement_date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата получения достижения
+          description: Дата, когда пользователь получил достижение.
+      required:
+      - achievement
+      - achievement_date
   securitySchemes:
     jwtAuth:
       type: http

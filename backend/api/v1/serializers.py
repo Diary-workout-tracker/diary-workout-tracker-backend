@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from running.models import Achievement, UserAchievement
 from users.models import GENDER_CHOICES
 from utils.authcode import AuthCode
 
@@ -52,3 +53,28 @@ class CustomTokenObtainSerializer(serializers.Serializer):
 			}
 		else:
 			raise serializers.ValidationError({"detail": "Неверный или устаревший код"})
+
+
+class AchievementSerializer(serializers.ModelSerializer):
+	"""Сериализатор достижения."""
+
+	class Meta:
+		model = Achievement
+		fields = (
+			"id",
+			"icon",
+			"title",
+			"description",
+			"reward_points",
+		)
+
+
+class UserAchievementSerializer(serializers.ModelSerializer):
+	achievement = AchievementSerializer()
+
+	class Meta:
+		model = UserAchievement
+		fields = (
+			"achievement",
+			"achievement_date",
+		)
