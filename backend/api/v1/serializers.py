@@ -70,11 +70,12 @@ class AchievementSerializer(serializers.ModelSerializer):
 
 
 class UserAchievementSerializer(serializers.ModelSerializer):
-	achievement = AchievementSerializer()
+	achievement_id = AchievementSerializer(read_only=True)
 
 	class Meta:
 		model = UserAchievement
 		fields = (
-			"achievement",
+			"id",
+			"achievement_id",
 			"achievement_date",
 		)

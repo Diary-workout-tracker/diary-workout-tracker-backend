@@ -1,17 +1,18 @@
-from django.urls import path
+from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+	AchievementListView,
 	HealthCheckView,
 	MyInfoView,
 	RegisterUserView,
 	ResendCodeView,
 	TokenRefreshView,
-	UserAchievementListView,
 )
 
 router = DefaultRouter()
+router.register("achivment", AchievementListView, basename="achivment")
 
 urlpatterns = (
 	path("health/", HealthCheckView.as_view(), name="health"),
@@ -21,5 +22,5 @@ urlpatterns = (
 	path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
 	path("me/", MyInfoView.as_view(), name="me"),
 	path("resend_code/", ResendCodeView.as_view(), name="code-resend"),
-	path("achivment/", UserAchievementListView.as_view(), name="achivment"),
+	path("", include(router.urls)),
 )

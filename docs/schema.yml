@@ -7,8 +7,10 @@ paths:
   /api/v1/achivment/:
     get:
       operationId: api_v1_achivment_list
+      description: Выводит список достижений
+      summary: Список достижений
       tags:
-      - api
+      - Run
       security:
       - jwtAuth: []
       responses:
@@ -18,7 +20,46 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserAchievement'
+                  $ref: '#/components/schemas/Achievement'
+          description: ''
+  /api/v1/achivment/{id}/:
+    get:
+      operationId: api_v1_achivment_retrieve
+      description: Получает информацию о достижение по его идентификатору
+      summary: Получение достижения по идентификатору
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Достижение.
+        required: true
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Achievement'
+          description: ''
+  /api/v1/achivment/me/:
+    get:
+      operationId: api_v1_achivment_me_retrieve
+      description: Получает информацию о достижениях авторизированного пользователя
+      summary: Получение достижений авторизированного пользователя
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAchievement'
           description: ''
   /api/v1/health/:
     get:
@@ -270,8 +311,13 @@ components:
     UserAchievement:
       type: object
       properties:
-        achievement:
-          $ref: '#/components/schemas/Achievement'
+        id:
+          type: integer
+          readOnly: true
+        achievement_id:
+          allOf:
+          - $ref: '#/components/schemas/Achievement'
+          readOnly: true
         achievement_date:
           type: string
           format: date-time
@@ -279,8 +325,9 @@ components:
           title: Дата получения достижения
           description: Дата, когда пользователь получил достижение.
       required:
-      - achievement
       - achievement_date
+      - achievement_id
+      - id
   securitySchemes:
     jwtAuth:
       type: http

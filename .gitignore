@@ -167,3 +167,6 @@ static/
 
 # development
 achievement_icons/
+
+# vscode
+.vscode/
