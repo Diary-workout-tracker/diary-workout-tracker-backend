@@ -6,7 +6,7 @@ info:
 paths:
   /api/v1/health/:
     get:
-      operationId: health_retrieve
+      operationId: api_v1_health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:
@@ -23,9 +23,9 @@ paths:
           description: ''
   /api/v1/me/:
     get:
-      operationId: me_retrieve
+      operationId: api_v1_me_retrieve
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -36,9 +36,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: me_partial_update
+      operationId: api_v1_me_partial_update
       tags:
-      - me
+      - api
       requestBody:
         content:
           application/json:
@@ -60,9 +60,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     delete:
-      operationId: me_destroy
+      operationId: api_v1_me_destroy
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -81,9 +81,9 @@ paths:
           description: No response body
   /api/v1/token/refresh/:
     post:
-      operationId: token_refresh_create
+      operationId: api_v1_token_refresh_create
       tags:
-      - token
+      - api
       requestBody:
         content:
           application/json:
@@ -108,9 +108,9 @@ paths:
           description: ''
   /api/v1/user/:
     post:
-      operationId: user_create
+      operationId: api_v1_user_create
       tags:
-      - user
+      - api
       requestBody:
         content:
           application/json:
