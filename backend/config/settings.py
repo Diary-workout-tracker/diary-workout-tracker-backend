@@ -141,6 +141,10 @@ CACHES = {
 	}
 }
 
+# 100 years token lifetime
+
+SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(weeks=52 * 100)}
+
 # access restore code
 
 ACCESS_RESTORE_CODE_TTL_SECONDS = 300
