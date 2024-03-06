@@ -1,3 +1,7 @@
+import base64
+import datetime
+
+from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -10,6 +14,27 @@ from utils.authcode import AuthCode
 User = get_user_model()
 
 
+class Base64ImageField(serializers.ImageField):
+	"""Класс для сериализации изображения и десериализации URI."""
+
+	def to_internal_value(self, data):
+		"""Декодирование base64 в файл."""
+
+		if isinstance(data, str) and data.startswith("data:image"):
+			format, imgstr = data.split(";base64,")
+			ext = format.split("/")[-1]
+			data = ContentFile(
+				base64.b64decode(imgstr),
+				name=str(datetime.datetime.now().timestamp()) + "." + ext,
+			)
+		return super().to_internal_value(data)
+
+	def to_representation(self, value):
+		"""Возвращает полный url изображения."""
+
+		return self.context["request"].build_absolute_uri(value.url)
+
+
 class UserSerializer(serializers.ModelSerializer):
 	"""Сериализатор кастомного пользователя."""
 
@@ -20,6 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
 	weight_kg = serializers.FloatField(allow_null=True, required=False)
 	last_completed_training_number = serializers.IntegerField(read_only=True)
 	amount_of_skips = serializers.IntegerField(read_only=True)
+	avatar = Base64ImageField(required=False)
 
 	class Meta:
 		model = User
@@ -31,7 +57,15 @@ class UserSerializer(serializers.ModelSerializer):
 			"weight_kg",
 			"last_completed_training_number",
 			"amount_of_skips",
+			"avatar",
 		)
+
+	def create(self, validated_data):
+		avatar_data = validated_data.pop("avatar", None)
+		user = User.objects.create(**validated_data)
+		if avatar_data:
+			user.avatar.save(avatar_data.name, avatar_data)
+		return user
 
 
 class CustomTokenObtainSerializer(serializers.Serializer):
