@@ -3,8 +3,8 @@ from django.utils import timezone
 from rest_framework import throttling
 
 
-class CodeRequestThrottle(throttling.BaseThrottle):
-	"""Класс для тротлинга запросов кода.
+class DurationCooldownRequestThrottle(throttling.BaseThrottle):
+	"""Класс для тротлинга запросов и вводов кода.
 	Настраиваемое решение со следующей логикой: если код запрашивается
 	больше num_requests раз в течение duration минут, включается запрет
 	на дельнейшие запросы, который длится cooldown минут."""
