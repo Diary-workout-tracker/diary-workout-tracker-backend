@@ -12,7 +12,7 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register("achivment", AchievementListView, basename="achivment")
+router.register("achievement", AchievementListView, basename="achievement")
 
 urlpatterns = (
 	path("health/", HealthCheckView.as_view(), name="health"),

@@ -4,9 +4,9 @@ info:
   version: 1.0.0
   description: Live докумениация сервиса
 paths:
-  /api/v1/achivment/:
+  /api/v1/achievement/:
     get:
-      operationId: api_v1_achivment_list
+      operationId: api_v1_achievement_list
       description: Выводит список достижений
       summary: Список достижений
       tags:
@@ -22,9 +22,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/Achievement'
           description: ''
-  /api/v1/achivment/{id}/:
+  /api/v1/achievement/{id}/:
     get:
-      operationId: api_v1_achivment_retrieve
+      operationId: api_v1_achievement_retrieve
       description: Получает информацию о достижение по его идентификатору
       summary: Получение достижения по идентификатору
       parameters:
@@ -45,9 +45,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Achievement'
           description: ''
-  /api/v1/achivment/me/:
+  /api/v1/achievement/me/:
     get:
-      operationId: api_v1_achivment_me_retrieve
+      operationId: api_v1_achievement_me_retrieve
       description: Получает информацию о достижениях авторизированного пользователя
       summary: Получение достижений авторизированного пользователя
       tags:
