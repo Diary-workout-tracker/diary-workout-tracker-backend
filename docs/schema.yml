@@ -6,14 +6,13 @@ info:
 paths:
   /api/v1/health/:
     get:
-      operationId: health_retrieve
+      operationId: api_v1_health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:
       - System
       security:
-      - cookieAuth: []
-      - basicAuth: []
+      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -22,12 +21,206 @@ paths:
               schema:
                 Health: OK
           description: ''
+  /api/v1/me/:
+    get:
+      operationId: api_v1_me_retrieve
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: api_v1_me_partial_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: api_v1_me_destroy
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/resend_code/:
+    post:
+      operationId: resend_code_create
+      tags:
+      - resend_code
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/token/refresh/:
+    post:
+      operationId: api_v1_token_refresh_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtain'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomTokenObtain'
+          description: ''
+  /api/v1/user/:
+    post:
+      operationId: api_v1_user_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
 components:
+  schemas:
+    BlankEnum:
+      enum:
+      - ''
+    CustomTokenObtain:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          writeOnly: true
+        code:
+          type: string
+          writeOnly: true
+          maxLength: 4
+          minLength: 4
+      required:
+      - code
+      - email
+    GenderEnum:
+      enum:
+      - M
+      - F
+      - NS
+      type: string
+      description: |-
+        * `M` - Male
+        * `F` - Female
+        * `NS` - Not Set
+    PatchedUser:
+      type: object
+      description: Сериализатор кастомного пользователя.
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        gender:
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        height_cm:
+          type: integer
+          nullable: true
+        weight_kg:
+          type: number
+          format: double
+          nullable: true
+        last_completed_training_number:
+          type: integer
+          readOnly: true
+        amount_of_skips:
+          type: integer
+          readOnly: true
+    User:
+      type: object
+      description: Сериализатор кастомного пользователя.
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        gender:
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        height_cm:
+          type: integer
+          nullable: true
+        weight_kg:
+          type: number
+          format: double
+          nullable: true
+        last_completed_training_number:
+          type: integer
+          readOnly: true
+        amount_of_skips:
+          type: integer
+          readOnly: true
+      required:
+      - amount_of_skips
+      - email
+      - last_completed_training_number
   securitySchemes:
-    basicAuth:
+    jwtAuth:
       type: http
-      scheme: basic
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: sessionid
+      scheme: bearer
+      bearerFormat: JWT

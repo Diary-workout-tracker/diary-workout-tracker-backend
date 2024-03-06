@@ -1,7 +1,8 @@
 import os
+from datetime import timedelta
 from pathlib import Path
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -9,12 +10,15 @@ path_to_env = os.path.join(BASE_DIR, "..", "infra", ".env")
 
 load_dotenv(path_to_env)
 
+
 SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 
 DEBUG = True
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
 # ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS", default="http://127.0.0.1")]
 
 
 INSTALLED_APPS = [
@@ -29,8 +33,9 @@ INSTALLED_APPS = [
 	"rest_framework.authtoken",
 	"drf_spectacular",
 	# app
-	"api",
-	"running",
+	"api.apps.ApiConfig",
+	"running.apps.RunningConfig",
+	"users.apps.UsersConfig",
 ]
 
 MIDDLEWARE = [
@@ -90,6 +95,7 @@ AUTH_PASSWORD_VALIDATORS = [
 	},
 ]
 
+AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "ru-RU"
 
@@ -109,9 +115,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
 	"DEFAULT_PERMISSION_CLASSES": [
-		"rest_framework.permissions.AllowAny",
+		"rest_framework.permissions.IsAuthenticated",
 	],
 	"DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+	"DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+	"DEFAULT_THROTTLE_CLASSES": [
+		"rest_framework.throttling.UserRateThrottle",
+		"rest_framework.throttling.AnonRateThrottle",
+	],
+	"DEFAULT_THROTTLE_RATES": {
+		"user": "10000/day",
+		"anon": "1000/day",
+	},
 }
 
 SPECTACULAR_SETTINGS = {
@@ -119,4 +134,25 @@ SPECTACULAR_SETTINGS = {
 	"DESCRIPTION": "Live докумениация сервиса",
 	"VERSION": "1.0.0",
 	"SERVE_INCLUDE_SCHEMA": False,
+}
+
+CACHES = {
+	"default": {
+		"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+		"LOCATION": "diary-localmemcache",
+	}
+}
+
+# 100 years token lifetime
+
+SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(weeks=52 * 100)}
+
+# access restore code
+
+ACCESS_RESTORE_CODE_TTL_SECONDS = 300
+
+ACCESS_RESTORE_CODE_THROTTLING = {
+	"duration": timedelta(minutes=10),
+	"num_requests": 5,
+	"cooldown": timedelta(minutes=5),
 }

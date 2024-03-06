@@ -24,6 +24,10 @@
 
 ![ER-диаграмма](docs/ER_model.svg)
 
+## Структура базы данных
+
+![ER-диаграмма](docs/ER_model.svg)
+
 ## Запуск проекта
 
 ### Настройка и запуск локально для разработки
@@ -62,10 +66,10 @@
 4. Создайте и заполните файл `.env` согласно шаблону [.env.example](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/blob/develop/infra/.env.example)
 5. Выполнить команду Make в консоли.
     ```bash
-    make project-init # при первом запуске
+    make project-init-dev # при первом запуске
     ```
     ```bash
-    make project-start # при последующих запусках
+    make project-start-dev # при последующих запусках
     ```
 
 ## Дополниельные сведения для разработчика
@@ -102,14 +106,15 @@
 <details>
   <summary><h3>Команды make</h3></summary>
 
-- Удаление Volumes: `make clear-volumes`
-- Запуск контейнеров: `make start-containers`
-- Выполнить миграции Django: `make migrate`
-- Собрать статику Django: `make collectstatic`
-- Создать супер пользователя: `make createsuperuser`
-- Инициализировать проект: `make project-init`
-- Запустить проект: `make project-start`
-- Остановить проект: `make project-stop`
+- Удаление Volumes: `make clear-volumes-dev`
+- Запуск контейнеров: `make start-containers-dev`
+- Выполнить миграции Django: `make migrate-dev`
+- Собрать статику Django: `make collectstatic-dev`
+- Создать супер пользователя: `make createsuperuser-dev`
+- Запуск сервера: `make start-server-dev`
+- Инициализировать проект: `make project-init-dev`
+- Запустить проект: `make project-start-dev`
+- Остановить контейнеры: `make containers-stop-dev`
 
 </details>
 
