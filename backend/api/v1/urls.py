@@ -3,7 +3,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-	AchievementListView,
+	AchievementViewSet,
 	HealthCheckView,
 	MyInfoView,
 	RegisterUserView,
@@ -12,7 +12,7 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register("achievement", AchievementListView, basename="achievement")
+router.register("achievement", AchievementViewSet, basename="achievement")
 
 urlpatterns = (
 	path("health/", HealthCheckView.as_view(), name="health"),

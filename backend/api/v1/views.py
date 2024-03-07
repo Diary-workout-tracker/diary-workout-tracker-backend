@@ -114,7 +114,7 @@ class MyInfoView(APIView):
 		tags=("Run",),
 	),
 )
-class AchievementListView(viewsets.ReadOnlyModelViewSet):
+class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
 	queryset = Achievement.objects.all()
 	serializer_class = AchievementSerializer
 
