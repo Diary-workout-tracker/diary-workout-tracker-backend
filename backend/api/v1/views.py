@@ -41,7 +41,7 @@ class RegisterUserView(APIView):
 	permission_classes = (AllowAny,)
 
 	def post(self, request, format=None):
-		serializer = self.serializer_class(data=request.data)
+		serializer = self.serializer_class(data=request.data, context={"request": request})
 		if serializer.is_valid():
 			serializer.save()
 			send_auth_code(User.objects.get(email=request.data["email"]))
@@ -77,12 +77,12 @@ class MyInfoView(APIView):
 
 	def get(self, request, *args, **kwargs):
 		user = request.user
-		serializer = self.serializer_class(user)
+		serializer = self.serializer_class(user, context={"request": request})
 		return Response(serializer.data)
 
 	def patch(self, request, *args, **kwargs):
 		user = request.user
-		serializer = self.serializer_class(user, data=request.data, partial=True)
+		serializer = self.serializer_class(user, data=request.data, context={"request": request}, partial=True)
 		if serializer.is_valid():
 			serializer.save()
 			return Response(serializer.data)
