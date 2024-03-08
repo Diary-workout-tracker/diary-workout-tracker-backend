@@ -5,6 +5,7 @@ from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models import GENDER_CHOICES
+from running.models import Day
 from utils.authcode import AuthCode
 
 User = get_user_model()
@@ -52,3 +53,14 @@ class CustomTokenObtainSerializer(serializers.Serializer):
 			}
 		else:
 			raise serializers.ValidationError({"detail": "Неверный или устаревший код"})
+
+
+class TrainingSerializer(serializers.ModelSerializer):
+	"""Сериализатор тренировок."""
+
+	motivation_phrase = serializers.CharField()
+	completed = serializers.BooleanField(required=False)
+
+	class Meta:
+		model = Day
+		fields = ("day_number", "workout", "workout_info", "motivation_phrase", "completed")

@@ -50,7 +50,16 @@ project-init-dev: # Инициализировать проект
 	make clear-volumes-dev start-containers-dev migrate-dev collectstatic-dev createsuperuser-dev start-server-dev
 
 project-start-dev: # Запустить проект
-	make start-containers start-server-dev
+	make start-containers-dev start-server-dev
 
 containers-stop-dev: # Остановить контейнеры
 	docker compose -f docker-compose.dev.yml  --env-file ./infra/.env down;
+
+test-training: # Создаёт тестовые тренировки
+	poetry run python backend/manage.py test_training
+
+test-phrase: # Создаёт тестовые фразы
+	poetry run python backend/manage.py test_phrase
+
+test-data: # Создаёт тестовые данные
+	make test-training test-phrase

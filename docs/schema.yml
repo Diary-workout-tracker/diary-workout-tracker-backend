@@ -6,7 +6,7 @@ info:
 paths:
   /api/v1/health/:
     get:
-      operationId: health_retrieve
+      operationId: api_v1_health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:
@@ -23,9 +23,9 @@ paths:
           description: ''
   /api/v1/me/:
     get:
-      operationId: me_retrieve
+      operationId: api_v1_me_retrieve
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -36,9 +36,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: me_partial_update
+      operationId: api_v1_me_partial_update
       tags:
-      - me
+      - api
       requestBody:
         content:
           application/json:
@@ -60,9 +60,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     delete:
-      operationId: me_destroy
+      operationId: api_v1_me_destroy
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -70,9 +70,9 @@ paths:
           description: No response body
   /api/v1/resend_code/:
     post:
-      operationId: resend_code_create
+      operationId: api_v1_resend_code_create
       tags:
-      - resend_code
+      - api
       security:
       - jwtAuth: []
       - {}
@@ -81,9 +81,9 @@ paths:
           description: No response body
   /api/v1/token/refresh/:
     post:
-      operationId: token_refresh_create
+      operationId: api_v1_token_refresh_create
       tags:
-      - token
+      - api
       requestBody:
         content:
           application/json:
@@ -106,11 +106,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/CustomTokenObtain'
           description: ''
+  /api/v1/training/:
+    get:
+      operationId: api_v1_training_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Training'
+          description: ''
   /api/v1/user/:
     post:
-      operationId: user_create
+      operationId: api_v1_user_create
       tags:
-      - user
+      - api
       requestBody:
         content:
           application/json:
@@ -189,6 +205,33 @@ components:
         amount_of_skips:
           type: integer
           readOnly: true
+    Training:
+      type: object
+      description: Сериализатор тренировок.
+      properties:
+        day_number:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Номер дня
+          description: Номер дня.
+        workout:
+          title: Этапы тренировки
+          description: Описанные этапы тренировки в json.
+        workout_info:
+          type: string
+          title: Описание тренировки
+          description: Описание тренировки.
+          maxLength: 100
+        motivation_phrase:
+          type: string
+        completed:
+          type: boolean
+      required:
+      - day_number
+      - motivation_phrase
+      - workout
+      - workout_info
     User:
       type: object
       description: Сериализатор кастомного пользователя.

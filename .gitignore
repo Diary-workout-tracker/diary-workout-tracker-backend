@@ -162,5 +162,4 @@ cython_debug/
 # ruff
 .ruff_cache/
 
-# poetry files specific to OS
 static/

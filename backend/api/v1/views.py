@@ -1,15 +1,17 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django.db.models.query import QuerySet
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
+from utils import authcode, mailsender, motivation_phrase
 
-from utils import authcode, mailsender
-
-from .serializers import CustomTokenObtainSerializer, UserSerializer
+from .serializers import CustomTokenObtainSerializer, UserSerializer, TrainingSerializer
 from .throttling import CodeRequestThrottle
+from running.models import Day
 
 User = get_user_model()
 
@@ -88,3 +90,25 @@ class MyInfoView(APIView):
 		user = request.user
 		user.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TrainingView(ListAPIView):
+	queryset = Day.objects.all()
+	serializer_class = TrainingSerializer
+
+	def get_queryset(self) -> QuerySet:
+		"""
+		Формирует список тренировок с динамическими фразами
+		и флагом завершения тренировки.
+		"""
+		user = self.request.user
+		queryset = self.queryset.all()
+		history = user.user_history.all()
+		dynamic_motivation_phrase = motivation_phrase.get_dynamic_list_motivation_phrase(user)
+		len_history = len(history)
+		for i in range(len(queryset)):
+			element = queryset[i]
+			if len_history > i:
+				element.completed = history[i].completed
+			element.motivation_phrase = dynamic_motivation_phrase[i]
+		return queryset
