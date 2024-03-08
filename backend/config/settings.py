@@ -18,6 +18,8 @@ DEBUG = True
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
 # ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS", default="http://127.0.0.1")]
+
 
 INSTALLED_APPS = [
 	"django.contrib.admin",
@@ -106,6 +108,8 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -140,6 +144,10 @@ CACHES = {
 		"LOCATION": "diary-localmemcache",
 	}
 }
+
+# 100 years token lifetime
+
+SIMPLE_JWT = {"ACCESS_TOKEN_LIFETIME": timedelta(weeks=52 * 100)}
 
 # access restore code
 
