@@ -164,3 +164,9 @@ cython_debug/
 
 # poetry files specific to OS
 static/
+
+# development
+achievement_icons/
+
+# vscode
+.vscode/
