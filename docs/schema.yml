@@ -233,7 +233,7 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
-          title: Заморозк
+          title: Заморозка
           description: Количество заморозок за достижение.
       required:
       - description
