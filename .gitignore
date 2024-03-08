@@ -162,8 +162,6 @@ cython_debug/
 # ruff
 .ruff_cache/
 
-static/
-
 # development
 achievement_icons/
 static/
