@@ -4,6 +4,63 @@ info:
   version: 1.0.0
   description: Live докумениация сервиса
 paths:
+  /api/v1/achievement/:
+    get:
+      operationId: api_v1_achievement_list
+      description: Выводит список достижений
+      summary: Список достижений
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Achievement'
+          description: ''
+  /api/v1/achievement/{id}/:
+    get:
+      operationId: api_v1_achievement_retrieve
+      description: Получает информацию о достижение по его идентификатору
+      summary: Получение достижения по идентификатору
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Достижение.
+        required: true
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Achievement'
+          description: ''
+  /api/v1/achievement/me/:
+    get:
+      operationId: api_v1_achievement_me_retrieve
+      description: Получает информацию о достижениях авторизированного пользователя
+      summary: Получение достижений авторизированного пользователя
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAchievement'
+          description: ''
   /api/v1/health/:
     get:
       operationId: api_v1_health_retrieve
@@ -151,6 +208,38 @@ paths:
           description: ''
 components:
   schemas:
+    Achievement:
+      type: object
+      description: Сериализатор достижения.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        icon:
+          type: string
+          format: uri
+          title: Иконка достижения
+          description: Иконка, представляющая достижение.
+        title:
+          type: string
+          title: Название достижения
+          description: Название достижения.
+          maxLength: 100
+        description:
+          type: string
+          title: Описание достижения
+          description: Описание достижения.
+        reward_points:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Заморозк
+          description: Количество заморозок за достижение.
+      required:
+      - description
+      - icon
+      - id
+      - title
     BlankEnum:
       enum:
       - ''
@@ -173,12 +262,10 @@ components:
       enum:
       - M
       - F
-      - NS
       type: string
       description: |-
         * `M` - Male
         * `F` - Female
-        * `NS` - Not Set
     PatchedUser:
       type: object
       description: Сериализатор кастомного пользователя.
@@ -205,6 +292,9 @@ components:
         amount_of_skips:
           type: integer
           readOnly: true
+        avatar:
+          type: string
+          format: uri
     Training:
       type: object
       description: Сериализатор тренировок.
@@ -258,10 +348,33 @@ components:
         amount_of_skips:
           type: integer
           readOnly: true
+        avatar:
+          type: string
+          format: uri
       required:
       - amount_of_skips
       - email
       - last_completed_training_number
+    UserAchievement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        achievement_id:
+          allOf:
+          - $ref: '#/components/schemas/Achievement'
+          readOnly: true
+        achievement_date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата получения достижения
+          description: Дата, когда пользователь получил достижение.
+      required:
+      - achievement_date
+      - achievement_id
+      - id
   securitySchemes:
     jwtAuth:
       type: http

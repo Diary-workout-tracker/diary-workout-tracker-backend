@@ -1,17 +1,26 @@
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
+from django.core.handlers.wsgi import WSGIRequest
 from django.db.models.query import QuerySet
-from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
-from utils import authcode, mailsender, motivation_phrase
 
-from .serializers import CustomTokenObtainSerializer, UserSerializer, TrainingSerializer
-from .throttling import CodeRequestThrottle
-from running.models import Day
+from running.models import Achievement, Day, UserAchievement
+from utils import authcode, mailsender, motivation_phrase
+from .serializers import (
+  AchievementSerializer,
+  CustomTokenObtainSerializer,
+  TrainingSerializer,
+  UserAchievementSerializer,
+  UserSerializer
+)
+from .throttling import DurationCooldownRequestThrottle
+
 
 User = get_user_model()
 
@@ -40,7 +49,7 @@ class RegisterUserView(APIView):
 	permission_classes = (AllowAny,)
 
 	def post(self, request, format=None):
-		serializer = self.serializer_class(data=request.data)
+		serializer = self.serializer_class(data=request.data, context={"request": request})
 		if serializer.is_valid():
 			serializer.save()
 			send_auth_code(User.objects.get(email=request.data["email"]))
@@ -50,7 +59,7 @@ class RegisterUserView(APIView):
 
 class ResendCodeView(APIView):
 	permission_classes = (AllowAny,)
-	throttle_classes = (CodeRequestThrottle,)
+	throttle_classes = (DurationCooldownRequestThrottle,)
 
 	def post(self, request):
 		user = get_object_or_404(User, email=request.data.get("email"))
@@ -60,6 +69,7 @@ class ResendCodeView(APIView):
 
 class TokenRefreshView(APIView):
 	serializer_class = CustomTokenObtainSerializer
+	throttle_classes = (DurationCooldownRequestThrottle,)
 	permission_classes = (AllowAny,)
 
 	def post(self, request, format=None):
@@ -75,12 +85,12 @@ class MyInfoView(APIView):
 
 	def get(self, request, *args, **kwargs):
 		user = request.user
-		serializer = self.serializer_class(user)
+		serializer = self.serializer_class(user, context={"request": request})
 		return Response(serializer.data)
 
 	def patch(self, request, *args, **kwargs):
 		user = request.user
-		serializer = self.serializer_class(user, data=request.data, partial=True)
+		serializer = self.serializer_class(user, data=request.data, context={"request": request}, partial=True)
 		if serializer.is_valid():
 			serializer.save()
 			return Response(serializer.data)
@@ -112,3 +122,38 @@ class TrainingView(ListAPIView):
 				element.completed = history[i].completed
 			element.motivation_phrase = dynamic_motivation_phrase[i]
 		return queryset
+
+
+@extend_schema_view(
+	list=extend_schema(
+		responses={200: AchievementSerializer(many=True)},
+		summary="Список достижений",
+		description="Выводит список достижений",
+		tags=("Run",),
+	),
+	retrieve=extend_schema(
+		responses={200: AchievementSerializer()},
+		summary="Получение достижения по идентификатору",
+		description="Получает информацию о достижение по его идентификатору",
+		tags=("Run",),
+	),
+	me=extend_schema(
+		responses={200: UserAchievementSerializer()},
+		summary="Получение достижений авторизированного пользователя",
+		description="Получает информацию о достижениях авторизированного пользователя",
+		tags=("Run",),
+	),
+)
+class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
+	queryset = Achievement.objects.all()
+	serializer_class = AchievementSerializer
+
+	@action(
+		detail=False,
+		serializer_class=UserAchievementSerializer,
+	)
+	def me(self, request: WSGIRequest) -> Response:
+		user = request.user
+		queryset = UserAchievement.objects.filter(user_id=user)
+		serializer = self.serializer_class(queryset, many=True)
+		return Response(serializer.data)
