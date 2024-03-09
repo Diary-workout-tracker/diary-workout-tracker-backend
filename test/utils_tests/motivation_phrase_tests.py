@@ -5,7 +5,11 @@ import pytest
 from django.contrib.auth import get_user_model
 
 from running.models import Day, MotivationalPhrase, RecreationPhrase, History  # noqa
-from backend.utils.motivation_phrase import get_rest_phrases, get_dynamic_list_motivation_phrase
+from backend.utils.motivation_phrase import (
+	get_rest_phrases,
+	get_dynamic_list_motivation_phrase,
+	replaces_phrases,
+)
 
 
 User = get_user_model()
@@ -215,3 +219,28 @@ def test_get_dynamic_list_motivation_phrase_more_five_history_last_training_morn
 		motivation_phrase[9],
 		motivation_phrase[11],
 	)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+	"days_to_replace, rest_phrases",
+	(
+		((1, 2, 3), ("Фраза отдыха 1", "Фраза отдыха 2", "Фраза отдыха 3")),
+		((1, 2), ("Фраза отдыха 1", "Фраза отдыха 2")),
+		((1,), ("Фраза отдыха 1",)),
+	),
+)
+def test_replaces_phrases(create_motivation_phrase, days_to_replace, rest_phrases):
+	motivational_phrases = list(MotivationalPhrase.objects.all().values_list("text", flat=True))
+	replaces_phrases(motivational_phrases, days_to_replace, rest_phrases)
+	new_motivational_phrases = tuple(motivational_phrases[day] for day in days_to_replace)
+	assert new_motivational_phrases == rest_phrases
+
+
+@pytest.mark.django_db
+def test_replaces_phrases_not_index(create_motivation_phrase):
+	days_to_replace = (99, 100, 101)
+	rest_phrases = ("Фраза отдыха 1", "Фраза отдыха 2", "Фраза отдыха 3")
+	motivational_phrases = list(MotivationalPhrase.objects.all().values_list("text", flat=True))
+	replaces_phrases(motivational_phrases, days_to_replace, rest_phrases)
+	assert motivational_phrases[days_to_replace[0]] == rest_phrases[0]
