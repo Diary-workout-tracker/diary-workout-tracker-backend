@@ -13,11 +13,11 @@ from rest_framework.generics import ListAPIView
 from running.models import Achievement, Day, UserAchievement
 from utils import authcode, mailsender, motivation_phrase
 from .serializers import (
-  AchievementSerializer,
-  CustomTokenObtainSerializer,
-  TrainingSerializer,
-  UserAchievementSerializer,
-  UserSerializer
+	AchievementSerializer,
+	CustomTokenObtainSerializer,
+	TrainingSerializer,
+	UserAchievementSerializer,
+	UserSerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
 
@@ -102,6 +102,14 @@ class MyInfoView(APIView):
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema_view(
+	get=extend_schema(
+		responses={200: TrainingSerializer(many=True)},
+		summary="Список тренировок",
+		description="Выводит список тренировок",
+		tags=("Run",),
+	),
+)
 class TrainingView(ListAPIView):
 	queryset = Day.objects.all()
 	serializer_class = TrainingSerializer

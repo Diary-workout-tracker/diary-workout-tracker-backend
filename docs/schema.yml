@@ -166,8 +166,10 @@ paths:
   /api/v1/training/:
     get:
       operationId: api_v1_training_list
+      description: Выводит список тренировок
+      summary: Список тренировок
       tags:
-      - api
+      - Run
       security:
       - jwtAuth: []
       responses:
