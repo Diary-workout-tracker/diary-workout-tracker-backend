@@ -85,8 +85,16 @@ class HistoryAdmin(admin.ModelAdmin):
 		"avg_speed",
 		"user_id",
 	)
-	list_filter = ("completed", "training_day", "user_id")
-	search_fields = ("training_day", "motivation_phrase", "user_id")
+	list_filter = (
+		"completed",
+		"training_day",
+		"user_id",
+	)
+	search_fields = (
+		"training_day",
+		"motivation_phrase",
+		"user_id",
+	)
 
 
 @admin.register(UserAchievement)

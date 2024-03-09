@@ -56,7 +56,6 @@ psycopg2-binary = "^2.9.9"
 djangorestframework-simplejwt = "^5.3.1"
 psycopg2 = "^2.9.9"
 pillow = "^10.2.0"
-freezegun = "^1.4.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -64,6 +63,7 @@ pre-commit = "^3.6.1"
 ruff = "^0.2.1"
 pytest = "^8.0.0"
 pytest-django = "^4.8.0"
+freezegun = "^1.4.0"
 
 
 [build-system]

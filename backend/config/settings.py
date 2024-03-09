@@ -158,8 +158,3 @@ ACCESS_RESTORE_CODE_THROTTLING = {
 	"num_requests": 5,
 	"cooldown": timedelta(minutes=5),
 }
-
-SIMPLE_JWT = {
-	"ACCESS_TOKEN_LIFETIME": timedelta(days=100),
-	"REFRESH_TOKEN_LIFETIME": timedelta(days=100),
-}
