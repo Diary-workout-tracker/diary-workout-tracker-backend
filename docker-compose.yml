@@ -20,7 +20,9 @@ services:
       start_period: 3s
 
   backend:
-    build: ./backend/
+    build:
+      context: ./
+      dockerfile: ./backend/Dockerfile
     env_file: ./infra/.env
     depends_on:
       db:
