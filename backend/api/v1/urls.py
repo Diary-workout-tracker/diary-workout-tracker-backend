@@ -9,7 +9,9 @@ from .views import (
 	RegisterUserView,
 	ResendCodeView,
 	TokenRefreshView,
+  TrainingView
 )
+
 
 router = DefaultRouter()
 router.register("achievement", AchievementViewSet, basename="achievement")
@@ -22,5 +24,6 @@ urlpatterns = (
 	path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
 	path("me/", MyInfoView.as_view(), name="me"),
 	path("resend_code/", ResendCodeView.as_view(), name="code-resend"),
+	path("training/", TrainingView.as_view(), name="training"),
 	path("", include(router.urls)),
 )

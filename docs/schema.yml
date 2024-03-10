@@ -163,6 +163,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/CustomTokenObtain'
           description: ''
+  /api/v1/training/:
+    get:
+      operationId: api_v1_training_list
+      description: Выводит список тренировок
+      summary: Список тренировок
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Training'
+          description: ''
   /api/v1/user/:
     post:
       operationId: api_v1_user_create
@@ -217,7 +235,7 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
-          title: Заморозк
+          title: Заморозка
           description: Количество заморозок за достижение.
       required:
       - description
@@ -279,6 +297,33 @@ components:
         avatar:
           type: string
           format: uri
+    Training:
+      type: object
+      description: Сериализатор тренировок.
+      properties:
+        day_number:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Номер дня
+          description: Номер дня.
+        workout:
+          title: Этапы тренировки
+          description: Описанные этапы тренировки в json.
+        workout_info:
+          type: string
+          title: Описание тренировки
+          description: Описание тренировки.
+          maxLength: 100
+        motivation_phrase:
+          type: string
+        completed:
+          type: boolean
+      required:
+      - day_number
+      - motivation_phrase
+      - workout
+      - workout_info
     User:
       type: object
       description: Сериализатор кастомного пользователя.
