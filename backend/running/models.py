@@ -75,7 +75,7 @@ class Achievement(models.Model):
 		db_comment=_("Числовое представление уровня сложности достижения."),
 	)
 	reward_points = models.PositiveSmallIntegerField(
-		verbose_name=_("Заморозк"),
+		verbose_name=_("Заморозка"),
 		default=0,
 		help_text=_("Количество заморозок за достижение."),
 		db_comment=_("Количество заморозок за достижение."),
@@ -177,6 +177,16 @@ class History(models.Model):
 		verbose_name=_("Средняя скорость"),
 		help_text=_("Средняя скорость за всю тренировку."),
 		db_comment=_("Средняя скорость за всю тренировку."),
+	)
+	user_id = models.ForeignKey(
+		User,
+		on_delete=models.CASCADE,
+		verbose_name=_("Пользователь"),
+		related_name="user_history",
+		help_text=_("История пользователя."),
+		db_comment=_("История пользователя."),
+		null=False,
+		blank=False,
 	)
 
 	class Meta:

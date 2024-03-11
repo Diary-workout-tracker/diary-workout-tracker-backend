@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.handlers.wsgi import WSGIRequest
+from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, viewsets
@@ -7,12 +8,19 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 
-from running.models import Achievement, UserAchievement
-from utils import authcode, mailsender
-
-from .serializers import AchievementSerializer, CustomTokenObtainSerializer, UserAchievementSerializer, UserSerializer
+from running.models import Achievement, Day, UserAchievement
+from utils import authcode, mailsender, motivation_phrase
+from .serializers import (
+	AchievementSerializer,
+	CustomTokenObtainSerializer,
+	TrainingSerializer,
+	UserAchievementSerializer,
+	UserSerializer,
+)
 from .throttling import DurationCooldownRequestThrottle
+
 
 User = get_user_model()
 
@@ -92,6 +100,36 @@ class MyInfoView(APIView):
 		user = request.user
 		user.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@extend_schema_view(
+	get=extend_schema(
+		responses={200: TrainingSerializer(many=True)},
+		summary="Список тренировок",
+		description="Выводит список тренировок",
+		tags=("Run",),
+	),
+)
+class TrainingView(ListAPIView):
+	queryset = Day.objects.all()
+	serializer_class = TrainingSerializer
+
+	def get_queryset(self) -> QuerySet:
+		"""
+		Формирует список тренировок с динамическими фразами
+		и флагом завершения тренировки.
+		"""
+		user = self.request.user
+		queryset = self.queryset.all()
+		history = user.user_history.all()
+		dynamic_motivation_phrase = motivation_phrase.get_dynamic_list_motivation_phrase(user)
+		len_history = len(history)
+		for i in range(len(queryset)):
+			element = queryset[i]
+			if len_history > i:
+				element.completed = history[i].completed
+			element.motivation_phrase = dynamic_motivation_phrase[i]
+		return queryset
 
 
 @extend_schema_view(
