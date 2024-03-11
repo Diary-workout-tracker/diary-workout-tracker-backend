@@ -25,6 +25,6 @@ class CustomUserAdmin(admin.ModelAdmin):
 			},
 		),
 	)
-	list_display = ("email", "name", "is_staff")
+	list_display = ("avatar_display", "email", "name", "is_staff")
 	search_fields = ("email", "name")
 	ordering = ("email",)

@@ -162,5 +162,9 @@ cython_debug/
 # ruff
 .ruff_cache/
 
-# poetry files specific to OS
+# development
+achievement_icons/
 static/
+
+# vscode
+.vscode/
