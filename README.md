@@ -112,8 +112,6 @@
 - Запустить проект: `make project-start-dev`
 - Остановить контейнеры: `make containers-stop-dev`
 - Создаёт тестовые тренировки: `make test-training`
-- Создаёт тестовые фразы: `make test-phrase`
-- Создаёт тестовые данные: `make test-data`
 
 </details>
 

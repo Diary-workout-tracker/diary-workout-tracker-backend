@@ -57,9 +57,3 @@ containers-stop-dev: # Остановить контейнеры
 
 test-training: # Создаёт тестовые тренировки
 	poetry run python backend/manage.py test_training
-
-test-phrase: # Создаёт тестовые фразы
-	poetry run python backend/manage.py test_phrase
-
-test-data: # Создаёт тестовые данные
-	make test-training test-phrase
