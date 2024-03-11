@@ -6,17 +6,26 @@ User = get_user_model()
 
 
 class MotivationalPhrase(models.Model):
-	text = models.TextField()
+	"""Модель, представляющая мотивационные фразы и фразы отдыха."""
+
+	text = models.TextField(
+		verbose_name=_("Текст фразы"),
+		help_text=_("Текст фразы."),
+		db_comment=_("Текст фразы."),
+	)
+	rest = models.BooleanField(
+		default=False,
+		verbose_name=_("Флаг фразы отдыха"),
+		help_text=_("Флаг, обозначающий фразу отдыха."),
+		db_comment=_("Флаг, обозначающий фразу отдыха."),
+	)
+
+	class Meta:
+		verbose_name = _("Мотивационная фраза")
+		verbose_name_plural = _("Мотивационные фразы")
 
 	def __str__(self):
-		return self.text
-
-
-class RecreationPhrase(models.Model):
-	text = models.TextField()
-
-	def __str__(self):
-		return self.text
+		return f"{self.text} - {self.rest}"
 
 
 class Day(models.Model):
