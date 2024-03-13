@@ -1,8 +1,8 @@
-from freezegun import freeze_time
 from datetime import datetime, timedelta
 
-import pytest
 from django.contrib.auth import get_user_model
+from freezegun import freeze_time
+import pytest
 
 from running.models import Day, MotivationalPhrase, History  # noqa
 from backend.utils.motivation_phrase import (

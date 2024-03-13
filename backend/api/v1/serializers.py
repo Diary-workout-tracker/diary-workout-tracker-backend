@@ -8,7 +8,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from running.models import Achievement, UserAchievement
+from constants.achievment import FORMAT_DATE
+from running.models import Achievement
 from users.models import GENDER_CHOICES
 from running.models import Day
 from utils.authcode import AuthCode
@@ -98,30 +99,28 @@ class TrainingSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Day
-		fields = ("day_number", "workout", "workout_info", "motivation_phrase", "completed")
+		fields = (
+			"day_number",
+			"workout",
+			"workout_info",
+			"motivation_phrase",
+			"completed",
+		)
 
 
 class AchievementSerializer(serializers.ModelSerializer):
 	"""Сериализатор достижения."""
 
+	achievement_date = serializers.DateTimeField(format=FORMAT_DATE, required=False)
+	received = serializers.BooleanField(required=False)
+
 	class Meta:
 		model = Achievement
 		fields = (
-			"id",
 			"icon",
 			"title",
 			"description",
 			"reward_points",
-		)
-
-
-class UserAchievementSerializer(serializers.ModelSerializer):
-	achievement_id = AchievementSerializer(read_only=True)
-
-	class Meta:
-		model = UserAchievement
-		fields = (
-			"id",
-			"achievement_id",
 			"achievement_date",
+			"received",
 		)

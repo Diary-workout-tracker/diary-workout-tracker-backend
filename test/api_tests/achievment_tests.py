@@ -1,48 +1,26 @@
-from collections import OrderedDict
+from datetime import datetime
 
-import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
+import pytest
 from rest_framework import status
 
-from running.models import Achievement
+from backend.constants.achievment import FORMAT_DATE
+from running.models import UserAchievement  # noqa
 
-NAME = "achievement"
 
-
-def check_achievement_data(data: OrderedDict, achievement: Achievement) -> None:
-	"""Тестирование соответствие полей достижения"""
-	assert data["id"] == achievement.id
-	assert data["title"] == achievement.title
-	assert data["description"] == achievement.description
-	assert data["reward_points"] == achievement.reward_points
+User = get_user_model()
 
 
 @pytest.mark.django_db
 def test_all_achievments_returns_correct(user_client, achievements) -> None:
 	"""Тестирование выдачи списка достижений"""
-	response = user_client.get(reverse(NAME + "-list"))
+	date = datetime.now()
+	user = User.objects.get(email="test@test.ru")
+	UserAchievement.objects.create(achievement_date=date, user_id=user, achievement_id=achievements[0])
+	response = user_client.get(reverse("achievements"))
 	assert response.status_code == status.HTTP_200_OK
 	assert len(response.data) == 3
-	for item, equal in zip(sorted(response.data, key=lambda x: x["id"]), achievements):
-		check_achievement_data(item, equal)
-
-
-@pytest.mark.django_db
-def test_achievment_returns_correct(user_client, achievements) -> None:
-	"""Тестирование выдачи информации о достижение"""
-	achievement = achievements[0]
-	response = user_client.get(reverse(NAME + "-detail", kwargs={"pk": achievement.id}))
-	assert response.status_code == status.HTTP_200_OK
-	check_achievement_data(response.data, achievement)
-
-
-@pytest.mark.django_db
-def test_me_achievment_returns_correct(user_client, achievement_to_user) -> None:
-	"""Тестирование выдачи списка достижений авторизированного пользователя"""
-	response = user_client.get(reverse(NAME + "-me"))
-	assert response.status_code == status.HTTP_200_OK
-	assert len(response.data) == 1
-	data = response.data[0]
-	achievement = data["achievement_id"]
-	check_achievement_data(achievement, achievement_to_user.achievement_id)
-	assert data is not None
+	achievement = response.data[0]
+	assert achievement["achievement_date"] == date.strftime(FORMAT_DATE)
+	assert achievement["received"]

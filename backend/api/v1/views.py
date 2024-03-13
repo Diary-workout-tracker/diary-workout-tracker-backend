@@ -1,22 +1,19 @@
 from django.contrib.auth import get_user_model
-from django.core.handlers.wsgi import WSGIRequest
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 
 from running.models import Achievement, Day, UserAchievement
-from utils import authcode, mailsender, motivation_phrase
+from utils import achievement, authcode, mailsender, motivation_phrase
 from .serializers import (
 	AchievementSerializer,
 	CustomTokenObtainSerializer,
 	TrainingSerializer,
-	UserAchievementSerializer,
 	UserSerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
@@ -139,29 +136,15 @@ class TrainingView(ListAPIView):
 		description="Выводит список достижений",
 		tags=("Run",),
 	),
-	retrieve=extend_schema(
-		responses={200: AchievementSerializer()},
-		summary="Получение достижения по идентификатору",
-		description="Получает информацию о достижение по его идентификатору",
-		tags=("Run",),
-	),
-	me=extend_schema(
-		responses={200: UserAchievementSerializer()},
-		summary="Получение достижений авторизированного пользователя",
-		description="Получает информацию о достижениях авторизированного пользователя",
-		tags=("Run",),
-	),
 )
-class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
+class AchievementViewSet(ListAPIView):
 	queryset = Achievement.objects.all()
 	serializer_class = AchievementSerializer
 
-	@action(
-		detail=False,
-		serializer_class=UserAchievementSerializer,
-	)
-	def me(self, request: WSGIRequest) -> Response:
-		user = request.user
-		queryset = UserAchievement.objects.filter(user_id=user)
-		serializer = self.serializer_class(queryset, many=True)
-		return Response(serializer.data)
+	def get_queryset(self) -> QuerySet:
+		"""Формирует список ачивок c флагом получения и датой."""
+		user = self.request.user
+		queryset = self.queryset.all()
+		user_achievement = UserAchievement.objects.filter(user_id=user)
+		achievement.designation_received_achievements(queryset, user_achievement)
+		return queryset
