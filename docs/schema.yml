@@ -7,8 +7,10 @@ paths:
   /api/v1/achievements/:
     get:
       operationId: api_v1_achievements_list
+      description: Выводит список достижений
+      summary: Список достижений
       tags:
-      - api
+      - Run
       security:
       - jwtAuth: []
       responses:

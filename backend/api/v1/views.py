@@ -130,7 +130,7 @@ class TrainingView(ListAPIView):
 
 
 @extend_schema_view(
-	list=extend_schema(
+	get=extend_schema(
 		responses={200: AchievementSerializer(many=True)},
 		summary="Список достижений",
 		description="Выводит список достижений",
