@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from constants.achievment import FORMAT_DATE
+from .constants import FORMAT_DATE
 from running.models import Achievement
 from users.models import GENDER_CHOICES
 from running.models import Day

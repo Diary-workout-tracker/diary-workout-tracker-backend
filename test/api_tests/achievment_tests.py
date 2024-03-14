@@ -4,7 +4,7 @@ from django.urls import reverse
 import pytest
 from rest_framework import status
 
-from backend.constants.achievment import FORMAT_DATE
+from backend.api.v1.constants import FORMAT_DATE
 from running.models import UserAchievement  # noqa
 
 
