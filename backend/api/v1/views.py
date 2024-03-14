@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db.models import BooleanField, Case, DateTimeField, F, When
 from django.db.models.query import QuerySet
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -10,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 
 from running.models import Achievement, Day
-from utils import authcode, mailsender, motivation_phrase
+from utils import authcode, mailsender, motivation_phrase, users
 from .serializers import (
 	AchievementSerializer,
 	CustomTokenObtainSerializer,
@@ -60,7 +59,7 @@ class ResendCodeView(APIView):
 	throttle_classes = (DurationCooldownRequestThrottle,)
 
 	def post(self, request):
-		user = get_object_or_404(User, email=request.data.get("email"))
+		user = users.get_user_by_email_or_404(request.data.get("email"))
 		send_auth_code(user)
 		return Response({"result": "Код создан и отправлен"}, status=status.HTTP_201_CREATED)
 
