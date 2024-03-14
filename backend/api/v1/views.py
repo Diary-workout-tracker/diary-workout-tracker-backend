@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import BooleanField, Case, DateTimeField, F, When
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -8,8 +9,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 
-from running.models import Achievement, Day, UserAchievement
-from utils import achievement, authcode, mailsender, motivation_phrase
+from running.models import Achievement, Day
+from utils import authcode, mailsender, motivation_phrase
 from .serializers import (
 	AchievementSerializer,
 	CustomTokenObtainSerializer,
@@ -138,13 +139,20 @@ class TrainingView(ListAPIView):
 	),
 )
 class AchievementViewSet(ListAPIView):
-	queryset = Achievement.objects.all()
 	serializer_class = AchievementSerializer
 
 	def get_queryset(self) -> QuerySet:
 		"""Формирует список ачивок c флагом получения и датой."""
 		user = self.request.user
-		queryset = self.queryset.all()
-		user_achievement = UserAchievement.objects.filter(user_id=user)
-		achievement.designation_received_achievements(queryset, user_achievement)
-		return queryset
+		return Achievement.objects.annotate(
+			received=Case(
+				When(user_achievements__user_id=user, then=True),
+				default=False,
+				output_field=BooleanField(),
+			),
+			achievement_date=Case(
+				When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
+				default=None,
+				output_field=DateTimeField(),
+			),
+		).all()

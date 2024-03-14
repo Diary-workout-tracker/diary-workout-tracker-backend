@@ -98,11 +98,6 @@ class Achievement(models.Model):
 	def __str__(self) -> str:
 		return f"{self.title} - {self.stars}"
 
-	def __lt__(self, other):
-		if not isinstance(other, (Achievement)):
-			raise TypeError("The operand on the right must be of the Achievement type")
-		return self.id < other.id
-
 
 class UserAchievement(models.Model):
 	"""Модель, представляющая связь достижений с пользователем."""

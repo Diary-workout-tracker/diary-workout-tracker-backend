@@ -14,7 +14,7 @@ User = get_user_model()
 @pytest.mark.django_db
 def test_all_achievments_returns_correct(user_client, achievements) -> None:
 	"""Тестирование выдачи списка достижений"""
-	date = timezone.now()
+	date = timezone.localtime()
 	user = User.objects.get(email="test@test.ru")
 	UserAchievement.objects.create(achievement_date=date, user_id=user, achievement_id=achievements[0])
 	response = user_client.get(reverse("achievements"))

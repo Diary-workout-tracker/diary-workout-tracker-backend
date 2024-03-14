@@ -201,8 +201,10 @@ components:
         received:
           type: boolean
       required:
+      - achievement_date
       - description
       - icon
+      - received
       - title
     BlankEnum:
       enum:

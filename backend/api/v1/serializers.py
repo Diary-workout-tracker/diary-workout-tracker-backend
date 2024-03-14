@@ -111,8 +111,8 @@ class TrainingSerializer(serializers.ModelSerializer):
 class AchievementSerializer(serializers.ModelSerializer):
 	"""Сериализатор достижения."""
 
-	achievement_date = serializers.DateTimeField(format=FORMAT_DATE, required=False)
-	received = serializers.BooleanField(required=False)
+	achievement_date = serializers.DateTimeField(format=FORMAT_DATE)
+	received = serializers.BooleanField()
 
 	class Meta:
 		model = Achievement
