@@ -156,7 +156,7 @@ ACCESS_RESTORE_CODE_TTL_SECONDS = 300
 ACCESS_RESTORE_CODE_THROTTLING = {
 	"duration": timedelta(minutes=10),
 	"num_requests": 5,
-	"cooldown": timedelta(minutes=5),
+	"cooldown": timedelta(seconds=5),
 }
 
 # email send

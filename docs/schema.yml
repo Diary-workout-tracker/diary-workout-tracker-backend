@@ -6,7 +6,7 @@ info:
 paths:
   /api/v1/achievement/:
     get:
-      operationId: api_v1_achievement_list
+      operationId: achievement_list
       description: Выводит список достижений
       summary: Список достижений
       tags:
@@ -24,7 +24,7 @@ paths:
           description: ''
   /api/v1/achievement/{id}/:
     get:
-      operationId: api_v1_achievement_retrieve
+      operationId: achievement_retrieve
       description: Получает информацию о достижение по его идентификатору
       summary: Получение достижения по идентификатору
       parameters:
@@ -47,7 +47,7 @@ paths:
           description: ''
   /api/v1/achievement/me/:
     get:
-      operationId: api_v1_achievement_me_retrieve
+      operationId: achievement_me_retrieve
       description: Получает информацию о достижениях авторизированного пользователя
       summary: Получение достижений авторизированного пользователя
       tags:
@@ -63,7 +63,7 @@ paths:
           description: ''
   /api/v1/health/:
     get:
-      operationId: api_v1_health_retrieve
+      operationId: health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:
@@ -80,9 +80,9 @@ paths:
           description: ''
   /api/v1/me/:
     get:
-      operationId: api_v1_me_retrieve
+      operationId: me_retrieve
       tags:
-      - api
+      - me
       security:
       - jwtAuth: []
       responses:
@@ -93,9 +93,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: api_v1_me_partial_update
+      operationId: me_partial_update
       tags:
-      - api
+      - me
       requestBody:
         content:
           application/json:
@@ -117,9 +117,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     delete:
-      operationId: api_v1_me_destroy
+      operationId: me_destroy
       tags:
-      - api
+      - me
       security:
       - jwtAuth: []
       responses:
@@ -127,9 +127,9 @@ paths:
           description: No response body
   /api/v1/resend_code/:
     post:
-      operationId: api_v1_resend_code_create
+      operationId: resend_code_create
       tags:
-      - api
+      - resend_code
       security:
       - jwtAuth: []
       - {}
@@ -138,9 +138,9 @@ paths:
           description: No response body
   /api/v1/token/refresh/:
     post:
-      operationId: api_v1_token_refresh_create
+      operationId: token_refresh_create
       tags:
-      - api
+      - token
       requestBody:
         content:
           application/json:
@@ -165,7 +165,7 @@ paths:
           description: ''
   /api/v1/training/:
     get:
-      operationId: api_v1_training_list
+      operationId: training_list
       description: Выводит список тренировок
       summary: Список тренировок
       tags:
@@ -183,9 +183,9 @@ paths:
           description: ''
   /api/v1/user/:
     post:
-      operationId: api_v1_user_create
+      operationId: user_create
       tags:
-      - api
+      - user
       requestBody:
         content:
           application/json:
@@ -233,8 +233,9 @@ components:
           description: Описание достижения.
         reward_points:
           type: integer
-          maximum: 32767
+          maximum: 9223372036854775807
           minimum: 0
+          format: int64
           title: Заморозка
           description: Количество заморозок за достижение.
       required:
@@ -303,8 +304,9 @@ components:
       properties:
         day_number:
           type: integer
-          maximum: 32767
+          maximum: 9223372036854775807
           minimum: 0
+          format: int64
           title: Номер дня
           description: Номер дня.
         workout:
