@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from django.utils import timezone
 from freezegun import freeze_time
 import pytest
 
@@ -10,7 +9,7 @@ from running.models import Achievement, UserAchievement  # noqa
 @pytest.mark.django_db
 @freeze_time("2024-03-04 00:00:00")
 def test_designation_received_achievements(user, achievements) -> None:
-	date = datetime.now().date()
+	date = timezone.now().date()
 	UserAchievement.objects.create(achievement_date=date, user_id=user, achievement_id=achievements[0])
 	user_achievement = UserAchievement.objects.filter(user_id=user)
 	achievement = Achievement.objects.all()
