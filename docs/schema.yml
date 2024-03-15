@@ -4,9 +4,9 @@ info:
   version: 1.0.0
   description: Live докумениация сервиса
 paths:
-  /api/v1/achievement/:
+  /api/v1/achievements/:
     get:
-      operationId: achievement_list
+      operationId: achievements_list
       description: Выводит список достижений
       summary: Список достижений
       tags:
@@ -21,45 +21,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Achievement'
-          description: ''
-  /api/v1/achievement/{id}/:
-    get:
-      operationId: achievement_retrieve
-      description: Получает информацию о достижение по его идентификатору
-      summary: Получение достижения по идентификатору
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this Достижение.
-        required: true
-      tags:
-      - Run
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Achievement'
-          description: ''
-  /api/v1/achievement/me/:
-    get:
-      operationId: achievement_me_retrieve
-      description: Получает информацию о достижениях авторизированного пользователя
-      summary: Получение достижений авторизированного пользователя
-      tags:
-      - Run
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserAchievement'
           description: ''
   /api/v1/health/:
     get:
@@ -255,9 +216,6 @@ components:
       type: object
       description: Сериализатор достижения.
       properties:
-        id:
-          type: integer
-          readOnly: true
         icon:
           type: string
           format: uri
@@ -278,10 +236,16 @@ components:
           minimum: 0
           title: Заморозка
           description: Количество заморозок за достижение.
+        achievement_date:
+          type: string
+          format: date-time
+        received:
+          type: boolean
       required:
+      - achievement_date
       - description
       - icon
-      - id
+      - received
       - title
     BlankEnum:
       enum:
@@ -466,26 +430,6 @@ components:
       - amount_of_skips
       - email
       - last_completed_training_number
-    UserAchievement:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        achievement_id:
-          allOf:
-          - $ref: '#/components/schemas/Achievement'
-          readOnly: true
-        achievement_date:
-          type: string
-          format: date-time
-          readOnly: true
-          title: Дата получения достижения
-          description: Дата, когда пользователь получил достижение.
-      required:
-      - achievement_date
-      - achievement_id
-      - id
   securitySchemes:
     jwtAuth:
       type: http

@@ -3,16 +3,22 @@ import datetime
 
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from running.models import Achievement, Day, History, UserAchievement
+from running.models import Achievement, Day, History
+from .constants import FORMAT_DATE
 from users.models import GENDER_CHOICES
 from utils.authcode import AuthCode
+from utils.users import get_user_by_email_or_404
+from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
+
+
+class CustomUniqueValidator(UniqueValidator):
+	message = _("Такой email уже существует.")
 
 
 class Base64ImageField(serializers.ImageField):
@@ -39,7 +45,7 @@ class Base64ImageField(serializers.ImageField):
 class UserSerializer(serializers.ModelSerializer):
 	"""Сериализатор кастомного пользователя."""
 
-	email = serializers.EmailField(validators=(UniqueValidator(queryset=User.objects.all()),))
+	email = serializers.EmailField(validators=(CustomUniqueValidator(queryset=User.objects.all()),))
 	name = serializers.CharField(required=False)
 	gender = serializers.ChoiceField(choices=GENDER_CHOICES, allow_blank=True, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
@@ -73,20 +79,21 @@ class CustomTokenObtainSerializer(serializers.Serializer):
 	email = serializers.EmailField(write_only=True)
 	code = serializers.CharField(min_length=4, max_length=4, write_only=True)
 
-	def create(self, validated_data):
-		email = validated_data["email"]
-		code = validated_data["code"]
-
-		user = get_object_or_404(User, email=email)
+	def validate(self, attrs):
+		user = get_user_by_email_or_404(attrs["email"])
 		authcode = AuthCode(user)
-		if authcode.code_is_valid(code):
-			refresh = RefreshToken.for_user(user)
-			return {
-				"refresh": str(refresh),
-				"access": str(refresh.access_token),
-			}
-		else:
-			raise serializers.ValidationError({"detail": "Неверный или устаревший код"})
+		if authcode.code_is_valid(attrs["code"]):
+			return attrs
+		raise serializers.ValidationError({"code": ["Неверный или устаревший код"]})
+
+	def create(self, validated_data):
+		user = User.objects.get(email=validated_data["email"])
+
+		refresh = RefreshToken.for_user(user)
+		return {
+			"refresh": str(refresh),
+			"access": str(refresh.access_token),
+		}
 
 
 class TrainingSerializer(serializers.ModelSerializer):
@@ -97,32 +104,30 @@ class TrainingSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Day
-		fields = ("day_number", "workout", "workout_info", "motivation_phrase", "completed")
+		fields = (
+			"day_number",
+			"workout",
+			"workout_info",
+			"motivation_phrase",
+			"completed",
+		)
 
 
 class AchievementSerializer(serializers.ModelSerializer):
 	"""Сериализатор достижения."""
 
+	achievement_date = serializers.DateTimeField(format=FORMAT_DATE)
+	received = serializers.BooleanField()
+
 	class Meta:
 		model = Achievement
 		fields = (
-			"id",
 			"icon",
 			"title",
 			"description",
 			"reward_points",
-		)
-
-
-class UserAchievementSerializer(serializers.ModelSerializer):
-	achievement_id = AchievementSerializer(read_only=True)
-
-	class Meta:
-		model = UserAchievement
-		fields = (
-			"id",
-			"achievement_id",
 			"achievement_date",
+			"received",
 		)
 
 

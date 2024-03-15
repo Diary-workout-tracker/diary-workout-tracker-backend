@@ -1,21 +1,18 @@
 from django.contrib.auth import get_user_model
-from django.core.handlers.wsgi import WSGIRequest
+from django.db.models import BooleanField, Case, DateTimeField, F, When
 from django.db.models.query import QuerySet
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import generics, status, viewsets
-from rest_framework.decorators import action
+from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from running.models import Achievement, Day, UserAchievement
-from utils import authcode, mailsender, motivation_phrase
+from running.models import Achievement, Day
+from utils import authcode, mailsender, motivation_phrase, users
 from .serializers import (
 	AchievementSerializer,
 	CustomTokenObtainSerializer,
 	TrainingSerializer,
-	UserAchievementSerializer,
 	UserSerializer,
 	HistorySerializer,
 )
@@ -62,7 +59,7 @@ class ResendCodeView(APIView):
 	throttle_classes = (DurationCooldownRequestThrottle,)
 
 	def post(self, request):
-		user = get_object_or_404(User, email=request.data.get("email"))
+		user = users.get_user_by_email_or_404(request.data.get("email"))
 		send_auth_code(user)
 		return Response({"result": "Код создан и отправлен"}, status=status.HTTP_201_CREATED)
 
@@ -133,38 +130,31 @@ class TrainingView(generics.ListAPIView):
 
 
 @extend_schema_view(
-	list=extend_schema(
+	get=extend_schema(
 		responses={200: AchievementSerializer(many=True)},
 		summary="Список достижений",
 		description="Выводит список достижений",
 		tags=("Run",),
 	),
-	retrieve=extend_schema(
-		responses={200: AchievementSerializer()},
-		summary="Получение достижения по идентификатору",
-		description="Получает информацию о достижение по его идентификатору",
-		tags=("Run",),
-	),
-	me=extend_schema(
-		responses={200: UserAchievementSerializer()},
-		summary="Получение достижений авторизированного пользователя",
-		description="Получает информацию о достижениях авторизированного пользователя",
-		tags=("Run",),
-	),
 )
-class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
-	queryset = Achievement.objects.all()
+class AchievementViewSet(generics.ListAPIView):
 	serializer_class = AchievementSerializer
 
-	@action(
-		detail=False,
-		serializer_class=UserAchievementSerializer,
-	)
-	def me(self, request: WSGIRequest) -> Response:
-		user = request.user
-		queryset = UserAchievement.objects.filter(user_id=user)
-		serializer = self.serializer_class(queryset, many=True)
-		return Response(serializer.data)
+	def get_queryset(self) -> QuerySet:
+		"""Формирует список ачивок c флагом получения и датой."""
+		user = self.request.user
+		return Achievement.objects.annotate(
+			received=Case(
+				When(user_achievements__user_id=user, then=True),
+				default=False,
+				output_field=BooleanField(),
+			),
+			achievement_date=Case(
+				When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
+				default=None,
+				output_field=DateTimeField(),
+			),
+		).all()
 
 
 class HistoryView(generics.ListCreateAPIView):

@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.db.models.query import QuerySet
+from django.utils import timezone
 
 from running.models import MotivationalPhrase, History
 from users.models import User
@@ -8,7 +9,7 @@ from users.models import User
 
 def get_count_training_last_week(user: User) -> int:
 	"""Возвращает кол-во тренировок на прошлой неделе."""
-	date_now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+	date_now = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
 	date_now_number_day_week = date_now.weekday() + 1
 	date_end_last_week = date_now - timedelta(days=date_now_number_day_week)
 	date_start_last_week = date_end_last_week - timedelta(days=6)
@@ -60,7 +61,7 @@ def get_dynamic_list_motivation_phrase(user: User) -> list:
 	count_training = get_count_training_last_week(user)
 	if count_training < 4:
 		return motivational_phrases
-	date_now_number_day_week = datetime.now().weekday() + 1
+	date_now_number_day_week = timezone.now().weekday() + 1
 	last_training = History.objects.get(id=last_completed_training_number)
 	day_last_training = last_training.training_day.day_number
 	if count_training == 4:
