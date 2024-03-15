@@ -3,12 +3,11 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import status, viewsets
+from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
 
 from running.models import Achievement, Day, UserAchievement
 from utils import authcode, mailsender, motivation_phrase
@@ -18,6 +17,7 @@ from .serializers import (
 	TrainingSerializer,
 	UserAchievementSerializer,
 	UserSerializer,
+	HistorySerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
 
@@ -110,7 +110,7 @@ class MyInfoView(APIView):
 		tags=("Run",),
 	),
 )
-class TrainingView(ListAPIView):
+class TrainingView(generics.ListAPIView):
 	queryset = Day.objects.all()
 	serializer_class = TrainingSerializer
 
@@ -165,3 +165,11 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
 		queryset = UserAchievement.objects.filter(user_id=user)
 		serializer = self.serializer_class(queryset, many=True)
 		return Response(serializer.data)
+
+
+class HistoryView(generics.ListCreateAPIView):
+	serializer_class = HistorySerializer
+
+	def get_queryset(self) -> QuerySet:
+		"""Формирует список историй тренировок пользователя."""
+		return self.request.user.user_history.all()

@@ -6,7 +6,7 @@ info:
 paths:
   /api/v1/achievement/:
     get:
-      operationId: api_v1_achievement_list
+      operationId: achievement_list
       description: Выводит список достижений
       summary: Список достижений
       tags:
@@ -24,7 +24,7 @@ paths:
           description: ''
   /api/v1/achievement/{id}/:
     get:
-      operationId: api_v1_achievement_retrieve
+      operationId: achievement_retrieve
       description: Получает информацию о достижение по его идентификатору
       summary: Получение достижения по идентификатору
       parameters:
@@ -47,7 +47,7 @@ paths:
           description: ''
   /api/v1/achievement/me/:
     get:
-      operationId: api_v1_achievement_me_retrieve
+      operationId: achievement_me_retrieve
       description: Получает информацию о достижениях авторизированного пользователя
       summary: Получение достижений авторизированного пользователя
       tags:
@@ -63,7 +63,7 @@ paths:
           description: ''
   /api/v1/health/:
     get:
-      operationId: api_v1_health_retrieve
+      operationId: health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:
@@ -78,11 +78,52 @@ paths:
               schema:
                 Health: OK
           description: ''
+  /api/v1/history/:
+    get:
+      operationId: history_list
+      tags:
+      - history
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/History'
+          description: ''
+    post:
+      operationId: history_create
+      tags:
+      - history
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/History'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/History'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/History'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/History'
+          description: ''
   /api/v1/me/:
     get:
-      operationId: api_v1_me_retrieve
+      operationId: me_retrieve
       tags:
-      - api
+      - me
       security:
       - jwtAuth: []
       responses:
@@ -93,9 +134,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: api_v1_me_partial_update
+      operationId: me_partial_update
       tags:
-      - api
+      - me
       requestBody:
         content:
           application/json:
@@ -117,9 +158,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     delete:
-      operationId: api_v1_me_destroy
+      operationId: me_destroy
       tags:
-      - api
+      - me
       security:
       - jwtAuth: []
       responses:
@@ -127,9 +168,9 @@ paths:
           description: No response body
   /api/v1/resend_code/:
     post:
-      operationId: api_v1_resend_code_create
+      operationId: resend_code_create
       tags:
-      - api
+      - resend_code
       security:
       - jwtAuth: []
       - {}
@@ -138,9 +179,9 @@ paths:
           description: No response body
   /api/v1/token/refresh/:
     post:
-      operationId: api_v1_token_refresh_create
+      operationId: token_refresh_create
       tags:
-      - api
+      - token
       requestBody:
         content:
           application/json:
@@ -165,7 +206,7 @@ paths:
           description: ''
   /api/v1/training/:
     get:
-      operationId: api_v1_training_list
+      operationId: training_list
       description: Выводит список тренировок
       summary: Список тренировок
       tags:
@@ -183,9 +224,9 @@ paths:
           description: ''
   /api/v1/user/:
     post:
-      operationId: api_v1_user_create
+      operationId: user_create
       tags:
-      - api
+      - user
       requestBody:
         content:
           application/json:
@@ -268,6 +309,74 @@ components:
       description: |-
         * `M` - Male
         * `F` - Female
+    History:
+      type: object
+      description: Сериализатор историй тренировок.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        training_start:
+          type: string
+          format: date-time
+          title: Время начала тренировки
+          description: Дата и время начала тренировки.
+        training_end:
+          type: string
+          format: date-time
+          title: Время окончания тренировки
+          description: Дата и время окончания тренировки.
+        completed:
+          type: boolean
+          title: Завершено
+          description: Показывает, завершена ли тренировка или нет.
+        training_day:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: День тренировки
+          description: День тренировки.
+        image:
+          type: string
+          format: uri
+        motivation_phrase:
+          type: string
+          title: Мотивационная фраза
+          description: Мотивационная фраза
+          maxLength: 150
+        cities:
+          type: array
+          items:
+            type: string
+            title: Города
+            description: Города, в которых были совершены тренировки.
+            maxLength: 150
+        route: {}
+        distance:
+          type: number
+          format: double
+          title: Дистанция (в метрах)
+          description: Пройденная дистанция в метрах.
+        max_speed:
+          type: number
+          format: double
+          title: Максимальная скорость
+          description: Максимальная достигнутая скорость во время тренировки.
+        avg_speed:
+          type: number
+          format: double
+          title: Средняя скорость
+          description: Средняя скорость за всю тренировку.
+      required:
+      - avg_speed
+      - cities
+      - distance
+      - id
+      - max_speed
+      - motivation_phrase
+      - training_day
+      - training_end
+      - training_start
     PatchedUser:
       type: object
       description: Сериализатор кастомного пользователя.

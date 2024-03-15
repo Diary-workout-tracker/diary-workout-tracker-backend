@@ -72,12 +72,15 @@ class DayAdmin(admin.ModelAdmin):
 
 @admin.register(History)
 class HistoryAdmin(admin.ModelAdmin):
-	"""Отображение в админ панели Тренировок."""
+	"""Отображение в админ панели истории тренировки."""
 
 	list_display = (
-		"training_date",
+		"training_start",
+		"training_end",
 		"completed",
+		"show_image",
 		"motivation_phrase",
+		"cities",
 		"training_day",
 		"distance",
 		"max_speed",
@@ -86,14 +89,21 @@ class HistoryAdmin(admin.ModelAdmin):
 	)
 	list_filter = (
 		"completed",
-		"training_day",
+		"training_end",
+		"cities",
 		"user_id",
 	)
 	search_fields = (
-		"training_day",
+		"training_end",
 		"motivation_phrase",
+		"cities",
 		"user_id",
 	)
+
+	@admin.display(description="Превью изображения маршрута")
+	def show_image(self, obj: History) -> str:
+		"""Отображение превью изображения маршрута."""
+		return format_html('<img src="{}" style="max-height: 100px;">', obj.image.url)
 
 
 @admin.register(UserAchievement)

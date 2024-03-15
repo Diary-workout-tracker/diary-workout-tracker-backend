@@ -8,9 +8,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from running.models import Achievement, UserAchievement
+from running.models import Achievement, Day, History, UserAchievement
 from users.models import GENDER_CHOICES
-from running.models import Day
 from utils.authcode import AuthCode
 
 User = get_user_model()
@@ -124,4 +123,28 @@ class UserAchievementSerializer(serializers.ModelSerializer):
 			"id",
 			"achievement_id",
 			"achievement_date",
+		)
+
+
+class HistorySerializer(serializers.ModelSerializer):
+	"""Сериализатор историй тренировок."""
+
+	image = Base64ImageField(required=False)
+	route = serializers.JSONField(required=False)
+
+	class Meta:
+		model = History
+		fields = (
+			"id",
+			"training_start",
+			"training_end",
+			"completed",
+			"training_day",
+			"image",
+			"motivation_phrase",
+			"cities",
+			"route",
+			"distance",
+			"max_speed",
+			"avg_speed",
 		)
