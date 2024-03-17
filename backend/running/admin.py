@@ -8,7 +8,10 @@ from .models import Achievement, Day, History, MotivationalPhrase, UserAchieveme
 class MotivationalPhraseAdmin(admin.ModelAdmin):
 	"""Отображение в админ панели Мотивацонных фраз."""
 
-	list_display = ("text", "rest")
+	list_display = (
+		"text",
+		"rest",
+	)
 	search_fields = ("text",)
 	list_filter = ("rest",)
 
@@ -89,21 +92,19 @@ class HistoryAdmin(admin.ModelAdmin):
 	)
 	list_filter = (
 		"completed",
-		"training_end",
-		"cities",
 		"user_id",
 	)
 	search_fields = (
-		"training_end",
 		"motivation_phrase",
-		"cities",
 		"user_id",
 	)
 
 	@admin.display(description="Превью изображения маршрута")
-	def show_image(self, obj: History) -> str:
+	def show_image(self, obj: History) -> str | None:
 		"""Отображение превью изображения маршрута."""
-		return format_html('<img src="{}" style="max-height: 100px;">', obj.image.url)
+		if obj.image:
+			return format_html('<img src="{}" style="max-height: 100px;">', obj.image.url)
+		return
 
 
 @admin.register(UserAchievement)
