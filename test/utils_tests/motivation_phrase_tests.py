@@ -42,11 +42,12 @@ def more_five_history(user, training):
 	for i in range(1, 6):
 		history.append(
 			History(
-				training_date=timezone.now() - timedelta(days=8 - i),
+				training_start=timezone.now() - timedelta(days=8 - i),
+				training_end=timezone.now() - timedelta(days=8 - i),
 				completed=True,
 				training_day=training[i - 1],
 				motivation_phrase="Тестовая фраза",
-				route="[]",
+				cities=["Moscow"],
 				distance=1,
 				max_speed=1,
 				avg_speed=1,
@@ -64,11 +65,12 @@ def more_five_history_last_training_morning(user, training):
 	for i in range(1, 8):
 		history.append(
 			History(
-				training_date=timezone.now() - timedelta(days=8 - i),
+				training_start=timezone.now() - timedelta(days=8 - i),
+				training_end=timezone.now() - timedelta(days=8 - i),
 				completed=True,
 				training_day=training[i - 1],
 				motivation_phrase="Тестовая фраза",
-				route="[]",
+				cities=["Moscow"],
 				distance=1,
 				max_speed=1,
 				avg_speed=1,
@@ -86,11 +88,12 @@ def four_history(user, training):
 	for i in range(1, 5):
 		history.append(
 			History(
-				training_date=timezone.now() - timedelta(days=8 - i),
+				training_start=timezone.now() - timedelta(days=8 - i),
+				training_end=timezone.now() - timedelta(days=8 - i),
 				completed=True,
 				training_day=training[i - 1],
 				motivation_phrase="Тестовая фраза",
-				route="[]",
+				cities=["Moscow"],
 				distance=1,
 				max_speed=1,
 				avg_speed=1,
@@ -108,11 +111,12 @@ def one_hundred_history(user, training):
 	for i in range(1, 101):
 		history.append(
 			History(
-				training_date=timezone.now() - timedelta(days=101 - i),
+				training_start=timezone.now() - timedelta(days=101 - i),
+				training_end=timezone.now() - timedelta(days=101 - i),
 				completed=True,
 				training_day=training[i - 1],
 				motivation_phrase="Тестовая фраза",
-				route="[]",
+				cities=["Moscow"],
 				distance=1,
 				max_speed=1,
 				avg_speed=1,

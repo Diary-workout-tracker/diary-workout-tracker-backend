@@ -164,7 +164,8 @@ cython_debug/
 
 # development
 achievement_icons/
-static/
-
+*/static/admin/
+*/static/rest_framework/
+history_images/
 # vscode
 .vscode/
