@@ -333,10 +333,10 @@ components:
           type: array
           items:
             type: string
-            title: Города
-            description: Города, в которых были совершены тренировки.
             maxLength: 150
           writeOnly: true
+          title: Города
+          description: Города, в которых были совершены тренировки.
         route:
           nullable: true
           title: Маршрут

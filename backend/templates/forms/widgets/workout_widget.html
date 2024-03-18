@@ -1,0 +1,68 @@
+{% load i18n %}
+{% load utils %}
+<div style="width: 100%;">
+    <div>
+        <div style="margin-top: 10px;">
+            <div>
+                {% translate "Темп тренировки" %}
+            </div>
+        </div>
+        <div style="margin-top:10px;">
+            <input type="text" name="running_pace" value="{{ widget.value.running_pace }}" style="border-color: var(--border-color);" class="vTextField">
+        </div>
+    </div>
+    <div>
+        <div style="margin-top: 10px;" class="top-workout-program">
+            <div>
+                <span style="margin-right: 20px;">{% translate "Программа тренировки" %}</span>
+                <button type="button"
+                class="addlink"
+                onclick="addWorkoutProgram();">
+                    {% translate "Добавить" %}
+                </button>
+                <button type="button"
+                class="deletelink"
+                onclick="deleteWorkoutProgram();">
+                    {% translate "Удалить" %}
+                </button>
+            </div>
+        </div>
+        {% if widget.value.workout_program %}
+            {% for workout_program in widget.value.workout_program %}
+                <div class="workout-program">
+                    {% for key, value in workout_program.items %}
+                        <div style="margin-top: 10px;">
+                            <span style="margin-right:5px;">
+                                {% if key == "pace" %}{% translate "Темп" %}{% else %}{% translate "Продолжительность" %}{% endif %}:
+                            </span>
+                            <span>
+                                <input type="{% if key == "pace" %}text{% else %}number{% endif %}"
+                                name="{{ key }}" value="{{ value }}"
+                                class="{% if key == "pace" %}vTextField pace{% else %}vIntegerField duration{% endif %}">
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="workout-program">
+                <div style="margin-top: 10px;">
+                    <span style="margin-right:5px;">
+                        {% translate "Темп" %}:
+                    </span>
+                    <span>
+                        <input type="text" name="pace" class="vTextField pace">
+                    </span>
+                </div>
+                <div style="margin-top: 10px;">
+                    <span style="margin-right:5px;">
+                        {% translate "Продолжительность" %}:
+                    </span>
+                    <span>
+                        <input type="number" name="duration" class="vIntegerField duration">
+                    </span>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>

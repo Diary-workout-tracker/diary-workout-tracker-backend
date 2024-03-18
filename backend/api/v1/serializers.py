@@ -189,7 +189,7 @@ class HistorySerializer(serializers.ModelSerializer):
 
 	def validate_achievements(self, value: list) -> list:
 		if len(value) > Achievement.objects.filter(title__in=value).count():
-			raise serializers.ValidationError("Некорректные ачивки")
+			raise serializers.ValidationError({"achievements": ["Некорректные ачивки"]})
 		return value
 
 	def get_time(self, obj: History) -> int:

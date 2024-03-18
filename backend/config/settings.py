@@ -27,6 +27,7 @@ INSTALLED_APPS = [
 	"django.contrib.sessions",
 	"django.contrib.messages",
 	"django.contrib.staticfiles",
+	"django.forms",
 	# lib
 	"rest_framework",
 	"rest_framework.authtoken",
@@ -35,6 +36,7 @@ INSTALLED_APPS = [
 	"api.apps.ApiConfig",
 	"running.apps.RunningConfig",
 	"users.apps.UsersConfig",
+	"core.apps.CoreConfig",
 ]
 
 MIDDLEWARE = [
@@ -52,7 +54,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
 	{
 		"BACKEND": "django.template.backends.django.DjangoTemplates",
-		"DIRS": [],
+		"DIRS": [os.path.join(BASE_DIR, "templates")],
 		"APP_DIRS": True,
 		"OPTIONS": {
 			"context_processors": [
@@ -106,13 +108,16 @@ USE_TZ = True
 
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
+if DEBUG:
+	STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
+else:
+	STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 REST_FRAMEWORK = {
 	"DEFAULT_PERMISSION_CLASSES": [

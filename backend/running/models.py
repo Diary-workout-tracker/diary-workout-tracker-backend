@@ -51,11 +51,11 @@ class Day(models.Model):
 	)
 
 	class Meta:
-		verbose_name = _("День")
-		verbose_name_plural = _("Дни")
+		verbose_name = _("День тренировки")
+		verbose_name_plural = _("Дни тренировки")
 
 	def __str__(self) -> str:
-		return f"{_('День')} {self.day_number}"
+		return f"{_('День тренировки')} {self.day_number}"
 
 
 class Achievement(models.Model):
@@ -182,12 +182,10 @@ class History(models.Model):
 		db_comment=_("Мотивационная фраза на дне тренировки."),
 	)
 	cities = ArrayField(
-		models.CharField(
-			verbose_name=_("Города"),
-			max_length=150,
-			help_text=_("Города, в которых были совершены тренировки."),
-			db_comment=_("Города, в которых были совершены тренировки."),
-		)
+		models.CharField(max_length=150),
+		verbose_name=_("Города"),
+		help_text=_("Города, в которых были совершены тренировки."),
+		db_comment=_("Города, в которых были совершены тренировки."),
 	)
 	route = models.JSONField(
 		verbose_name=_("Маршрут"),
@@ -224,8 +222,8 @@ class History(models.Model):
 
 	class Meta:
 		ordering = ("training_end",)
-		verbose_name = _("Тренировка")
-		verbose_name_plural = _("Тренировки")
+		verbose_name = _("История тренировки")
+		verbose_name_plural = _("История тренировок")
 
 	def __str__(self) -> str:
-		return f"{_('Тренировка')} {self.id}"
+		return f"{_('История тренировки')} {self.id}"
