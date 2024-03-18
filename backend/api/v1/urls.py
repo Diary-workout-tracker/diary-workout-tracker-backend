@@ -10,6 +10,7 @@ from .views import (
 	ResendCodeView,
 	TokenRefreshView,
 	TrainingView,
+	# test
 )
 
 
@@ -23,4 +24,5 @@ urlpatterns = (
 	path("me/", MyInfoView.as_view(), name="me"),
 	path("resend_code/", ResendCodeView.as_view(), name="code-resend"),
 	path("training/", TrainingView.as_view(), name="training"),
+	# path("test/", test, name="test")
 )

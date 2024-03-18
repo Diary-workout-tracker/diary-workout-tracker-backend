@@ -155,3 +155,13 @@ class AchievementViewSet(ListAPIView):
 				output_field=DateTimeField(),
 			),
 		).all()
+
+
+# from rest_framework.decorators import api_view
+# from utils.achievements import AchievementUpdater
+# @api_view(("POST", ))
+# def test(request):
+# 	user = request.user
+# 	updater = AchievementUpdater(user, request.data)
+# 	updater.update_achievements()
+# 	return Response('')
