@@ -1,9 +1,11 @@
+from typing import Any
+
 from django import template
 
 register = template.Library()
 
 
 @register.filter
-def get_type(value):
+def get_type(value: Any) -> str:
 	"""Отдаёт тип."""
 	return type(value).__name__
