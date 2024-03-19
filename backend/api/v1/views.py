@@ -119,15 +119,20 @@ class TrainingView(generics.ListAPIView):
 		и флагом завершения тренировки.
 		"""
 		user = self.request.user
-		queryset = self.queryset.annotate(
-			completed=Case(
-				When(
-					Q(historis__training_day=F("day_number")) & Q(historis__user_id=user), then=F("historis__completed")
-				),
-				default=False,
-				output_field=BooleanField(),
+		queryset = (
+			self.queryset.annotate(
+				completed=Case(
+					When(
+						Q(historis__training_day=F("day_number")) & Q(historis__user_id=user),
+						then=F("historis__completed"),
+					),
+					default=False,
+					output_field=BooleanField(),
+				)
 			)
-		).all()
+			.all()
+			.order_by("day_number")
+		)
 		dynamic_motivation_phrase = motivation_phrase.get_dynamic_list_motivation_phrase(user)
 		for i in range(len(queryset)):
 			queryset[i].motivation_phrase = dynamic_motivation_phrase[i]
@@ -181,7 +186,7 @@ class HistoryView(generics.ListCreateAPIView):
 
 	def get_queryset(self) -> QuerySet:
 		"""Формирует список историй тренировок пользователя."""
-		return self.request.user.user_history.all()
+		return self.request.user.user_history.all().order_by("training_day")
 
 	def create(self, request: Request, *args, **kwargs) -> Response:
 		achievements = request.data.pop("achievements", None)  # noqa

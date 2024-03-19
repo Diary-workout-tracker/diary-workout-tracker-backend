@@ -162,6 +162,7 @@ class HistorySerializer(serializers.ModelSerializer):
 			"time",
 			"max_speed",
 			"avg_speed",
+			"height_difference",
 			"achievements",
 		)
 		extra_kwargs = {
@@ -188,7 +189,7 @@ class HistorySerializer(serializers.ModelSerializer):
 		return value
 
 	def validate_achievements(self, value: list) -> list:
-		if len(value) > Achievement.objects.filter(title__in=value).count():
+		if value and len(value) > Achievement.objects.filter(title__in=value).count():
 			raise serializers.ValidationError({"achievements": ["Некорректные ачивки"]})
 		return value
 

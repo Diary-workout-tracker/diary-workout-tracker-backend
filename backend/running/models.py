@@ -45,7 +45,7 @@ class Day(models.Model):
 	)
 	workout_info = models.CharField(
 		verbose_name=_("Описание тренировки"),
-		max_length=100,
+		max_length=200,
 		help_text=_("Описание тренировки."),
 		db_comment=_("Описание тренировки дополнительно к этапам"),
 	)
@@ -208,6 +208,11 @@ class History(models.Model):
 		verbose_name=_("Средняя скорость"),
 		help_text=_("Средняя скорость за всю тренировку."),
 		db_comment=_("Средняя скорость за всю тренировку."),
+	)
+	height_difference = models.PositiveSmallIntegerField(
+		verbose_name=_("Перепад высот"),
+		help_text=_("Перепад высот."),
+		db_comment=_("Перепад высот."),
 	)
 	user_id = models.ForeignKey(
 		User,

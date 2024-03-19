@@ -364,6 +364,12 @@ components:
           minimum: 0
           title: Средняя скорость
           description: Средняя скорость за всю тренировку.
+        height_difference:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Перепад высот
+          description: Перепад высот.
         achievements:
           type: array
           items:
@@ -373,6 +379,7 @@ components:
       - avg_speed
       - cities
       - distance
+      - height_difference
       - max_speed
       - motivation_phrase
       - time
@@ -425,7 +432,7 @@ components:
           type: string
           title: Описание тренировки
           description: Описание тренировки.
-          maxLength: 100
+          maxLength: 200
         motivation_phrase:
           type: string
         completed:
