@@ -15,7 +15,7 @@ def get_count_training_last_week(user: User) -> int:
 	date_start_last_week = date_end_last_week - timedelta(days=6)
 	date_end_last_week += timedelta(hours=23, minutes=59, seconds=59)
 	return History.objects.filter(
-		user_id=user, completed=True, training_date__range=[date_start_last_week, date_end_last_week]
+		user_id=user, completed=True, training_end__range=[date_start_last_week, date_end_last_week]
 	).count()
 
 
@@ -80,7 +80,7 @@ def get_dynamic_list_motivation_phrase(user: User) -> list:
 	shift_first_rest = 1 - date_now_number_day_week
 	shift_second_rest = 3 - date_now_number_day_week
 	shift_third_rest = 5 - date_now_number_day_week
-	date_last_training_week = last_training.training_date.weekday() + 1
+	date_last_training_week = last_training.training_end.weekday() + 1
 	if date_last_training_week == 7:
 		shift_first_rest += 1
 		shift_second_rest += 1

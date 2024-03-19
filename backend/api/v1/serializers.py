@@ -1,25 +1,20 @@
 import base64
+from collections import OrderedDict
 import datetime
 
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from running.models import Achievement, Day, History, MotivationalPhrase
 from .constants import FORMAT_DATE
-from running.models import Achievement
+from .validators import CustomUniqueValidator
 from users.models import GENDER_CHOICES
-from running.models import Day
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
-from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
-
-
-class CustomUniqueValidator(UniqueValidator):
-	message = _("Такой email уже существует.")
 
 
 class Base64ImageField(serializers.ImageField):
@@ -27,7 +22,6 @@ class Base64ImageField(serializers.ImageField):
 
 	def to_internal_value(self, data):
 		"""Декодирование base64 в файл."""
-
 		if isinstance(data, str) and data.startswith("data:image"):
 			format, imgstr = data.split(";base64,")
 			ext = format.split("/")[-1]
@@ -39,8 +33,9 @@ class Base64ImageField(serializers.ImageField):
 
 	def to_representation(self, value):
 		"""Возвращает полный url изображения."""
-
-		return self.context["request"].build_absolute_uri(value.url)
+		if value:
+			return self.context["request"].build_absolute_uri(value.url)
+		return
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -130,3 +125,77 @@ class AchievementSerializer(serializers.ModelSerializer):
 			"achievement_date",
 			"received",
 		)
+
+
+class AchievementEndTrainingSerializer(serializers.ModelSerializer):
+	"""Сериализатор достижения конца тренировки."""
+
+	icon = Base64ImageField()
+
+	class Meta:
+		model = Achievement
+		fields = (
+			"icon",
+			"title",
+		)
+
+
+class HistorySerializer(serializers.ModelSerializer):
+	"""Сериализатор историй тренировок."""
+
+	image = Base64ImageField(required=False)
+	time = serializers.SerializerMethodField(read_only=True)
+	achievements = serializers.ListField(required=False, write_only=True, child=serializers.CharField())
+
+	class Meta:
+		model = History
+		fields = (
+			"training_start",
+			"training_end",
+			"completed",
+			"training_day",
+			"image",
+			"motivation_phrase",
+			"cities",
+			"route",
+			"distance",
+			"time",
+			"max_speed",
+			"avg_speed",
+			"achievements",
+		)
+		extra_kwargs = {
+			"training_start": {"write_only": True},
+			"completed": {"write_only": True},
+			"training_day": {"write_only": True},
+			"cities": {"write_only": True},
+			"max_speed": {"write_only": True, "min_value": 0},
+			"distance": {"min_value": 0},
+			"avg_speed": {"min_value": 0},
+			"route": {"required": False},
+		}
+
+	def validate(self, data: OrderedDict) -> OrderedDict:
+		if data["training_start"] >= data["training_end"]:
+			raise serializers.ValidationError(
+				{"training_start_training_end": ["Время начала тренировки должно быть раньше конца"]}
+			)
+		return data
+
+	def validate_motivation_phrase(self, value: str) -> str:
+		if not MotivationalPhrase.objects.filter(text=value).count():
+			raise serializers.ValidationError("Данной мотивационной фразы не существует")
+		return value
+
+	def validate_achievements(self, value: list) -> list:
+		if len(value) > Achievement.objects.filter(title__in=value).count():
+			raise serializers.ValidationError({"achievements": ["Некорректные ачивки"]})
+		return value
+
+	def get_time(self, obj: History) -> int:
+		"""Отдаёт продолжительность тренировки."""
+		return (obj.training_end - obj.training_start).total_seconds() // 60
+
+	def create(self, validated_data: dict) -> History:
+		validated_data["user_id"] = self.context["request"].user
+		return super().create(validated_data)

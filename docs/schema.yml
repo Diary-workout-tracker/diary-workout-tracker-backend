@@ -39,6 +39,53 @@ paths:
               schema:
                 Health: OK
           description: ''
+  /api/v1/history/:
+    get:
+      operationId: api_v1_history_list
+      description: Выводит историю тренировок
+      summary: История тренировок
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/History'
+          description: ''
+    post:
+      operationId: api_v1_history_create
+      description: Сохраняет выполненную тренировку
+      summary: Сохранение выполненной тренировки
+      tags:
+      - Run
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/History'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/History'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/History'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AchievementEndTraining'
+          description: ''
   /api/v1/me/:
     get:
       operationId: me_retrieve
@@ -206,6 +253,21 @@ components:
       - icon
       - received
       - title
+    AchievementEndTraining:
+      type: object
+      description: Сериализатор достижения конца тренировки.
+      properties:
+        icon:
+          type: string
+          format: uri
+        title:
+          type: string
+          title: Название достижения
+          description: Название достижения.
+          maxLength: 100
+      required:
+      - icon
+      - title
     BlankEnum:
       enum:
       - ''
@@ -232,6 +294,91 @@ components:
       description: |-
         * `M` - Male
         * `F` - Female
+    History:
+      type: object
+      description: Сериализатор историй тренировок.
+      properties:
+        training_start:
+          type: string
+          format: date-time
+          writeOnly: true
+          title: Время начала тренировки
+          description: Дата и время начала тренировки.
+        training_end:
+          type: string
+          format: date-time
+          title: Время окончания тренировки
+          description: Дата и время окончания тренировки.
+        completed:
+          type: boolean
+          writeOnly: true
+          title: Завершено
+          description: Показывает, завершена ли тренировка или нет.
+        training_day:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: День тренировки
+          description: День тренировки.
+          writeOnly: true
+        image:
+          type: string
+          format: uri
+        motivation_phrase:
+          type: string
+          title: Мотивационная фраза
+          description: Мотивационная фраза
+          maxLength: 150
+        cities:
+          type: array
+          items:
+            type: string
+            maxLength: 150
+          writeOnly: true
+          title: Города
+          description: Города, в которых были совершены тренировки.
+        route:
+          nullable: true
+          title: Маршрут
+          description: Маршрут тренировки.
+        distance:
+          type: number
+          format: double
+          minimum: 0
+          title: Дистанция (в метрах)
+          description: Пройденная дистанция в метрах.
+        time:
+          type: integer
+          description: Отдаёт продолжительность тренировки.
+          readOnly: true
+        max_speed:
+          type: number
+          format: double
+          minimum: 0
+          writeOnly: true
+          title: Максимальная скорость
+          description: Максимальная достигнутая скорость во время тренировки.
+        avg_speed:
+          type: number
+          format: double
+          minimum: 0
+          title: Средняя скорость
+          description: Средняя скорость за всю тренировку.
+        achievements:
+          type: array
+          items:
+            type: string
+          writeOnly: true
+      required:
+      - avg_speed
+      - cities
+      - distance
+      - max_speed
+      - motivation_phrase
+      - time
+      - training_day
+      - training_end
+      - training_start
     PatchedUser:
       type: object
       description: Сериализатор кастомного пользователя.

@@ -27,8 +27,9 @@ class Command(BaseCommand):
 		for i in range(1, 101):
 			insert_records = (
 				'INSERT INTO running_day ("day_number", "workout", "workout_info")'
-				f'VALUES({i}, \'{{"workout":[{{"duration": {i}, "pace": "бег"}}, '
-				f'{{"duration": {i * 2}, "pace": "ходьба"}}]}}\', \'тестовая информация {i}\')'
+				f'VALUES({i}, \'{{"workout_program":[{{"duration": {i}, "pace": "бег"}}, '
+				f'{{"duration": {i * 2}, "pace": "ходьба"}}],"running_pace":"умеренный",'
+				f"\"total_duration\": {i + i*2}}}', 'тестовая информация {i}')"
 			)
 			cursor.execute(insert_records)
 

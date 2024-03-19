@@ -51,7 +51,6 @@
     pip install poetry
     poetry shell
     poetry install
-    poetry self add poetry-plugin-export
     ```
 > **Примечание:** версия python должна быть ^3.11.
 
