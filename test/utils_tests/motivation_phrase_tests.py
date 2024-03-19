@@ -19,24 +19,8 @@ User = get_user_model()
 
 
 @pytest.fixture
-def training():
-	training = []
-	for i in range(1, 101):
-		training.append(
-			Day(
-				day_number=i,
-				workout=(
-					f'{{"workout":[{{"duration": {i}, "pace": "бег"}}, {{"duration": {i * 2}, "pace": "ходьба"}}]}}'
-				),
-				workout_info="Тестовое описание",
-			)
-		)
-	return Day.objects.bulk_create(training)
-
-
-@pytest.fixture
 @freeze_time("2024-03-04 00:00:00")
-def more_five_history(user, training):
+def more_five_history(user):
 	history = []
 
 	for i in range(1, 6):
@@ -45,12 +29,13 @@ def more_five_history(user, training):
 				training_start=timezone.now() - timedelta(days=8 - i),
 				training_end=timezone.now() - timedelta(days=8 - i),
 				completed=True,
-				training_day=training[i - 1],
+				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
 				cities=["Moscow"],
 				distance=1,
 				max_speed=1,
 				avg_speed=1,
+				height_difference=1,
 				user_id=user,
 			)
 		)
@@ -59,7 +44,7 @@ def more_five_history(user, training):
 
 @pytest.fixture
 @freeze_time("2024-03-04 00:00:00")
-def more_five_history_last_training_morning(user, training):
+def more_five_history_last_training_morning(user):
 	history = []
 
 	for i in range(1, 8):
@@ -68,12 +53,13 @@ def more_five_history_last_training_morning(user, training):
 				training_start=timezone.now() - timedelta(days=8 - i),
 				training_end=timezone.now() - timedelta(days=8 - i),
 				completed=True,
-				training_day=training[i - 1],
+				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
 				cities=["Moscow"],
 				distance=1,
 				max_speed=1,
 				avg_speed=1,
+				height_difference=1,
 				user_id=user,
 			)
 		)
@@ -82,7 +68,7 @@ def more_five_history_last_training_morning(user, training):
 
 @pytest.fixture
 @freeze_time("2024-03-04 00:00:00")
-def four_history(user, training):
+def four_history(user):
 	history = []
 
 	for i in range(1, 5):
@@ -91,12 +77,13 @@ def four_history(user, training):
 				training_start=timezone.now() - timedelta(days=8 - i),
 				training_end=timezone.now() - timedelta(days=8 - i),
 				completed=True,
-				training_day=training[i - 1],
+				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
 				cities=["Moscow"],
 				distance=1,
 				max_speed=1,
 				avg_speed=1,
+				height_difference=1,
 				user_id=user,
 			)
 		)
@@ -105,7 +92,7 @@ def four_history(user, training):
 
 @pytest.fixture
 @freeze_time("2024-03-04 00:00:00")
-def one_hundred_history(user, training):
+def one_hundred_history(user):
 	history = []
 
 	for i in range(1, 101):
@@ -114,12 +101,13 @@ def one_hundred_history(user, training):
 				training_start=timezone.now() - timedelta(days=101 - i),
 				training_end=timezone.now() - timedelta(days=101 - i),
 				completed=True,
-				training_day=training[i - 1],
+				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
 				cities=["Moscow"],
 				distance=1,
 				max_speed=1,
 				avg_speed=1,
+				height_difference=1,
 				user_id=user,
 			)
 		)
