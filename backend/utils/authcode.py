@@ -36,13 +36,15 @@ class AuthCode:
 		возрастания/убывания (1,2,3/3,2,1).
 		"""
 		code = []
-		for i in range(4):
-			while True:
-				number = SEC_RANDOM.randint(0, 9)
-				if i > 0 and (code[i - 1] == number or code[i - 1] + 1 == number or code[i - 1] - 1 == number):
-					continue
-				code.append(number)
-				break
+		index = 0
+		while index < 4:
+			number = SEC_RANDOM.randint(0, 9)
+			if index > 0 and (
+				code[index - 1] == number or code[index - 1] + 1 == number or code[index - 1] - 1 == number
+			):
+				continue
+			code.append(number)
+			index += 1
 		return "".join(map(str, code))
 
 	def _store_code(self, code: str) -> None:
