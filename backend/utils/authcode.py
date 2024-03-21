@@ -35,13 +35,11 @@ class AuthCode:
 		Генерирует код без повторений соседних чисел и
 		возрастания/убывания (1,2,3/3,2,1).
 		"""
-		code = []
-		index = 0
+		code = [SEC_RANDOM.randint(0, 9)]
+		index = 1
 		while index < 4:
 			number = SEC_RANDOM.randint(0, 9)
-			if index > 0 and (
-				code[index - 1] == number or code[index - 1] + 1 == number or code[index - 1] - 1 == number
-			):
+			if code[index - 1] - number in (-1, 0, 1):
 				continue
 			code.append(number)
 			index += 1

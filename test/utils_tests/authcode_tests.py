@@ -63,8 +63,8 @@ def test_correct_code_is_valid(authcode):
 @pytest.mark.repeat(100)
 def test_correct_code_not_repetition_increasing_decreasing():
 	code = tuple(int(number) for number in AuthCode._generate_code())
-	for i in range(4):
-		assert not (i > 0 and (code[i - 1] == code[i] or code[i - 1] + 1 == code[i] or code[i - 1] - 1 == code[i]))
+	for i in range(1, 4):
+		assert code[i - 1] - code[i] not in (-1, 0, 1)
 
 
 @pytest.mark.django_db
