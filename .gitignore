@@ -169,3 +169,6 @@ achievement_icons/
 history_images/
 # vscode
 .vscode/
+
+#logs
+logs

@@ -41,7 +41,7 @@ paths:
           description: ''
   /api/v1/history/:
     get:
-      operationId: api_v1_history_list
+      operationId: history_list
       description: Выводит историю тренировок
       summary: История тренировок
       tags:
@@ -58,7 +58,7 @@ paths:
                   $ref: '#/components/schemas/History'
           description: ''
     post:
-      operationId: api_v1_history_create
+      operationId: history_create
       description: Сохраняет выполненную тренировку
       summary: Сохранение выполненной тренировки
       tags:
