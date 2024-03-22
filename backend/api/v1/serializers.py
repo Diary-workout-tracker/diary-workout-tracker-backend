@@ -72,17 +72,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 	def update(self, instance: ClassUser, validated_data: dict) -> ClassUser:
 		"""Обновляет данные пользователя."""
-		gender = None
-		if validated_data.get("gender"):
-			gender = validated_data.get("gender")
-		elif self.context["request"].user.gender:
-			gender = self.context["request"].user.gender
-
 		if not validated_data.get("avatar") and (
 			"avatar" in validated_data.keys()
 			or not self.context["request"].user.avatar
 			or self.context["request"].user.avatar in ("avatars/women.png", "avatars/men.png")
 		):
+			gender = None
+			if validated_data.get("gender"):
+				gender = validated_data.get("gender")
+			elif self.context["request"].user.gender:
+				gender = self.context["request"].user.gender
 			validated_data["avatar"] = "avatars/women.png" if gender == "F" else "avatars/men.png"
 
 		return super().update(instance, validated_data)
