@@ -207,13 +207,3 @@ class HistoryView(generics.ListCreateAPIView):
 		).data  # XXX Тут в будущем вместо всех ачивок надо добавить новые.
 
 		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
-
-
-# from rest_framework.decorators import api_view
-# from utils.achievements import AchievementUpdater
-# @api_view(("POST", ))
-# def test(request):
-# 	user = request.user
-# 	updater = AchievementUpdater(user, request.data)
-# 	updater.update_achievements()
-# 	return Response('')
