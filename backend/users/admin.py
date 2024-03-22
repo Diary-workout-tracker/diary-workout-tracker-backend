@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.utils.translation import gettext_lazy as _
 
 admin.site.unregister(Group)
 
@@ -13,8 +14,8 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 	fieldsets = (
 		(None, {"fields": ("email",)}),
-		("Personal info", {"fields": ("name",)}),
-		("Custom Fields", {"fields": ("last_completed_training_number", "amount_of_skips")}),
+		(_("Личная информация"), {"fields": ("name",)}),
+		(_("Кастомные поля"), {"fields": ("last_completed_training_number", "amount_of_skips", "avatar")}),
 	)
 	add_fieldsets = (
 		(

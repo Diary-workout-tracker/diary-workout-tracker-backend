@@ -10,7 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from running.models import Achievement, Day, History, MotivationalPhrase
 from .constants import FORMAT_DATE
 from .validators import CustomUniqueValidator
-from users.models import GENDER_CHOICES
+from users.models import GENDER_CHOICES, User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
 
@@ -34,8 +34,7 @@ class Base64ImageField(serializers.ImageField):
 	def to_representation(self, value):
 		"""Возвращает полный url изображения."""
 		if value:
-			return self.context["request"].build_absolute_uri(value.url)
-		return
+			return self.context["request"].build_absolute_uri(value if isinstance(value, str) else value.url)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,7 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
 	weight_kg = serializers.FloatField(allow_null=True, required=False)
 	last_completed_training_number = serializers.IntegerField(read_only=True)
 	amount_of_skips = serializers.IntegerField(read_only=True)
-	avatar = Base64ImageField(required=False)
+	avatar = Base64ImageField(allow_null=True, required=False)
 
 	class Meta:
 		model = User
@@ -63,12 +62,30 @@ class UserSerializer(serializers.ModelSerializer):
 			"avatar",
 		)
 
-	def create(self, validated_data):
+	def create(self, validated_data: dict) -> ClassUser:
+		"""Создаёт нового пользователя."""
 		avatar_data = validated_data.pop("avatar", None)
 		user = User.objects.create(**validated_data)
 		if avatar_data:
 			user.avatar.save(avatar_data.name, avatar_data)
 		return user
+
+	def update(self, instance: ClassUser, validated_data: dict) -> ClassUser:
+		"""Обновляет данные пользователя."""
+		gender = None
+		if validated_data.get("gender"):
+			gender = validated_data.get("gender")
+		elif self.context["request"].user.gender:
+			gender = self.context["request"].user.gender
+
+		if not validated_data.get("avatar") and (
+			"avatar" in validated_data.keys()
+			or not self.context["request"].user.avatar
+			or self.context["request"].user.avatar in ("avatars/women.png", "avatars/men.png")
+		):
+			validated_data["avatar"] = "avatars/women.png" if gender == "F" else "avatars/men.png"
+
+		return super().update(instance, validated_data)
 
 
 class CustomTokenObtainSerializer(serializers.Serializer):
@@ -114,11 +131,12 @@ class AchievementSerializer(serializers.ModelSerializer):
 
 	achievement_date = serializers.DateTimeField(format=FORMAT_DATE)
 	received = serializers.BooleanField()
+	achievement_icon = Base64ImageField()
 
 	class Meta:
 		model = Achievement
 		fields = (
-			"icon",
+			"achievement_icon",
 			"title",
 			"description",
 			"reward_points",

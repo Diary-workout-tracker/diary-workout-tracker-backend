@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, F, Q, When
+from django.db.models import BooleanField, Case, DateTimeField, URLField, F, Q, When
 from django.db.models.query import QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics, status
@@ -154,6 +154,11 @@ class AchievementViewSet(generics.ListAPIView):
 		"""Формирует список ачивок c флагом получения и датой."""
 		user = self.request.user
 		return Achievement.objects.annotate(
+			achievement_icon=Case(
+				When(user_achievements__user_id=user, then=F("icon")),
+				default=F("black_white_icon"),
+				output_field=URLField(),
+			),
 			received=Case(
 				When(user_achievements__user_id=user, then=True),
 				default=False,
@@ -204,6 +209,7 @@ class HistoryView(generics.ListCreateAPIView):
 
 		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
 
+
 # from rest_framework.decorators import api_view
 # from utils.achievements import AchievementUpdater
 # @api_view(("POST", ))
@@ -212,4 +218,3 @@ class HistoryView(generics.ListCreateAPIView):
 # 	updater = AchievementUpdater(user, request.data)
 # 	updater.update_achievements()
 # 	return Response('')
-
