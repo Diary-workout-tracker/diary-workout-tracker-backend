@@ -1,19 +1,17 @@
 from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-
 from .views import (
 	AchievementViewSet,
 	HealthCheckView,
+	# test
+	HistoryView,
 	MyInfoView,
 	RegisterUserView,
 	ResendCodeView,
 	TokenRefreshView,
 	TrainingView,
-	# test
-	HistoryView,
 )
-
 
 urlpatterns = (
 	path("achievements/", AchievementViewSet.as_view(), name="achievements"),

@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
 
+import psycopg2
 from django.core.management.base import BaseCommand
 from dotenv import load_dotenv
-import psycopg2
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 path_to_env = os.path.join(BASE_DIR, "..", "infra", ".env")

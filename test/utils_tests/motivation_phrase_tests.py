@@ -1,19 +1,18 @@
 from datetime import timedelta
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from freezegun import freeze_time
-import pytest
+from running.models import Day, History, MotivationalPhrase  # noqa
 
-from running.models import Day, MotivationalPhrase, History  # noqa
 from backend.utils.motivation_phrase import (
 	get_count_training_last_week,
+	get_dynamic_list_motivation_phrase,
 	get_phrases,
 	get_rest_phrases_to_replace,
-	get_dynamic_list_motivation_phrase,
 	replaces_phrases,
 )
-
 
 User = get_user_model()
 

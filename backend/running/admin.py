@@ -6,8 +6,8 @@ from django.http import HttpResponse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from .models import Achievement, Day, History, MotivationalPhrase, UserAchievement
 from .forms import DayForm
+from .models import Achievement, Day, History, MotivationalPhrase, UserAchievement
 
 
 @admin.register(MotivationalPhrase)

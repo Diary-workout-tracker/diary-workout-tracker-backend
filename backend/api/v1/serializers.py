@@ -1,18 +1,18 @@
 import base64
-from collections import OrderedDict
 import datetime
+from collections import OrderedDict
 
-from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from running.models import Achievement, Day, History, MotivationalPhrase
-from .constants import FORMAT_DATE
-from .validators import CustomUniqueValidator
 from users.models import GENDER_CHOICES
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
+
+from .constants import FORMAT_DATE
+from .validators import CustomUniqueValidator
 
 User = get_user_model()
 

@@ -4,22 +4,21 @@ from django.db.models.query import QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from running.models import Achievement, Day
 from utils import authcode, mailsender, motivation_phrase, users
+
 from .serializers import (
-	AchievementSerializer,
 	AchievementEndTrainingSerializer,
+	AchievementSerializer,
 	CustomTokenObtainSerializer,
+	HistorySerializer,
 	TrainingSerializer,
 	UserSerializer,
-	HistorySerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
-
 
 User = get_user_model()
 
@@ -204,6 +203,7 @@ class HistoryView(generics.ListCreateAPIView):
 
 		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
 
+
 # from rest_framework.decorators import api_view
 # from utils.achievements import AchievementUpdater
 # @api_view(("POST", ))
@@ -212,4 +212,3 @@ class HistoryView(generics.ListCreateAPIView):
 # 	updater = AchievementUpdater(user, request.data)
 # 	updater.update_achievements()
 # 	return Response('')
-
