@@ -60,6 +60,13 @@ def test_correct_code_is_valid(authcode):
 	assert authcode.code_is_valid(authcode.code)
 
 
+@pytest.mark.repeat(100)
+def test_correct_code_not_repetition_increasing_decreasing():
+	code = tuple(int(number) for number in AuthCode._generate_code())
+	for i in range(1, 4):
+		assert code[i - 1] - code[i] not in (-1, 0, 1)
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize("invalid_code", (None, "00000", "0000", "0", False, 123, 3.15, {"a": "b"}))
 def test_incorrect_code_after_generation_is_invalid(authcode, invalid_code):

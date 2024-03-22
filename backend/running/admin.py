@@ -30,6 +30,7 @@ class AchievementAdmin(admin.ModelAdmin):
 		"title",
 		"description",
 		"show_icon",
+		"show_black_white_icon",
 		"stars",
 		"reward_points",
 	)
@@ -41,6 +42,12 @@ class AchievementAdmin(admin.ModelAdmin):
 		"stars",
 		"reward_points",
 	)
+
+	@admin.display(description="Превью ЧБ иконки")
+	def show_black_white_icon(self, obj: Achievement) -> str:
+		"""Отображение превью ЧБ иконки достижения"""
+		images_column: str = format_html("<img src='{}' style='max-height: 100px;'>", obj.black_white_icon.url)
+		return images_column
 
 	@admin.display(description="Превью иконки")
 	def show_icon(self, obj: Achievement) -> str:

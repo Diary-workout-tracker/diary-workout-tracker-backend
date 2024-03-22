@@ -64,8 +64,14 @@ class Achievement(models.Model):
 	icon = models.ImageField(
 		verbose_name=_("Иконка достижения"),
 		upload_to="achievement_icons/",
-		db_comment=_("Название достижения."),
+		db_comment=_("Иконка достижения."),
 		help_text=_("Иконка, представляющая достижение."),
+	)
+	black_white_icon = models.ImageField(
+		verbose_name=_("ЧБ иконка достижения"),
+		upload_to="achievement_icons/",
+		db_comment=_("ЧБ иконка достижения."),
+		help_text=_("ЧБ иконка, представляющая достижение."),
 	)
 	title = models.CharField(
 		verbose_name=_("Название достижения"),

@@ -6,7 +6,7 @@ info:
 paths:
   /api/v1/achievements/:
     get:
-      operationId: achievements_list
+      operationId: api_v1_achievements_list
       description: Выводит список достижений
       summary: Список достижений
       tags:
@@ -24,7 +24,7 @@ paths:
           description: ''
   /api/v1/health/:
     get:
-      operationId: health_retrieve
+      operationId: api_v1_health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:
@@ -88,9 +88,9 @@ paths:
           description: ''
   /api/v1/me/:
     get:
-      operationId: me_retrieve
+      operationId: api_v1_me_retrieve
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -101,9 +101,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: me_partial_update
+      operationId: api_v1_me_partial_update
       tags:
-      - me
+      - api
       requestBody:
         content:
           application/json:
@@ -125,9 +125,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     delete:
-      operationId: me_destroy
+      operationId: api_v1_me_destroy
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -135,9 +135,9 @@ paths:
           description: No response body
   /api/v1/resend_code/:
     post:
-      operationId: resend_code_create
+      operationId: api_v1_resend_code_create
       tags:
-      - resend_code
+      - api
       security:
       - jwtAuth: []
       - {}
@@ -146,9 +146,9 @@ paths:
           description: No response body
   /api/v1/token/refresh/:
     post:
-      operationId: token_refresh_create
+      operationId: api_v1_token_refresh_create
       tags:
-      - token
+      - api
       requestBody:
         content:
           application/json:
@@ -173,7 +173,7 @@ paths:
           description: ''
   /api/v1/training/:
     get:
-      operationId: training_list
+      operationId: api_v1_training_list
       description: Выводит список тренировок
       summary: Список тренировок
       tags:
@@ -191,9 +191,9 @@ paths:
           description: ''
   /api/v1/user/:
     post:
-      operationId: user_create
+      operationId: api_v1_user_create
       tags:
-      - user
+      - api
       requestBody:
         content:
           application/json:
@@ -222,11 +222,9 @@ components:
       type: object
       description: Сериализатор достижения.
       properties:
-        icon:
+        achievement_icon:
           type: string
           format: uri
-          title: Иконка достижения
-          description: Иконка, представляющая достижение.
         title:
           type: string
           title: Название достижения
@@ -249,8 +247,8 @@ components:
           type: boolean
       required:
       - achievement_date
+      - achievement_icon
       - description
-      - icon
       - received
       - title
     AchievementEndTraining:
@@ -415,6 +413,7 @@ components:
         avatar:
           type: string
           format: uri
+          nullable: true
     Training:
       type: object
       description: Сериализатор тренировок.
@@ -471,10 +470,31 @@ components:
         avatar:
           type: string
           format: uri
+          nullable: true
       required:
       - amount_of_skips
       - email
       - last_completed_training_number
+    UserAchievement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        achievement_id:
+          allOf:
+          - $ref: '#/components/schemas/Achievement'
+          readOnly: true
+        achievement_date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата получения достижения
+          description: Дата, когда пользователь получил достижение.
+      required:
+      - achievement_date
+      - achievement_id
+      - id
   securitySchemes:
     jwtAuth:
       type: http
