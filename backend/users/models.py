@@ -26,7 +26,7 @@ class User(AbstractUser):
 	weight_kg = models.FloatField(_("Вес в кг"), null=True, blank=True)
 	last_completed_training_number = models.PositiveSmallIntegerField(_("Последняя завершенная тренировка"), default=0)
 	amount_of_skips = models.PositiveSmallIntegerField(_("Количество доступных пропусков/заморозок"), default=5)
-	avatar = models.ImageField(_("Аватар"), upload_to="avatars/", default="avatars/no-avatar.png")
+	avatar = models.ImageField(_("Аватар"), upload_to="avatars/", null=True, blank=True)
 	objects = CustomUserManager()
 
 	class Meta:
@@ -37,6 +37,6 @@ class User(AbstractUser):
 		return self.email
 
 	def avatar_display(self):
-		"""Small image thumbnail for admin zone."""
-
-		return mark_safe(f'<img src="{self.avatar.url}" width="100" />')
+		"""Вывод аватарки для админки."""
+		if self.avatar:
+			return mark_safe(f'<img src="{self.avatar.url}" width="100" />')

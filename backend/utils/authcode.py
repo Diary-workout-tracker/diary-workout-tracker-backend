@@ -31,7 +31,19 @@ class AuthCode:
 
 	@classmethod
 	def _generate_code(self) -> str:
-		return "".join([str(SEC_RANDOM.randint(0, 9)) for _ in range(4)])
+		"""
+		Генерирует код без повторений соседних чисел и
+		возрастания/убывания (1,2,3/3,2,1).
+		"""
+		code = [SEC_RANDOM.randint(0, 9)]
+		index = 1
+		while index < 4:
+			number = SEC_RANDOM.randint(0, 9)
+			if code[index - 1] - number in (-1, 0, 1):
+				continue
+			code.append(number)
+			index += 1
+		return "".join(map(str, code))
 
 	def _store_code(self, code: str) -> None:
 		cache.set(self._user.email, code, settings.ACCESS_RESTORE_CODE_TTL_SECONDS)
