@@ -11,8 +11,10 @@ from running.models import Achievement, Day, History, MotivationalPhrase
 from .constants import FORMAT_DATE
 from .validators import CustomUniqueValidator
 from users.models import GENDER_CHOICES
+from running.models import Day
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
+
 
 User = get_user_model()
 

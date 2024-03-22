@@ -475,6 +475,26 @@ components:
       - amount_of_skips
       - email
       - last_completed_training_number
+    UserAchievement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        achievement_id:
+          allOf:
+          - $ref: '#/components/schemas/Achievement'
+          readOnly: true
+        achievement_date:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Дата получения достижения
+          description: Дата, когда пользователь получил достижение.
+      required:
+      - achievement_date
+      - achievement_id
+      - id
   securitySchemes:
     jwtAuth:
       type: http
