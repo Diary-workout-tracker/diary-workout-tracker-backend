@@ -14,6 +14,7 @@ from users.models import GENDER_CHOICES, User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
 
+
 User = get_user_model()
 
 
