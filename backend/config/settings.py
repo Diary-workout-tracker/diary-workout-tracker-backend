@@ -36,7 +36,6 @@ INSTALLED_APPS = [
 	"api.apps.ApiConfig",
 	"running.apps.RunningConfig",
 	"users.apps.UsersConfig",
-	"core.apps.CoreConfig",
 ]
 
 MIDDLEWARE = [
