@@ -15,7 +15,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 	fieldsets = (
 		(None, {"fields": ("email",)}),
 		(_("Личная информация"), {"fields": ("name",)}),
-		(_("Кастомные поля"), {"fields": ("last_completed_training_number", "amount_of_skips", "avatar")}),
+		(_("Кастомные поля"), {"fields": ("last_completed_training", "date_last_skips", "amount_of_skips", "avatar")}),
 	)
 	add_fieldsets = (
 		(

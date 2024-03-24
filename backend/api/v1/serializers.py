@@ -1,41 +1,20 @@
-import base64
 from collections import OrderedDict
-import datetime
 
-from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from running.models import Achievement, Day, History, MotivationalPhrase
-from .constants import FORMAT_DATE
+from .constants import FORMAT_DATE, FORMAT_TIME
 from .validators import CustomUniqueValidator
-from users.models import GENDER_CHOICES, User as ClassUser
+from .fields import Base64ImageField
+from users.models import User as ClassUser
+from users.constants import GENDER_CHOICES
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
 
 
 User = get_user_model()
-
-
-class Base64ImageField(serializers.ImageField):
-	"""Класс для сериализации изображения и десериализации URI."""
-
-	def to_internal_value(self, data):
-		"""Декодирование base64 в файл."""
-		if isinstance(data, str) and data.startswith("data:image"):
-			format, imgstr = data.split(";base64,")
-			ext = format.split("/")[-1]
-			data = ContentFile(
-				base64.b64decode(imgstr),
-				name=str(datetime.datetime.now().timestamp()) + "." + ext,
-			)
-		return super().to_internal_value(data)
-
-	def to_representation(self, value):
-		"""Возвращает полный url изображения."""
-		if value:
-			return self.context["request"].build_absolute_uri(value if isinstance(value, str) else value.url)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -46,7 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
 	gender = serializers.ChoiceField(choices=GENDER_CHOICES, allow_blank=True, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
 	weight_kg = serializers.FloatField(allow_null=True, required=False)
-	last_completed_training_number = serializers.IntegerField(read_only=True)
+	last_completed_training = serializers.IntegerField(read_only=True)
+	date_last_skips = serializers.DateTimeField(allow_null=True, required=False)
 	amount_of_skips = serializers.IntegerField(read_only=True)
 	avatar = Base64ImageField(allow_null=True, required=False)
 
@@ -58,7 +38,8 @@ class UserSerializer(serializers.ModelSerializer):
 			"gender",
 			"height_cm",
 			"weight_kg",
-			"last_completed_training_number",
+			"last_completed_training",
+			"date_last_skips",
 			"amount_of_skips",
 			"avatar",
 		)
@@ -163,7 +144,7 @@ class HistorySerializer(serializers.ModelSerializer):
 
 	image = Base64ImageField(required=False)
 	time = serializers.SerializerMethodField(read_only=True)
-	achievements = serializers.ListField(required=False, write_only=True, child=serializers.CharField())
+	achievements = serializers.ListField(required=False, write_only=True, child=serializers.IntegerField())
 
 	class Meta:
 		model = History
@@ -184,7 +165,7 @@ class HistorySerializer(serializers.ModelSerializer):
 			"achievements",
 		)
 		extra_kwargs = {
-			"training_start": {"write_only": True},
+			"training_end": {"write_only": True},
 			"completed": {"write_only": True},
 			"training_day": {"write_only": True},
 			"cities": {"write_only": True},
@@ -213,7 +194,10 @@ class HistorySerializer(serializers.ModelSerializer):
 
 	def get_time(self, obj: History) -> int:
 		"""Отдаёт продолжительность тренировки."""
-		return (obj.training_end - obj.training_start).total_seconds() // 60
+		time_training = obj.training_end - obj.training_start
+		minutes = int(time_training.total_seconds() // 60)
+		seconds = int(time_training.total_seconds() % 60)
+		return FORMAT_TIME.format(minutes, seconds)
 
 	def create(self, validated_data: dict) -> History:
 		validated_data["user_id"] = self.context["request"].user

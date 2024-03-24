@@ -77,6 +77,7 @@ DATABASES = {
 		"HOST": os.getenv("DB_HOST", default="localhost"),
 		"PORT": os.getenv("DB_PORT", default=5432),
 		"PG_USER": os.getenv("PG_USER", default="user"),
+		"TIME_ZONE": os.getenv("TIME_ZONE", default="Europe/Moscow"),
 	}
 }
 
@@ -99,7 +100,7 @@ AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "ru-RU"
 
-TIME_ZONE = "Europe/Moscow"
+TIME_ZONE = os.getenv("TIME_ZONE", default="Europe/Moscow")
 
 USE_I18N = True
 
