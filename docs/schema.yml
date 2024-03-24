@@ -144,6 +144,22 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/skip/:
+    get:
+      operationId: api_v1_skip_retrieve
+      description: Обновляет заморозки у пользователя
+      summary: Обновляет заморозки у пользователя
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                updated: true
+          description: ''
   /api/v1/token/refresh/:
     post:
       operationId: api_v1_token_refresh_create
@@ -371,7 +387,7 @@ components:
         achievements:
           type: array
           items:
-            type: string
+            type: integer
           writeOnly: true
       required:
       - avg_speed
@@ -404,9 +420,13 @@ components:
           type: number
           format: double
           nullable: true
-        last_completed_training_number:
+        last_completed_training:
           type: integer
           readOnly: true
+        date_last_skips:
+          type: string
+          format: date-time
+          nullable: true
         amount_of_skips:
           type: integer
           readOnly: true
@@ -461,9 +481,13 @@ components:
           type: number
           format: double
           nullable: true
-        last_completed_training_number:
+        last_completed_training:
           type: integer
           readOnly: true
+        date_last_skips:
+          type: string
+          format: date-time
+          nullable: true
         amount_of_skips:
           type: integer
           readOnly: true
@@ -474,7 +498,7 @@ components:
       required:
       - amount_of_skips
       - email
-      - last_completed_training_number
+      - last_completed_training
   securitySchemes:
     jwtAuth:
       type: http
