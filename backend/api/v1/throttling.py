@@ -19,7 +19,7 @@ class DurationCooldownRequestThrottle(throttling.BaseThrottle):
 		self._now = None
 
 	def allow_request(self, request, view):
-		self._now = timezone.now()
+		self._now = timezone.localtime()
 		self._user_email = request.data.get("email")
 		self._refresh_history()
 		if len(self._history[self._user_email]) < self._num_requests:

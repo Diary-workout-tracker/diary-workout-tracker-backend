@@ -2,20 +2,21 @@ from django.urls import path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from .views import (
-	AchievementViewSet,
+	AchievementView,
 	HealthCheckView,
+	HistoryView,
 	MyInfoView,
 	RegisterUserView,
 	ResendCodeView,
 	TokenRefreshView,
 	TrainingView,
+	SkipView,
 	# test
-	HistoryView,
 )
 
 
 urlpatterns = (
-	path("achievements/", AchievementViewSet.as_view(), name="achievements"),
+	path("achievements/", AchievementView.as_view(), name="achievements"),
 	path("health/", HealthCheckView.as_view(), name="health"),
 	path("schema/", SpectacularAPIView.as_view(), name="schema"),
 	path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
@@ -26,4 +27,5 @@ urlpatterns = (
 	path("training/", TrainingView.as_view(), name="training"),
 	# path("test/", test, name="test")
 	path("history/", HistoryView.as_view(), name="history"),
+	path("skip/", SkipView.as_view(), name="skip"),
 )

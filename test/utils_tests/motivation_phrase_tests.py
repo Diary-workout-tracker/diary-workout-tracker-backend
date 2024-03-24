@@ -26,8 +26,8 @@ def more_five_history(user):
 	for i in range(1, 6):
 		history.append(
 			History(
-				training_start=timezone.now() - timedelta(days=8 - i),
-				training_end=timezone.now() - timedelta(days=8 - i),
+				training_start=timezone.localtime() - timedelta(days=8 - i),
+				training_end=timezone.localtime() - timedelta(days=8 - i),
 				completed=True,
 				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
@@ -50,8 +50,8 @@ def more_five_history_last_training_morning(user):
 	for i in range(1, 8):
 		history.append(
 			History(
-				training_start=timezone.now() - timedelta(days=8 - i),
-				training_end=timezone.now() - timedelta(days=8 - i),
+				training_start=timezone.localtime() - timedelta(days=8 - i),
+				training_end=timezone.localtime() - timedelta(days=8 - i),
 				completed=True,
 				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
@@ -74,8 +74,8 @@ def four_history(user):
 	for i in range(1, 5):
 		history.append(
 			History(
-				training_start=timezone.now() - timedelta(days=8 - i),
-				training_end=timezone.now() - timedelta(days=8 - i),
+				training_start=timezone.localtime() - timedelta(days=8 - i),
+				training_end=timezone.localtime() - timedelta(days=8 - i),
 				completed=True,
 				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
@@ -98,8 +98,8 @@ def one_hundred_history(user):
 	for i in range(1, 101):
 		history.append(
 			History(
-				training_start=timezone.now() - timedelta(days=101 - i),
-				training_end=timezone.now() - timedelta(days=101 - i),
+				training_start=timezone.localtime() - timedelta(days=101 - i),
+				training_end=timezone.localtime() - timedelta(days=101 - i),
 				completed=True,
 				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
@@ -153,14 +153,14 @@ def one_hundred_history(user):
 	),
 )
 def test_get_rest_phrases_to_replace(days_to_replace: tuple, replacement_phrases: list):
-	motivational_phrases, rest_phrases = get_phrases()
+	_, rest_phrases = get_phrases()
 	assert replacement_phrases == get_rest_phrases_to_replace(rest_phrases, days_to_replace)
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("days_to_replace, error", ((("1", "4", "9"), TypeError), ((), IndexError)))
 def test_get_rest_phrases_to_replace_with_strings(days_to_replace: tuple, error: Exception):
-	motivational_phrases, rest_phrases = get_phrases()
+	_, rest_phrases = get_phrases()
 	with pytest.raises(error):
 		get_rest_phrases_to_replace(rest_phrases, days_to_replace)
 
@@ -169,7 +169,7 @@ def test_get_rest_phrases_to_replace_with_strings(days_to_replace: tuple, error:
 @freeze_time("2024-03-08 00:00:00")
 def test_get_dynamic_list_motivation_phrase_more_five_history_morning_day_friday(more_five_history):
 	user = more_five_history[0].user_id
-	user.last_completed_training_number = more_five_history[-1].id
+	user.last_completed_training = more_five_history[-1]
 	motivation_phrase = get_dynamic_list_motivation_phrase(user)
 	assert (
 		"Восстановление – ключ к росту. Дай своему телу то, что ему нужно.",
@@ -186,7 +186,7 @@ def test_get_dynamic_list_motivation_phrase_more_five_history_morning_day_friday
 @freeze_time("2024-03-04 00:00:00")
 def test_get_dynamic_list_motivation_phrase_more_five_history(more_five_history):
 	user = more_five_history[0].user_id
-	user.last_completed_training_number = more_five_history[-1].id
+	user.last_completed_training = more_five_history[-1]
 	motivation_phrase = get_dynamic_list_motivation_phrase(user)
 	assert (
 		"Восстановление – ключ к росту. Дай своему телу то, что ему нужно.",
@@ -203,7 +203,7 @@ def test_get_dynamic_list_motivation_phrase_more_five_history(more_five_history)
 @freeze_time("2024-03-04 00:00:00")
 def test_get_dynamic_list_motivation_phrase_one_hundred_history(one_hundred_history):
 	user = one_hundred_history[0].user_id
-	user.last_completed_training_number = one_hundred_history[-1].id
+	user.last_completed_training = one_hundred_history[-1]
 	motivation_phrase = get_dynamic_list_motivation_phrase(user)
 	assert motivation_phrase == get_phrases()[0]
 
@@ -212,7 +212,7 @@ def test_get_dynamic_list_motivation_phrase_one_hundred_history(one_hundred_hist
 @freeze_time("2024-03-04 00:00:00")
 def test_get_dynamic_list_motivation_phrase_four_history(four_history):
 	user = four_history[0].user_id
-	user.last_completed_training_number = four_history[-1].id
+	user.last_completed_training = four_history[-1]
 	motivation_phrase = get_dynamic_list_motivation_phrase(user)
 	assert (
 		"Восстановление – ключ к росту. Дай своему телу то, что ему нужно.",
@@ -229,7 +229,7 @@ def test_get_dynamic_list_motivation_phrase_more_five_history_last_training_morn
 	more_five_history_last_training_morning,
 ):
 	user = more_five_history_last_training_morning[0].user_id
-	user.last_completed_training_number = more_five_history_last_training_morning[-1].id
+	user.last_completed_training = more_five_history_last_training_morning[-1]
 	motivation_phrase = get_dynamic_list_motivation_phrase(user)
 	assert (
 		"Отдыхай, когда устал, но не сдавайся.",
