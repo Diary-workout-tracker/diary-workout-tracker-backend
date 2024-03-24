@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, URLField, F, Q, When
+from django.db.models import BooleanField, Case, DateTimeField, F, Q, URLField, When
 from django.db.models.query import QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics, status
@@ -153,23 +153,29 @@ class AchievementViewSet(generics.ListAPIView):
 	def get_queryset(self) -> QuerySet:
 		"""Формирует список ачивок c флагом получения и датой."""
 		user = self.request.user
-		return Achievement.objects.annotate(
-			achievement_icon=Case(
-				When(user_achievements__user_id=user, then=F("icon")),
-				default=F("black_white_icon"),
-				output_field=URLField(),
-			),
-			received=Case(
-				When(user_achievements__user_id=user, then=True),
-				default=False,
-				output_field=BooleanField(),
-			),
-			achievement_date=Case(
-				When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
-				default=None,
-				output_field=DateTimeField(),
-			),
-		).all()
+		queryset = (
+			Achievement.objects.annotate(
+				achievement_icon=Case(
+					When(user_achievements__user_id=user, then=F("icon")),
+					default=F("black_white_icon"),
+					output_field=URLField(),
+				),
+				received=Case(
+					When(user_achievements__user_id=user, then=True),
+					default=False,
+					output_field=BooleanField(),
+				),
+				achievement_date=Case(
+					When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
+					default=None,
+					output_field=DateTimeField(),
+				),
+			)
+			.all()
+			.order_by("id")
+			.distinct("id")
+		)
+		return queryset
 
 
 @extend_schema_view(

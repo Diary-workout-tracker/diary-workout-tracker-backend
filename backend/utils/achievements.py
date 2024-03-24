@@ -1,10 +1,14 @@
 from running.models import Achievement, UserAchievement
+from users.models import User
 
 
-# def equator(x): return x.user_history.last().training_day == 50
 # валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
-def equator(x):
-	return True
+def equator(user: User) -> bool:
+	"""Проверка достижения Экватор"""
+	last_training = user.user_history.last()
+	if last_training is None:
+		return False
+	return last_training.training_day.day_number == 50
 
 
 def persistent(x):

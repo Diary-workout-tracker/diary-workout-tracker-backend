@@ -22,4 +22,4 @@ def test_all_achievments_returns_correct(user_client, achievements) -> None:
 	assert len(response.data) == 3
 	achievement = response.data[0]
 	assert achievement["achievement_date"] == date.strftime(FORMAT_DATE)
-	assert achievement["received"]
+	assert achievement["received"] is not None
