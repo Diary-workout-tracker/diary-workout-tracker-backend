@@ -52,6 +52,6 @@ def achievement_to_user(user, achievements) -> UserAchievement:
 	to_user = UserAchievement.objects.create(
 		user_id=user,
 		achievement_id=achievements[0],
-		achievement_date=timezone.now(),
+		achievement_date=timezone.localtime(),
 	)
 	return to_user
