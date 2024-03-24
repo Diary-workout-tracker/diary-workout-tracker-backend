@@ -315,12 +315,12 @@ components:
         training_start:
           type: string
           format: date-time
-          writeOnly: true
           title: Время начала тренировки
           description: Дата и время начала тренировки.
         training_end:
           type: string
           format: date-time
+          writeOnly: true
           title: Время окончания тренировки
           description: Дата и время окончания тренировки.
         completed:

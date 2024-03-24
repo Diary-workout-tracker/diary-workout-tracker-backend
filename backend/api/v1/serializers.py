@@ -165,7 +165,7 @@ class HistorySerializer(serializers.ModelSerializer):
 			"achievements",
 		)
 		extra_kwargs = {
-			"training_start": {"write_only": True},
+			"training_end": {"write_only": True},
 			"completed": {"write_only": True},
 			"training_day": {"write_only": True},
 			"cities": {"write_only": True},
