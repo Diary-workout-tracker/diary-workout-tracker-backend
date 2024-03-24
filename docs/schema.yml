@@ -238,6 +238,10 @@ components:
       type: object
       description: Сериализатор достижения.
       properties:
+        id:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
         achievement_icon:
           type: string
           format: uri
@@ -265,6 +269,7 @@ components:
       - achievement_date
       - achievement_icon
       - description
+      - id
       - received
       - title
     AchievementEndTraining:

@@ -117,6 +117,7 @@ class AchievementSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Achievement
 		fields = (
+			"id",
 			"achievement_icon",
 			"title",
 			"description",

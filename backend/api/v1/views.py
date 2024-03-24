@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, F, Q, URLField, When
+from django.db.models import BooleanField, Case, Exists, DateTimeField, F, OuterRef, Q, URLField, When
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
-from running.models import Achievement, Day, History
+from running.models import Achievement, Day, History, UserAchievement
 from users.models import User as ClassUser
 from users.constants import DEFAULT_AMOUNT_OF_SKIPS
 from utils import authcode, mailsender, motivation_phrase, users
@@ -158,18 +158,15 @@ class AchievementView(generics.ListAPIView):
 	def get_queryset(self) -> QuerySet:
 		"""Формирует список ачивок c флагом получения и датой."""
 		user = self.request.user
+		sub_queryset = UserAchievement.objects.filter(user_id=user).values("achievement_id", "achievement_date")
 		queryset = (
 			Achievement.objects.annotate(
 				achievement_icon=Case(
-					When(user_achievements__user_id=user, then=F("icon")),
+					When(Exists(sub_queryset.filter(achievement_id=OuterRef("id"))), then=F("icon")),
 					default=F("black_white_icon"),
 					output_field=URLField(),
 				),
-				received=Case(
-					When(user_achievements__user_id=user, then=True),
-					default=False,
-					output_field=BooleanField(),
-				),
+				received=Exists(sub_queryset.filter(achievement_id=OuterRef("id"))),
 				achievement_date=Case(
 					When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
 					default=None,
