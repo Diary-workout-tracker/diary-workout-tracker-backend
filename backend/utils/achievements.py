@@ -1,10 +1,14 @@
 from running.models import Achievement, UserAchievement
+from users.models import User
 
 
-# def equator(x): return x.user_history.last().training_day == 50
 # валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
-def equator(x):
-	return True
+def equator(user: User) -> bool:
+	"""Проверка достижения Экватор"""
+	last_training = user.user_history.last()
+	if last_training is None:
+		return False
+	return last_training.training_day.day_number == 50
 
 
 def persistent(x):
@@ -12,11 +16,8 @@ def persistent(x):
 
 
 VALIDATORS = {
-	"Экватор": equator,
-	"уПоРный": persistent,
+	3: equator,
 }
-
-VALIDATORS = {key.lower(): value for key, value in VALIDATORS.items()}
 
 
 class AchievementUpdater:
@@ -48,18 +49,21 @@ class AchievementUpdater:
 		UserAchievement.objects.bulk_create(user_achievements)
 
 	def _check_for_new_backend_achievements(self):
+		"""Проверка на выполнение достижений"""
 		for achievement in self._unfinished_achievements:
-			validator = VALIDATORS.get(achievement.title.lower())
+			validator = VALIDATORS.get(achievement.id)
 			if validator is not None and validator(self._user) is True:
 				self._new_achievements.append(achievement)
 
 	def _check_for_new_ios_achievements(self):
+		"""Добавление внешних достиженией"""
 		ios_achievements = self._data.get("achievements")
 		if ios_achievements is not None:
 			# при условии, что по этому ключу будет список с id-шнниками новых иос-ачивок. Если будут названия, надо написать сравнение с названиями из query
 			self._new_achievements.extend(ios_achievements)
 
 	def _query_unfinished_achievements(self):
+		"""Извлечение неполученных ачивок"""
 		self._unfinished_achievements = Achievement.objects.exclude(
 			id__in=UserAchievement.objects.filter(user_id=self._user.id).values("achievement_id")
 		)

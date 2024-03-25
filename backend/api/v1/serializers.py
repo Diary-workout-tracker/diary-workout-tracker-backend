@@ -116,6 +116,7 @@ class AchievementSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Achievement
 		fields = (
+			"id",
 			"achievement_icon",
 			"title",
 			"description",
@@ -128,12 +129,12 @@ class AchievementSerializer(serializers.ModelSerializer):
 class AchievementEndTrainingSerializer(serializers.ModelSerializer):
 	"""Сериализатор достижения конца тренировки."""
 
-	icon = Base64ImageField()
+	achievement_icon = Base64ImageField()
 
 	class Meta:
 		model = Achievement
 		fields = (
-			"icon",
+			"achievement_icon",
 			"title",
 		)
 
