@@ -8,7 +8,7 @@ from running.models import Day, History  # noqa
 
 
 @pytest.fixture
-def history(user):
+def equator_history(user):
 	return History.objects.create(
 		training_start=timezone.localtime(),
 		training_end=timezone.localtime() + timedelta(days=1),
@@ -25,12 +25,12 @@ def history(user):
 
 
 @pytest.mark.django_db
-def test_user_last_day_is_50(user, history):
+def test_user_last_day_is_50(user, equator_history):
 	assert equator(user) is True
 
 
 @pytest.mark.django_db
-def test_user_training_day_is_not_50(user, history):
-	history.training_day = Day.objects.get(day_number=30)
-	history.save()
+def test_user_training_day_is_not_50(user, equator_history):
+	equator_history.training_day = Day.objects.get(day_number=30)
+	equator_history.save()
 	assert equator(user) is False
