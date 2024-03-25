@@ -3,16 +3,15 @@ from collections import OrderedDict
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from running.models import Achievement, Day, History, MotivationalPhrase
-from .constants import FORMAT_DATE, FORMAT_TIME
-from .validators import CustomUniqueValidator
-from .fields import Base64ImageField
-from users.models import User as ClassUser
 from users.constants import GENDER_CHOICES
+from users.models import User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
 
+from .constants import FORMAT_DATE, FORMAT_TIME
+from .fields import Base64ImageField
+from .validators import CustomUniqueValidator
 
 User = get_user_model()
 
