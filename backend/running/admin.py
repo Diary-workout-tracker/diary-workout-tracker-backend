@@ -27,21 +27,18 @@ class AchievementAdmin(admin.ModelAdmin):
 	"""Отображение в админ панели Достижений."""
 
 	list_display = (
+		"id",
 		"title",
 		"description",
 		"show_icon",
 		"show_black_white_icon",
-		"stars",
 		"reward_points",
 	)
 	search_fields = (
 		"title",
 		"description",
 	)
-	list_filter = (
-		"stars",
-		"reward_points",
-	)
+	list_filter = ("reward_points",)
 
 	@admin.display(description="Превью ЧБ иконки")
 	def show_black_white_icon(self, obj: Achievement) -> str:
@@ -65,7 +62,6 @@ class DayAdmin(admin.ModelAdmin):
 		"day_number",
 		"show_workout",
 	)
-	list_filter = ("day_number",)
 
 	def changeform_view(
 		self, request: WSGIRequest, object_id: str | None = None, form_url: str = "", extra_context=None

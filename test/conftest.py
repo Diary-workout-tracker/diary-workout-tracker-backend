@@ -27,21 +27,21 @@ def user_client(user):
 @pytest.fixture
 def achievements() -> tuple[Achievement]:
 	achievement1 = Achievement.objects.create(
+		id=1,
 		title="One",
 		description="One achievement",
-		stars=1,
 		reward_points=1,
 	)
 	achievement2 = Achievement.objects.create(
+		id=2,
 		title="Two",
 		description="Two achievement",
-		stars=2,
 		reward_points=2,
 	)
 	achievement3 = Achievement.objects.create(
+		id=3,
 		title="Three",
 		description="Three achievement",
-		stars=3,
 		reward_points=3,
 	)
 	return achievement1, achievement2, achievement3

@@ -61,6 +61,7 @@ class Day(models.Model):
 class Achievement(models.Model):
 	"""Модель, представляющая достижения."""
 
+	id = models.PositiveBigIntegerField(primary_key=True)
 	icon = models.ImageField(
 		verbose_name=_("Иконка достижения"),
 		upload_to="achievement_icons/",
@@ -85,11 +86,6 @@ class Achievement(models.Model):
 		help_text=_("Описание достижения."),
 		db_comment=_("Описание достижения."),
 	)
-	stars = models.PositiveSmallIntegerField(
-		verbose_name=_("Звездность"),
-		help_text=_("Уровень выполненного достижения."),
-		db_comment=_("Числовое представление уровня сложности достижения."),
-	)
 	reward_points = models.PositiveSmallIntegerField(
 		verbose_name=_("Заморозка"),
 		default=0,
@@ -103,7 +99,7 @@ class Achievement(models.Model):
 		verbose_name_plural = _("Достижения")
 
 	def __str__(self) -> str:
-		return f"{self.title} - {self.stars}"
+		return self.title
 
 
 class UserAchievement(models.Model):
