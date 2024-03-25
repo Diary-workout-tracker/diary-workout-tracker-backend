@@ -1,12 +1,11 @@
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from django.urls import reverse
 import pytest
+from django.contrib.auth import get_user_model
+from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
-
-from backend.api.v1.constants import FORMAT_DATE
 from running.models import UserAchievement  # noqa
 
+from backend.api.v1.constants import FORMAT_DATE
 
 User = get_user_model()
 

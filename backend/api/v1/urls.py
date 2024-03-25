@@ -8,12 +8,10 @@ from .views import (
 	MyInfoView,
 	RegisterUserView,
 	ResendCodeView,
+	SkipView,
 	TokenRefreshView,
 	TrainingView,
-	SkipView,
-	# test
 )
-
 
 urlpatterns = (
 	path("achievements/", AchievementView.as_view(), name="achievements"),
@@ -27,5 +25,4 @@ urlpatterns = (
 	path("training/", TrainingView.as_view(), name="training"),
 	path("history/", HistoryView.as_view(), name="history"),
 	path("skip/", SkipView.as_view(), name="skip"),
-	# path("test/", test, name="test")
 )

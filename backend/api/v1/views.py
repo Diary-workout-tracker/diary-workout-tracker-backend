@@ -1,30 +1,29 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, URLField, F, Q, When
+from django.db.models import BooleanField, Case, DateTimeField, F, Q, URLField, When
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from running.models import Achievement, Day, History
-from users.models import User as ClassUser
 from users.constants import DEFAULT_AMOUNT_OF_SKIPS
+from users.models import User as ClassUser
 from utils import authcode, mailsender, motivation_phrase, users
+
 from .serializers import (
-	AchievementSerializer,
 	AchievementEndTrainingSerializer,
+	AchievementSerializer,
 	CustomTokenObtainSerializer,
+	HistorySerializer,
 	TrainingSerializer,
 	UserSerializer,
-	HistorySerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
-
 
 User = get_user_model()
 
@@ -271,13 +270,3 @@ class SkipView(APIView):
 		else:
 			self._clearing_user_training_data(user)
 		return response
-
-
-# from rest_framework.decorators import api_view
-# from utils.achievements import AchievementUpdater
-# @api_view(("POST", ))
-# def test(request):
-# 	user = request.user
-# 	updater = AchievementUpdater(user, request.data)
-# 	updater.update_achievements()
-# 	return Response('')
