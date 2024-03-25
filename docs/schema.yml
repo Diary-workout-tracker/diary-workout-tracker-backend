@@ -240,8 +240,9 @@ components:
       properties:
         id:
           type: integer
-          maximum: 2147483647
-          minimum: -2147483648
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
         achievement_icon:
           type: string
           format: uri

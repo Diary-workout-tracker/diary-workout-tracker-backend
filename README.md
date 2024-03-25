@@ -106,6 +106,7 @@
 - Выполнить миграции Django: `make migrate-dev`
 - Собрать статику Django: `make collectstatic-dev`
 - Создать супер пользователя: `make createsuperuser-dev`
+- Загрузка фикстур достижений `make loadachievment-dev`
 - Запуск сервера: `make start-server-dev`
 - Инициализировать проект: `make project-init-dev`
 - Запустить проект: `make project-start-dev`

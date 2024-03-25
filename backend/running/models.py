@@ -61,7 +61,7 @@ class Day(models.Model):
 class Achievement(models.Model):
 	"""Модель, представляющая достижения."""
 
-	id = models.IntegerField(primary_key=True)
+	id = models.PositiveBigIntegerField(primary_key=True)
 	icon = models.ImageField(
 		verbose_name=_("Иконка достижения"),
 		upload_to="achievement_icons/",
