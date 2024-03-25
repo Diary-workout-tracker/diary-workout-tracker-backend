@@ -163,7 +163,7 @@ cython_debug/
 .ruff_cache/
 
 # development
-achievement_icons/
+# achievement_icons/
 */static/admin/
 */static/rest_framework/
 history_images/

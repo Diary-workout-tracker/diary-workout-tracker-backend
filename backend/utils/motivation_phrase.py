@@ -8,13 +8,13 @@ from users.models import User
 
 def get_count_training_last_week(user: User) -> int:
 	"""Возвращает кол-во тренировок на прошлой неделе."""
-	date_now = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+	date_now = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
 	date_now_number_day_week = date_now.weekday() + 1
 	date_end_last_week = date_now - timedelta(days=date_now_number_day_week)
 	date_start_last_week = date_end_last_week - timedelta(days=6)
 	date_end_last_week += timedelta(hours=23, minutes=59, seconds=59)
 	return History.objects.filter(
-		user_id=user, completed=True, training_end__range=[date_start_last_week, date_end_last_week]
+		user_id=user, completed=True, training_start__range=[date_start_last_week, date_end_last_week]
 	).count()
 
 
@@ -54,14 +54,13 @@ def get_dynamic_list_motivation_phrase(user: User) -> list:
 	"""Формирует динамический список мотивационных фраз
 	в зависимости от истории тренировок."""
 	motivational_phrases, rest_phrases = get_phrases()
-	last_completed_training_number = user.last_completed_training_number
-	if not last_completed_training_number:
+	last_training = user.last_completed_training
+	if not last_training:
 		return motivational_phrases
 	count_training = get_count_training_last_week(user)
 	if count_training < 4:
 		return motivational_phrases
-	date_now_number_day_week = timezone.now().weekday() + 1
-	last_training = History.objects.get(id=last_completed_training_number)
+	date_now_number_day_week = timezone.localtime().weekday() + 1
 	day_last_training = last_training.training_day.day_number
 	if count_training == 4:
 		shift_wednesday = 3 - date_now_number_day_week
@@ -79,7 +78,7 @@ def get_dynamic_list_motivation_phrase(user: User) -> list:
 	shift_first_rest = 1 - date_now_number_day_week
 	shift_second_rest = 3 - date_now_number_day_week
 	shift_third_rest = 5 - date_now_number_day_week
-	date_last_training_week = last_training.training_end.weekday() + 1
+	date_last_training_week = last_training.training_start.weekday() + 1
 	if date_last_training_week == 7:
 		shift_first_rest += 1
 		shift_second_rest += 1

@@ -1,13 +1,18 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, URLField, F, Q, When
+from django.db.models import BooleanField, Case, DateTimeField, F, Q, URLField, When
 from django.db.models.query import QuerySet
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from running.models import Achievement, Day
+from running.models import Achievement, Day, History
+from users.constants import DEFAULT_AMOUNT_OF_SKIPS
+from users.models import User as ClassUser
 from utils import authcode, mailsender, motivation_phrase, users
 
 from .serializers import (
@@ -146,7 +151,7 @@ class TrainingView(generics.ListAPIView):
 		tags=("Run",),
 	),
 )
-class AchievementViewSet(generics.ListAPIView):
+class AchievementView(generics.ListAPIView):
 	serializer_class = AchievementSerializer
 
 	def get_queryset(self) -> QuerySet:
@@ -192,6 +197,10 @@ class HistoryView(generics.ListCreateAPIView):
 		"""Формирует список историй тренировок пользователя."""
 		return self.request.user.user_history.all().order_by("training_day")
 
+	def perform_create(self, serializer: HistorySerializer) -> History:
+		"""Создаёт новую историю."""
+		return serializer.save()
+
 	def create(self, request: Request, *args, **kwargs) -> Response:
 		achievements = request.data.pop("achievements", None)  # noqa
 		HistorySerializer.validate_achievements(self, achievements)
@@ -199,7 +208,9 @@ class HistoryView(generics.ListCreateAPIView):
 
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
-		self.perform_create(serializer)
+		history = self.perform_create(serializer)
+		self.request.user.last_completed_training = history
+		self.request.user.save()
 		headers = self.get_success_headers(serializer.data)
 
 		new_achievements = AchievementEndTrainingSerializer(
@@ -207,3 +218,55 @@ class HistoryView(generics.ListCreateAPIView):
 		).data  # XXX Тут в будущем вместо всех ачивок надо добавить новые.
 
 		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
+
+
+@extend_schema_view(
+	get=extend_schema(
+		responses={200: {"updated": True}},
+		summary="Обновляет заморозки у пользователя",
+		description="Обновляет заморозки у пользователя",
+		tags=("Run",),
+	),
+)
+class SkipView(APIView):
+	def _get_date_activity(self, user: ClassUser) -> datetime:
+		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
+		date_last_skips = user.date_last_skips
+		date_activity = user.last_completed_training.training_start
+		if date_last_skips:
+			date_activity = date_activity if date_activity > date_last_skips else date_last_skips
+		return date_activity
+
+	def _updates_skip_data(
+		self, user: ClassUser, amount_of_skips: int, days_missed: int, date_day_ago: datetime
+	) -> None:
+		"""Обновляет данные по заморозкам пользователя."""
+		user.amount_of_skips = amount_of_skips - days_missed
+		user.date_last_skips = date_day_ago
+		user.save()
+
+	def _clearing_user_training_data(self, user: ClassUser) -> None:
+		"""Очищает данные по тренировка пользователя."""
+		user.amount_of_skips = DEFAULT_AMOUNT_OF_SKIPS
+		user.date_last_skips = None
+		user.save()
+		History.objects.filter(user_id=user).delete()
+
+	def get(self, request: Request, *args, **kwargs) -> Response:
+		user = request.user
+		response = Response({"updated": True})
+		if not user.last_completed_training:
+			return response
+
+		date_activity = self._get_date_activity(user)
+		amount_of_skips = user.amount_of_skips
+		date_day_ago = timezone.localtime() - timedelta(days=1)
+		days_missed = (date_day_ago.date() - date_activity.date()).days
+		if days_missed <= 0:
+			return response
+
+		if amount_of_skips >= days_missed:
+			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
+		else:
+			self._clearing_user_training_data(user)
+		return response
