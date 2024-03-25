@@ -1,10 +1,17 @@
 from running.models import Achievement, UserAchievement
+from users.models import User
 
 
 # def equator(x): return x.user_history.last().training_day == 50
 # валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
 def equator(x):
 	return True
+
+
+def traveler(user: User) -> bool:
+	"""Проверка достижения Путешественник."""
+	last_training = user.user_history.last()
+	return len(set(last_training.cities)) >= 3
 
 
 def persistent(x):
@@ -14,6 +21,7 @@ def persistent(x):
 VALIDATORS = {
 	"Экватор": equator,
 	"уПоРный": persistent,
+	"Путешественник": traveler,
 }
 
 VALIDATORS = {key.lower(): value for key, value in VALIDATORS.items()}
