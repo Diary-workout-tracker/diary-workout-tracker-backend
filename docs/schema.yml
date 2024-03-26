@@ -6,7 +6,7 @@ info:
 paths:
   /api/v1/achievements/:
     get:
-      operationId: api_v1_achievements_list
+      operationId: achievements_list
       description: Выводит список достижений
       summary: Список достижений
       tags:
@@ -24,7 +24,7 @@ paths:
           description: ''
   /api/v1/health/:
     get:
-      operationId: api_v1_health_retrieve
+      operationId: health_retrieve
       description: Проверка работы АПИ
       summary: Проверка работы
       tags:
@@ -41,7 +41,7 @@ paths:
           description: ''
   /api/v1/history/:
     get:
-      operationId: api_v1_history_list
+      operationId: history_list
       description: Выводит историю тренировок
       summary: История тренировок
       tags:
@@ -58,7 +58,7 @@ paths:
                   $ref: '#/components/schemas/History'
           description: ''
     post:
-      operationId: api_v1_history_create
+      operationId: history_create
       description: Сохраняет выполненную тренировку
       summary: Сохранение выполненной тренировки
       tags:
@@ -88,9 +88,9 @@ paths:
           description: ''
   /api/v1/me/:
     get:
-      operationId: api_v1_me_retrieve
+      operationId: me_retrieve
       tags:
-      - api
+      - me
       security:
       - jwtAuth: []
       responses:
@@ -101,9 +101,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: api_v1_me_partial_update
+      operationId: me_partial_update
       tags:
-      - api
+      - me
       requestBody:
         content:
           application/json:
@@ -125,9 +125,9 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     delete:
-      operationId: api_v1_me_destroy
+      operationId: me_destroy
       tags:
-      - api
+      - me
       security:
       - jwtAuth: []
       responses:
@@ -135,9 +135,9 @@ paths:
           description: No response body
   /api/v1/resend_code/:
     post:
-      operationId: api_v1_resend_code_create
+      operationId: resend_code_create
       tags:
-      - api
+      - resend_code
       security:
       - jwtAuth: []
       - {}
@@ -146,7 +146,7 @@ paths:
           description: No response body
   /api/v1/skip/:
     get:
-      operationId: api_v1_skip_retrieve
+      operationId: skip_retrieve
       description: Обновляет заморозки у пользователя
       summary: Обновляет заморозки у пользователя
       tags:
@@ -162,9 +162,9 @@ paths:
           description: ''
   /api/v1/token/refresh/:
     post:
-      operationId: api_v1_token_refresh_create
+      operationId: token_refresh_create
       tags:
-      - api
+      - token
       requestBody:
         content:
           application/json:
@@ -189,7 +189,7 @@ paths:
           description: ''
   /api/v1/training/:
     get:
-      operationId: api_v1_training_list
+      operationId: training_list
       description: Выводит список тренировок
       summary: Список тренировок
       tags:
@@ -207,9 +207,9 @@ paths:
           description: ''
   /api/v1/user/:
     post:
-      operationId: api_v1_user_create
+      operationId: user_create
       tags:
-      - api
+      - user
       requestBody:
         content:
           application/json:
@@ -346,9 +346,9 @@ components:
           format: uri
         motivation_phrase:
           type: string
+          readOnly: true
           title: Мотивационная фраза
           description: Мотивационная фраза
-          maxLength: 150
         cities:
           type: array
           items:
