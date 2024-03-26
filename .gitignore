@@ -171,4 +171,4 @@ history_images/
 .vscode/
 
 #logs
-logs/*
+# logs/*
