@@ -188,7 +188,7 @@ class HistorySerializer(serializers.ModelSerializer):
 		return value
 
 	def validate_achievements(self, value: list) -> list:
-		if value and len(value) > Achievement.objects.filter(title__in=value).count():
+		if value and len(value) > Achievement.objects.filter(id__in=value).count():
 			raise serializers.ValidationError({"achievements": ["Некорректные ачивки"]})
 		return value
 
