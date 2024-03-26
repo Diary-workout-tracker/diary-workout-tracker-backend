@@ -277,7 +277,7 @@ components:
       type: object
       description: Сериализатор достижения конца тренировки.
       properties:
-        achievement_icon:
+        icon:
           type: string
           format: uri
         title:
@@ -286,7 +286,7 @@ components:
           description: Название достижения.
           maxLength: 100
       required:
-      - achievement_icon
+      - icon
       - title
     BlankEnum:
       enum:
