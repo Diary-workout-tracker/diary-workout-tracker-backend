@@ -346,9 +346,9 @@ components:
           format: uri
         motivation_phrase:
           type: string
-          readOnly: true
           title: Мотивационная фраза
           description: Мотивационная фраза
+          maxLength: 150
         cities:
           type: array
           items:

@@ -173,7 +173,7 @@ class HistorySerializer(serializers.ModelSerializer):
 			"distance": {"min_value": 0},
 			"avg_speed": {"min_value": 0},
 			"route": {"required": False},
-			"motivation_phrase": {"read_only": True},
+			# "motivation_phrase": {"read_only": True},
 		}
 
 	def validate(self, data: OrderedDict) -> OrderedDict:
