@@ -10,7 +10,7 @@ def equator(x):
 
 def traveler(user: User) -> bool:
 	"""Проверка достижения Путешественник."""
-	last_training = user.user_history.last()
+	last_training = user.last_completed_training
 	return len(set(last_training.cities)) >= 3
 
 

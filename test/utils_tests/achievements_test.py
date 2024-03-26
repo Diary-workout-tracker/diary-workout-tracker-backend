@@ -26,6 +26,8 @@ def history(user):
 
 @pytest.mark.django_db
 def test_user_1_cities_per_training(user, history):
+	user.last_completed_training = history
+	user.save()
 	assert traveler(user) is False
 
 
@@ -33,4 +35,6 @@ def test_user_1_cities_per_training(user, history):
 def test_user_3_cities_per_training(user, history):
 	history.cities = ["Moscow", "St. Petersburg", "Karaganda"]
 	history.save()
+	user.last_completed_training = history
+	user.save()
 	assert traveler(user) is True
