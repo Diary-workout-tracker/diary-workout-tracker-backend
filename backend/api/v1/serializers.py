@@ -24,7 +24,9 @@ class UserSerializer(serializers.ModelSerializer):
 	gender = serializers.ChoiceField(choices=GENDER_CHOICES, allow_blank=True, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
 	weight_kg = serializers.FloatField(allow_null=True, required=False)
-	last_completed_training = serializers.IntegerField(read_only=True)
+	last_completed_training = serializers.IntegerField(
+		source="last_completed_training.training_day.day_number", read_only=True
+	)
 	date_last_skips = serializers.DateTimeField(allow_null=True, required=False)
 	amount_of_skips = serializers.IntegerField(read_only=True)
 	avatar = Base64ImageField(allow_null=True, required=False)

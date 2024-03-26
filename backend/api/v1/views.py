@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, Exists, F, OuterRef, Q, URLField, When
+from django.db.models import BooleanField, Case, DateTimeField, Exists, F, OuterRef, Q, When, ImageField
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -163,7 +163,7 @@ class AchievementView(generics.ListAPIView):
 				achievement_icon=Case(
 					When(Exists(sub_queryset.filter(achievement_id=OuterRef("id"))), then=F("icon")),
 					default=F("black_white_icon"),
-					output_field=URLField(),
+					output_field=ImageField(),
 				),
 				received=Exists(sub_queryset.filter(achievement_id=OuterRef("id"))),
 				achievement_date=Case(
