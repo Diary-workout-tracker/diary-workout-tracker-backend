@@ -113,13 +113,13 @@ class AchievementSerializer(serializers.ModelSerializer):
 
 	achievement_date = serializers.DateTimeField(format=FORMAT_DATE)
 	received = serializers.BooleanField()
-	achievement_icon = Base64ImageField()
+	icon = Base64ImageField()
 
 	class Meta:
 		model = Achievement
 		fields = (
 			"id",
-			"achievement_icon",
+			"icon",
 			"title",
 			"description",
 			"reward_points",
@@ -153,7 +153,6 @@ class HistorySerializer(serializers.ModelSerializer):
 		fields = (
 			"training_start",
 			"training_end",
-			"completed",
 			"training_day",
 			"image",
 			"motivation_phrase",
@@ -168,7 +167,6 @@ class HistorySerializer(serializers.ModelSerializer):
 		)
 		extra_kwargs = {
 			"training_end": {"write_only": True},
-			"completed": {"write_only": True},
 			"training_day": {"write_only": True},
 			"cities": {"write_only": True},
 			"max_speed": {"write_only": True, "min_value": 0},

@@ -243,7 +243,7 @@ components:
           maximum: 9223372036854775807
           minimum: 0
           format: int64
-        achievement_icon:
+        icon:
           type: string
           format: uri
         title:
@@ -268,8 +268,8 @@ components:
           type: boolean
       required:
       - achievement_date
-      - achievement_icon
       - description
+      - icon
       - id
       - received
       - title
@@ -329,11 +329,6 @@ components:
           writeOnly: true
           title: Время окончания тренировки
           description: Дата и время окончания тренировки.
-        completed:
-          type: boolean
-          writeOnly: true
-          title: Завершено
-          description: Показывает, завершена ли тренировка или нет.
         training_day:
           type: integer
           maximum: 32767
