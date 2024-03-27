@@ -208,6 +208,7 @@ class HistoryView(generics.ListCreateAPIView):
 		serializer.is_valid(raise_exception=True)
 		history = self.perform_create(serializer)
 		self.request.user.last_completed_training = history
+		self.request.user.total_m_run += history.distance
 		self.request.user.save()
 		headers = self.get_success_headers(serializer.data)
 
