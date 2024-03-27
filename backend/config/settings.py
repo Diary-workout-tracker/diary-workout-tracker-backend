@@ -32,7 +32,6 @@ INSTALLED_APPS = [
 	"django.forms",
 	# lib
 	"rest_framework",
-	"rest_framework.authtoken",
 	"drf_spectacular",
 	# app
 	"api.apps.ApiConfig",

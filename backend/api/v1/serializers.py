@@ -129,12 +129,12 @@ class AchievementSerializer(serializers.ModelSerializer):
 class AchievementEndTrainingSerializer(serializers.ModelSerializer):
 	"""Сериализатор достижения конца тренировки."""
 
-	achievement_icon = Base64ImageField()
+	icon = Base64ImageField()
 
 	class Meta:
 		model = Achievement
 		fields = (
-			"achievement_icon",
+			"icon",
 			"title",
 		)
 
@@ -183,12 +183,12 @@ class HistorySerializer(serializers.ModelSerializer):
 		return data
 
 	def validate_motivation_phrase(self, value: str) -> str:
-		if not MotivationalPhrase.objects.filter(text=value).count():
+		if not MotivationalPhrase.objects.filter(text=value).exists():
 			raise serializers.ValidationError("Данной мотивационной фразы не существует")
 		return value
 
 	def validate_achievements(self, value: list) -> list:
-		if value and len(value) > Achievement.objects.filter(title__in=value).count():
+		if value and len(value) > Achievement.objects.filter(id__in=value).count():
 			raise serializers.ValidationError({"achievements": ["Некорректные ачивки"]})
 		return value
 
