@@ -4,6 +4,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from .logs import LOGGING_SETTINGS
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -203,4 +204,4 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True")
 
 
-# LOGGING = LOGGING_SETTINGS
+LOGGING = LOGGING_SETTINGS
