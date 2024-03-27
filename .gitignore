@@ -163,8 +163,12 @@ cython_debug/
 .ruff_cache/
 
 # development
-achievement_icons/
-static/
-
+# achievement_icons/
+*/static/admin/
+*/static/rest_framework/
+history_images/
 # vscode
 .vscode/
+
+#logs
+logs/*

@@ -1,26 +1,29 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth import get_user_model
-from django.core.handlers.wsgi import WSGIRequest
+from django.db.models import BooleanField, Case, DateTimeField, Exists, F, OuterRef, Q, When, ImageField
 from django.db.models.query import QuerySet
-from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
+from running.models import Achievement, Day, History, UserAchievement
+from users.constants import DEFAULT_AMOUNT_OF_SKIPS
+from users.models import User as ClassUser
+from utils import authcode, mailsender, motivation_phrase, users
 
-from running.models import Achievement, Day, UserAchievement
-from utils import authcode, mailsender, motivation_phrase
 from .serializers import (
+	AchievementEndTrainingSerializer,
 	AchievementSerializer,
 	CustomTokenObtainSerializer,
+	HistorySerializer,
 	TrainingSerializer,
-	UserAchievementSerializer,
 	UserSerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
-
 
 User = get_user_model()
 
@@ -62,7 +65,7 @@ class ResendCodeView(APIView):
 	throttle_classes = (DurationCooldownRequestThrottle,)
 
 	def post(self, request):
-		user = get_object_or_404(User, email=request.data.get("email"))
+		user = users.get_user_by_email_or_404(request.data.get("email"))
 		send_auth_code(user)
 		return Response({"result": "Код создан и отправлен"}, status=status.HTTP_201_CREATED)
 
@@ -110,7 +113,7 @@ class MyInfoView(APIView):
 		tags=("Run",),
 	),
 )
-class TrainingView(ListAPIView):
+class TrainingView(generics.ListAPIView):
 	queryset = Day.objects.all()
 	serializer_class = TrainingSerializer
 
@@ -120,48 +123,153 @@ class TrainingView(ListAPIView):
 		и флагом завершения тренировки.
 		"""
 		user = self.request.user
-		queryset = self.queryset.all()
-		history = user.user_history.all()
+		queryset = (
+			self.queryset.annotate(
+				completed=Case(
+					When(
+						Q(historis__training_day=F("day_number")) & Q(historis__user_id=user),
+						then=F("historis__completed"),
+					),
+					default=False,
+					output_field=BooleanField(),
+				)
+			)
+			.all()
+			.order_by("day_number")
+		)
 		dynamic_motivation_phrase = motivation_phrase.get_dynamic_list_motivation_phrase(user)
-		len_history = len(history)
 		for i in range(len(queryset)):
-			element = queryset[i]
-			if len_history > i:
-				element.completed = history[i].completed
-			element.motivation_phrase = dynamic_motivation_phrase[i]
+			queryset[i].motivation_phrase = dynamic_motivation_phrase[i]
 		return queryset
 
 
 @extend_schema_view(
-	list=extend_schema(
+	get=extend_schema(
 		responses={200: AchievementSerializer(many=True)},
 		summary="Список достижений",
 		description="Выводит список достижений",
 		tags=("Run",),
 	),
-	retrieve=extend_schema(
-		responses={200: AchievementSerializer()},
-		summary="Получение достижения по идентификатору",
-		description="Получает информацию о достижение по его идентификатору",
+)
+class AchievementView(generics.ListAPIView):
+	serializer_class = AchievementSerializer
+
+	def get_queryset(self) -> QuerySet:
+		"""Формирует список ачивок c флагом получения и датой."""
+		user = self.request.user
+		sub_queryset = UserAchievement.objects.filter(user_id=user).values("achievement_id", "achievement_date")
+		queryset = (
+			Achievement.objects.annotate(
+				achievement_icon=Case(
+					When(Exists(sub_queryset.filter(achievement_id=OuterRef("id"))), then=F("icon")),
+					default=F("black_white_icon"),
+					output_field=ImageField(),
+				),
+				received=Exists(sub_queryset.filter(achievement_id=OuterRef("id"))),
+				achievement_date=Case(
+					When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
+					default=None,
+					output_field=DateTimeField(),
+				),
+			)
+			.all()
+			.order_by("id")
+			.distinct("id")
+		)
+		return queryset
+
+
+@extend_schema_view(
+	get=extend_schema(
+		responses={200: HistorySerializer(many=True)},
+		summary="История тренировок",
+		description="Выводит историю тренировок",
 		tags=("Run",),
 	),
-	me=extend_schema(
-		responses={200: UserAchievementSerializer()},
-		summary="Получение достижений авторизированного пользователя",
-		description="Получает информацию о достижениях авторизированного пользователя",
+	post=extend_schema(
+		responses={201: AchievementEndTrainingSerializer(many=True)},
+		summary="Сохранение выполненной тренировки",
+		description="Сохраняет выполненную тренировку",
 		tags=("Run",),
 	),
 )
-class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
-	queryset = Achievement.objects.all()
-	serializer_class = AchievementSerializer
+class HistoryView(generics.ListCreateAPIView):
+	serializer_class = HistorySerializer
 
-	@action(
-		detail=False,
-		serializer_class=UserAchievementSerializer,
-	)
-	def me(self, request: WSGIRequest) -> Response:
+	def get_queryset(self) -> QuerySet:
+		"""Формирует список историй тренировок пользователя."""
+		return self.request.user.user_history.all().order_by("training_day")
+
+	def perform_create(self, serializer: HistorySerializer) -> History:
+		"""Создаёт новую историю."""
+		return serializer.save()
+
+	def create(self, request: Request, *args, **kwargs) -> Response:
+		achievements = request.data.pop("achievements", None)  # noqa
+		HistorySerializer.validate_achievements(self, achievements)
+		# XXX Тут можно начать просчёт ачивок.
+
+		serializer = self.get_serializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+		history = self.perform_create(serializer)
+		self.request.user.last_completed_training = history
+		self.request.user.save()
+		headers = self.get_success_headers(serializer.data)
+
+		new_achievements = AchievementEndTrainingSerializer(
+			Achievement.objects.all(), many=True, context={"request": request}
+		).data  # XXX Тут в будущем вместо всех ачивок надо добавить новые.
+
+		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
+
+
+@extend_schema_view(
+	get=extend_schema(
+		responses={200: {"updated": True}},
+		summary="Обновляет заморозки у пользователя",
+		description="Обновляет заморозки у пользователя",
+		tags=("Run",),
+	),
+)
+class SkipView(APIView):
+	def _get_date_activity(self, user: ClassUser) -> datetime:
+		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
+		date_last_skips = user.date_last_skips
+		date_activity = user.last_completed_training.training_start
+		if date_last_skips:
+			date_activity = date_activity if date_activity > date_last_skips else date_last_skips
+		return date_activity
+
+	def _updates_skip_data(
+		self, user: ClassUser, amount_of_skips: int, days_missed: int, date_day_ago: datetime
+	) -> None:
+		"""Обновляет данные по заморозкам пользователя."""
+		user.amount_of_skips = amount_of_skips - days_missed
+		user.date_last_skips = date_day_ago
+		user.save()
+
+	def _clearing_user_training_data(self, user: ClassUser) -> None:
+		"""Очищает данные по тренировка пользователя."""
+		user.amount_of_skips = DEFAULT_AMOUNT_OF_SKIPS
+		user.date_last_skips = None
+		user.save()
+		History.objects.filter(user_id=user).delete()
+
+	def get(self, request: Request, *args, **kwargs) -> Response:
 		user = request.user
-		queryset = UserAchievement.objects.filter(user_id=user)
-		serializer = self.serializer_class(queryset, many=True)
-		return Response(serializer.data)
+		response = Response({"updated": True})
+		if not user.last_completed_training:
+			return response
+
+		date_activity = self._get_date_activity(user)
+		amount_of_skips = user.amount_of_skips
+		date_day_ago = timezone.localtime() - timedelta(days=1)
+		days_missed = (date_day_ago.date() - date_activity.date()).days
+		if days_missed <= 0:
+			return response
+
+		if amount_of_skips >= days_missed:
+			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
+		else:
+			self._clearing_user_training_data(user)
+		return response

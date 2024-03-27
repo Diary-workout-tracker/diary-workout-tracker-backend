@@ -16,8 +16,11 @@ collectstatic-prod: # Собрать статику Django
 createsuperuser-prod: # Создать супер пользователя
 	docker compose exec backend poetry run python manage.py createsuperuser --noinput
 
+loadachievment-prod: # Загруска текстур ачивок
+	docker compose exec backend poetry run python manage.py loaddata fixture/achievements_fixture.json
+
 project-init-prod: # Инициализировать проект
-	make clear-volumes-prod start-containers-prod migrate-prod collectstatic-prod createsuperuser-prod
+	make clear-volumes-prod start-containers-prod migrate-prod collectstatic-prod createsuperuser-prod loadachievment-prod:
 
 project-start-prod: # Запустить проект
 	make start-containers
@@ -46,8 +49,11 @@ collectstatic-dev: # Собрать статику Django
 createsuperuser-dev: # Создать супер пользователя
 	poetry run python backend/manage.py createsuperuser --noinput
 
+loadachievment-dev: # Загруска текстур ачивок
+	poetry run python manage.py loaddata fixture/achievements_fixture.json
+
 project-init-dev: # Инициализировать проект
-	make clear-volumes-dev start-containers-dev migrate-dev collectstatic-dev createsuperuser-dev start-server-dev
+	make clear-volumes-dev start-containers-dev migrate-dev collectstatic-dev createsuperuser-dev loadachievment-dev start-server-dev
 
 project-start-dev: # Запустить проект
 	make start-containers-dev start-server-dev
@@ -57,9 +63,3 @@ containers-stop-dev: # Остановить контейнеры
 
 test-training: # Создаёт тестовые тренировки
 	poetry run python backend/manage.py test_training
-
-test-phrase: # Создаёт тестовые фразы
-	poetry run python backend/manage.py test_phrase
-
-test-data: # Создаёт тестовые данные
-	make test-training test-phrase

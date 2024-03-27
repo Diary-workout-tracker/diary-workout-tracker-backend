@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -6,17 +7,26 @@ User = get_user_model()
 
 
 class MotivationalPhrase(models.Model):
-	text = models.TextField()
+	"""Модель, представляющая мотивационные фразы и фразы отдыха."""
+
+	text = models.TextField(
+		verbose_name=_("Текст фразы"),
+		help_text=_("Текст фразы."),
+		db_comment=_("Текст фразы."),
+	)
+	rest = models.BooleanField(
+		default=False,
+		verbose_name=_("Флаг фразы отдыха"),
+		help_text=_("Флаг, обозначающий фразу отдыха."),
+		db_comment=_("Флаг, обозначающий фразу отдыха."),
+	)
+
+	class Meta:
+		verbose_name = _("Мотивационная фраза")
+		verbose_name_plural = _("Мотивационные фразы")
 
 	def __str__(self):
-		return self.text
-
-
-class RecreationPhrase(models.Model):
-	text = models.TextField()
-
-	def __str__(self):
-		return self.text
+		return f"{self.text} - {self.rest}"
 
 
 class Day(models.Model):
@@ -35,27 +45,34 @@ class Day(models.Model):
 	)
 	workout_info = models.CharField(
 		verbose_name=_("Описание тренировки"),
-		max_length=100,
+		max_length=200,
 		help_text=_("Описание тренировки."),
 		db_comment=_("Описание тренировки дополнительно к этапам"),
 	)
 
 	class Meta:
-		verbose_name = _("День")
-		verbose_name_plural = _("Дни")
+		verbose_name = _("День тренировки")
+		verbose_name_plural = _("Дни тренировки")
 
 	def __str__(self) -> str:
-		return f"{_('День')} {self.day_number}"
+		return f"{_('День тренировки')} {self.day_number}"
 
 
 class Achievement(models.Model):
 	"""Модель, представляющая достижения."""
 
+	id = models.PositiveBigIntegerField(primary_key=True)
 	icon = models.ImageField(
 		verbose_name=_("Иконка достижения"),
 		upload_to="achievement_icons/",
-		db_comment=_("Название достижения."),
+		db_comment=_("Иконка достижения."),
 		help_text=_("Иконка, представляющая достижение."),
+	)
+	black_white_icon = models.ImageField(
+		verbose_name=_("ЧБ иконка достижения"),
+		upload_to="achievement_icons/",
+		db_comment=_("ЧБ иконка достижения."),
+		help_text=_("ЧБ иконка, представляющая достижение."),
 	)
 	title = models.CharField(
 		verbose_name=_("Название достижения"),
@@ -68,11 +85,6 @@ class Achievement(models.Model):
 		verbose_name=_("Описание достижения"),
 		help_text=_("Описание достижения."),
 		db_comment=_("Описание достижения."),
-	)
-	stars = models.PositiveSmallIntegerField(
-		verbose_name=_("Звездность"),
-		help_text=_("Уровень выполненного достижения."),
-		db_comment=_("Числовое представление уровня сложности достижения."),
 	)
 	reward_points = models.PositiveSmallIntegerField(
 		verbose_name=_("Заморозка"),
@@ -87,7 +99,7 @@ class Achievement(models.Model):
 		verbose_name_plural = _("Достижения")
 
 	def __str__(self) -> str:
-		return f"{self.title} - {self.stars}"
+		return self.title
 
 
 class UserAchievement(models.Model):
@@ -129,14 +141,19 @@ class UserAchievement(models.Model):
 
 
 class History(models.Model):
-	"""Модель, представляющая записанную тренировку."""
+	"""Модель, отображающая историю тренировки."""
 
-	training_date = models.DateTimeField(
-		verbose_name=_("Дата тренировки"),
-		help_text=_("Дата и время проведения тренировки."),
-		db_comment=_("Дата, когда пользователь получил достижение."),
+	training_start = models.DateTimeField(
+		verbose_name=_("Время начала тренировки"),
+		help_text=_("Дата и время начала тренировки."),
+		db_comment=_("Дата и время начала тренировки."),
 	)
-	completed = models.BooleanField(  # XXX: нужен ли, если в конце тренировки данные
+	training_end = models.DateTimeField(
+		verbose_name=_("Время окончания тренировки"),
+		help_text=_("Дата и время окончания тренировки."),
+		db_comment=_("Дата и время окончания тренировки."),
+	)
+	completed = models.BooleanField(
 		default=False,
 		verbose_name=_("Завершено"),
 		help_text=_("Показывает, завершена ли тренировка или нет."),
@@ -152,31 +169,52 @@ class History(models.Model):
 		null=False,
 		blank=False,
 	)
+	image = models.ImageField(
+		verbose_name=_("Изображение маршрута"),
+		upload_to="history_images/",
+		db_comment=_("Изображение пройденного маршрута на карте."),
+		help_text=_("Изображение пройденного маршрута на карте."),
+		blank=True,
+		null=True,
+	)
 	motivation_phrase = models.CharField(
 		verbose_name=_("Мотивационная фраза"),
 		max_length=150,
 		help_text=_("Мотивационная фраза"),
 		db_comment=_("Мотивационная фраза на дне тренировки."),
 	)
+	cities = ArrayField(
+		models.CharField(max_length=150),
+		verbose_name=_("Города"),
+		help_text=_("Города, в которых были совершены тренировки."),
+		db_comment=_("Города, в которых были совершены тренировки."),
+	)
 	route = models.JSONField(
 		verbose_name=_("Маршрут"),
 		help_text=_("Маршрут тренировки."),
 		db_comment=_("Маршрут тренировки."),
+		blank=True,
+		null=True,
 	)
-	distance = models.PositiveSmallIntegerField(
+	distance = models.FloatField(
 		verbose_name=_("Дистанция (в метрах)"),
 		help_text=_("Пройденная дистанция в метрах."),
 		db_comment=_("Пройденная дистанция в метрах."),
 	)
-	max_speed = models.PositiveSmallIntegerField(
+	max_speed = models.FloatField(
 		verbose_name=_("Максимальная скорость"),
 		help_text=_("Максимальная достигнутая скорость во время тренировки."),
 		db_comment=_("Максимальная достигнутая скорость во время тренировки."),
 	)
-	avg_speed = models.PositiveSmallIntegerField(
+	avg_speed = models.FloatField(
 		verbose_name=_("Средняя скорость"),
 		help_text=_("Средняя скорость за всю тренировку."),
 		db_comment=_("Средняя скорость за всю тренировку."),
+	)
+	height_difference = models.PositiveSmallIntegerField(
+		verbose_name=_("Перепад высот"),
+		help_text=_("Перепад высот."),
+		db_comment=_("Перепад высот."),
 	)
 	user_id = models.ForeignKey(
 		User,
@@ -190,9 +228,9 @@ class History(models.Model):
 	)
 
 	class Meta:
-		ordering = ("training_date",)
-		verbose_name = _("Тренировка ")
-		verbose_name_plural = _("Тренировки")
+		ordering = ("training_end",)
+		verbose_name = _("История тренировки")
+		verbose_name_plural = _("История тренировок")
 
 	def __str__(self) -> str:
-		return f"{_('Тренировка')} {self.id}"
+		return f"{_('История тренировки')} {self.id}"

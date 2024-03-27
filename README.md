@@ -51,7 +51,6 @@
     pip install poetry
     poetry shell
     poetry install
-    poetry self add poetry-plugin-export
     ```
 > **Примечание:** версия python должна быть ^3.11.
 
@@ -107,13 +106,11 @@
 - Выполнить миграции Django: `make migrate-dev`
 - Собрать статику Django: `make collectstatic-dev`
 - Создать супер пользователя: `make createsuperuser-dev`
+- Загрузка фикстур достижений `make loadachievment-dev`
 - Запуск сервера: `make start-server-dev`
 - Инициализировать проект: `make project-init-dev`
 - Запустить проект: `make project-start-dev`
 - Остановить контейнеры: `make containers-stop-dev`
-- Создаёт тестовые тренировки: `make test-training`
-- Создаёт тестовые фразы: `make test-phrase`
-- Создаёт тестовые данные: `make test-data`
 
 </details>
 

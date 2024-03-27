@@ -4,9 +4,9 @@ info:
   version: 1.0.0
   description: Live докумениация сервиса
 paths:
-  /api/v1/achievement/:
+  /api/v1/achievements/:
     get:
-      operationId: api_v1_achievement_list
+      operationId: api_v1_achievements_list
       description: Выводит список достижений
       summary: Список достижений
       tags:
@@ -21,45 +21,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Achievement'
-          description: ''
-  /api/v1/achievement/{id}/:
-    get:
-      operationId: api_v1_achievement_retrieve
-      description: Получает информацию о достижение по его идентификатору
-      summary: Получение достижения по идентификатору
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this Достижение.
-        required: true
-      tags:
-      - Run
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Achievement'
-          description: ''
-  /api/v1/achievement/me/:
-    get:
-      operationId: api_v1_achievement_me_retrieve
-      description: Получает информацию о достижениях авторизированного пользователя
-      summary: Получение достижений авторизированного пользователя
-      tags:
-      - Run
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserAchievement'
           description: ''
   /api/v1/health/:
     get:
@@ -77,6 +38,53 @@ paths:
             application/json:
               schema:
                 Health: OK
+          description: ''
+  /api/v1/history/:
+    get:
+      operationId: api_v1_history_list
+      description: Выводит историю тренировок
+      summary: История тренировок
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/History'
+          description: ''
+    post:
+      operationId: api_v1_history_create
+      description: Сохраняет выполненную тренировку
+      summary: Сохранение выполненной тренировки
+      tags:
+      - Run
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/History'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/History'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/History'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AchievementEndTraining'
           description: ''
   /api/v1/me/:
     get:
@@ -136,6 +144,22 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/skip/:
+    get:
+      operationId: api_v1_skip_retrieve
+      description: Обновляет заморозки у пользователя
+      summary: Обновляет заморозки у пользователя
+      tags:
+      - Run
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                updated: true
+          description: ''
   /api/v1/token/refresh/:
     post:
       operationId: api_v1_token_refresh_create
@@ -216,12 +240,12 @@ components:
       properties:
         id:
           type: integer
-          readOnly: true
-        icon:
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        achievement_icon:
           type: string
           format: uri
-          title: Иконка достижения
-          description: Иконка, представляющая достижение.
         title:
           type: string
           title: Название достижения
@@ -237,10 +261,32 @@ components:
           minimum: 0
           title: Заморозка
           description: Количество заморозок за достижение.
+        achievement_date:
+          type: string
+          format: date-time
+        received:
+          type: boolean
       required:
+      - achievement_date
+      - achievement_icon
       - description
-      - icon
       - id
+      - received
+      - title
+    AchievementEndTraining:
+      type: object
+      description: Сериализатор достижения конца тренировки.
+      properties:
+        icon:
+          type: string
+          format: uri
+        title:
+          type: string
+          title: Название достижения
+          description: Название достижения.
+          maxLength: 100
+      required:
+      - icon
       - title
     BlankEnum:
       enum:
@@ -268,6 +314,98 @@ components:
       description: |-
         * `M` - Male
         * `F` - Female
+    History:
+      type: object
+      description: Сериализатор историй тренировок.
+      properties:
+        training_start:
+          type: string
+          format: date-time
+          title: Время начала тренировки
+          description: Дата и время начала тренировки.
+        training_end:
+          type: string
+          format: date-time
+          writeOnly: true
+          title: Время окончания тренировки
+          description: Дата и время окончания тренировки.
+        completed:
+          type: boolean
+          writeOnly: true
+          title: Завершено
+          description: Показывает, завершена ли тренировка или нет.
+        training_day:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: День тренировки
+          description: День тренировки.
+          writeOnly: true
+        image:
+          type: string
+          format: uri
+        motivation_phrase:
+          type: string
+          title: Мотивационная фраза
+          description: Мотивационная фраза
+          maxLength: 150
+        cities:
+          type: array
+          items:
+            type: string
+            maxLength: 150
+          writeOnly: true
+          title: Города
+          description: Города, в которых были совершены тренировки.
+        route:
+          nullable: true
+          title: Маршрут
+          description: Маршрут тренировки.
+        distance:
+          type: number
+          format: double
+          minimum: 0
+          title: Дистанция (в метрах)
+          description: Пройденная дистанция в метрах.
+        time:
+          type: integer
+          description: Отдаёт продолжительность тренировки.
+          readOnly: true
+        max_speed:
+          type: number
+          format: double
+          minimum: 0
+          writeOnly: true
+          title: Максимальная скорость
+          description: Максимальная достигнутая скорость во время тренировки.
+        avg_speed:
+          type: number
+          format: double
+          minimum: 0
+          title: Средняя скорость
+          description: Средняя скорость за всю тренировку.
+        height_difference:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          title: Перепад высот
+          description: Перепад высот.
+        achievements:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+      required:
+      - avg_speed
+      - cities
+      - distance
+      - height_difference
+      - max_speed
+      - motivation_phrase
+      - time
+      - training_day
+      - training_end
+      - training_start
     PatchedUser:
       type: object
       description: Сериализатор кастомного пользователя.
@@ -288,15 +426,20 @@ components:
           type: number
           format: double
           nullable: true
-        last_completed_training_number:
+        last_completed_training:
           type: integer
           readOnly: true
+        date_last_skips:
+          type: string
+          format: date-time
+          nullable: true
         amount_of_skips:
           type: integer
           readOnly: true
         avatar:
           type: string
           format: uri
+          nullable: true
     Training:
       type: object
       description: Сериализатор тренировок.
@@ -314,7 +457,7 @@ components:
           type: string
           title: Описание тренировки
           description: Описание тренировки.
-          maxLength: 100
+          maxLength: 200
         motivation_phrase:
           type: string
         completed:
@@ -344,39 +487,24 @@ components:
           type: number
           format: double
           nullable: true
-        last_completed_training_number:
+        last_completed_training:
           type: integer
           readOnly: true
+        date_last_skips:
+          type: string
+          format: date-time
+          nullable: true
         amount_of_skips:
           type: integer
           readOnly: true
         avatar:
           type: string
           format: uri
+          nullable: true
       required:
       - amount_of_skips
       - email
-      - last_completed_training_number
-    UserAchievement:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        achievement_id:
-          allOf:
-          - $ref: '#/components/schemas/Achievement'
-          readOnly: true
-        achievement_date:
-          type: string
-          format: date-time
-          readOnly: true
-          title: Дата получения достижения
-          description: Дата, когда пользователь получил достижение.
-      required:
-      - achievement_date
-      - achievement_id
-      - id
+      - last_completed_training
   securitySchemes:
     jwtAuth:
       type: http

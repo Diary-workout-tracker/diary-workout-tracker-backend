@@ -4,6 +4,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from .logs import LOGGING_SETTINGS
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 path_to_env = os.path.join(BASE_DIR, "..", "infra", ".env")
@@ -13,10 +15,9 @@ load_dotenv(path_to_env)
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", default=False)
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
-# ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS", default="http://127.0.0.1")]
 
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
 	"django.contrib.sessions",
 	"django.contrib.messages",
 	"django.contrib.staticfiles",
+	"django.forms",
 	# lib
 	"rest_framework",
 	"rest_framework.authtoken",
@@ -53,7 +55,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
 	{
 		"BACKEND": "django.template.backends.django.DjangoTemplates",
-		"DIRS": [],
+		"DIRS": [os.path.join(BASE_DIR, "templates")],
 		"APP_DIRS": True,
 		"OPTIONS": {
 			"context_processors": [
@@ -70,13 +72,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
 	"default": {
-		"ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.sqlite3"),
-		"NAME": os.getenv("POSTGRES_DB", default=BASE_DIR / "db.sqlite3"),
-		"USER": os.getenv("POSTGRES_USER", default="user"),
-		"PASSWORD": os.getenv("POSTGRES_PASSWORD", default="password"),
-		"HOST": os.getenv("DB_HOST", default=""),
+		"ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.postgresql"),
+		"NAME": os.getenv("POSTGRES_DB", default="postgres"),
+		"USER": os.getenv("POSTGRES_USER", default="postgres"),
+		"PASSWORD": os.getenv("POSTGRES_PASSWORD", default="postgres"),
+		"HOST": os.getenv("DB_HOST", default="localhost"),
 		"PORT": os.getenv("DB_PORT", default=5432),
 		"PG_USER": os.getenv("PG_USER", default="user"),
+		"TIME_ZONE": os.getenv("TIME_ZONE", default="Europe/Moscow"),
 	}
 }
 
@@ -99,7 +102,7 @@ AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "ru-RU"
 
-TIME_ZONE = "Europe/Moscow"
+TIME_ZONE = os.getenv("TIME_ZONE", default="Europe/Moscow")
 
 USE_I18N = True
 
@@ -107,13 +110,16 @@ USE_TZ = True
 
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
+if DEBUG:
+	STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
+else:
+	STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 REST_FRAMEWORK = {
 	"DEFAULT_PERMISSION_CLASSES": [
@@ -158,3 +164,14 @@ ACCESS_RESTORE_CODE_THROTTLING = {
 	"num_requests": 5,
 	"cooldown": timedelta(minutes=5),
 }
+
+# email send
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.yandex.ru")
+EMAIL_PORT = os.getenv("EMAIL_PORT", 465)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True")
+
+
+LOGGING = LOGGING_SETTINGS
