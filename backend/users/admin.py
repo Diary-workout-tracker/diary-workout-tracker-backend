@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.conf import settings
 from django.core.handlers.wsgi import WSGIRequest
 from django.utils.translation import gettext_lazy as _
-from .models import User as ClasUser
+from .models import User as ClassUser
 
 
 admin.site.unregister(Group)
@@ -50,6 +50,6 @@ class CustomUserAdmin(admin.ModelAdmin):
 		"""Разрешение на добавление объекта."""
 		return DEBUG
 
-	def has_delete_permission(self, request: WSGIRequest, obj: ClasUser | None = None) -> bool:
+	def has_delete_permission(self, request: WSGIRequest, obj: ClassUser | None = None) -> bool:
 		"""Разрешение на удаление объекта."""
 		return DEBUG
