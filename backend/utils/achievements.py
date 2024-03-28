@@ -3,6 +3,17 @@ from functools import partial
 from running.models import Achievement, UserAchievement
 from users.models import User
 
+# def equator(x): return x.user_history.last().training_day == 50
+# валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
+
+
+def traveler(user: User) -> bool:
+	"""Проверка достижения Путешественник."""
+	last_training = user.last_completed_training
+	if last_training is None:
+		return False
+	return len(set(last_training.cities)) >= 3
+
 
 def equator(user: User) -> bool:
 	"""Проверка достижения Экватор"""
@@ -52,6 +63,7 @@ VALIDATORS = {
 	15: goblet(50),
 	16: goblet(70),
 	17: goblet(100),  # Большой кубок со звездами - 100 тренировок
+	22: traveler,  # Путешественник
 }
 
 
