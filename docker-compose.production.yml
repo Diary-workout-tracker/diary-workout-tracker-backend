@@ -52,13 +52,11 @@ services:
 
   celery-worker:
     image: blakkheart/diary_backend
-    env_file: ./infra/.env
+    env_file: .env
     depends_on:
       db:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      backend:
         condition: service_healthy
     command: celery -A config worker -l info
     volumes:
@@ -70,6 +68,7 @@ services:
     image: blakkheart/diary_gateway
     depends_on:
       - backend
+      - celery-worker
     ports:
       - 8000:80
     volumes:
