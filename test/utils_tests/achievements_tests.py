@@ -21,7 +21,6 @@ def history(user):
 	return History.objects.create(
 		training_start=timezone.localtime(),
 		training_end=timezone.localtime() + timedelta(days=1),
-		completed=True,
 		training_day=Day.objects.get(day_number=50),
 		motivation_phrase="Тестовая фраза",
 		cities=["St. Petersburg"],

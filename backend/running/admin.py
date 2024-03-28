@@ -47,7 +47,6 @@ class AchievementAdmin(admin.ModelAdmin):
 		"title",
 		"description",
 		"show_icon",
-		"show_black_white_icon",
 		"reward_points",
 	)
 	search_fields = (
@@ -65,12 +64,6 @@ class AchievementAdmin(admin.ModelAdmin):
 	def has_delete_permission(self, request: WSGIRequest, obj: Achievement | None = None) -> bool:
 		"""Разрешение на удаление объекта."""
 		return DEBUG
-
-	@admin.display(description="Превью ЧБ иконки")
-	def show_black_white_icon(self, obj: Achievement) -> str:
-		"""Отображение превью ЧБ иконки достижения"""
-		images_column: str = format_html("<img src='{}' style='max-height: 100px;'>", obj.black_white_icon.url)
-		return images_column
 
 	@admin.display(description="Превью иконки")
 	def show_icon(self, obj: Achievement) -> str:
@@ -149,7 +142,6 @@ class HistoryAdmin(admin.ModelAdmin):
 	list_display = (
 		"training_start",
 		"training_end",
-		"completed",
 		"show_image",
 		"motivation_phrase",
 		"cities",
@@ -159,10 +151,7 @@ class HistoryAdmin(admin.ModelAdmin):
 		"avg_speed",
 		"user_id",
 	)
-	list_filter = (
-		"completed",
-		"user_id",
-	)
+	list_filter = ("user_id",)
 	search_fields = (
 		"motivation_phrase",
 		"user_id",

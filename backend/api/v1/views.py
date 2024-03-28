@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, Exists, F, OuterRef, Q, When, ImageField
+from django.db.models import BooleanField, Case, DateTimeField, Exists, F, OuterRef, Q, When
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -128,7 +128,7 @@ class TrainingView(generics.ListAPIView):
 				completed=Case(
 					When(
 						Q(historis__training_day=F("day_number")) & Q(historis__user_id=user),
-						then=F("historis__completed"),
+						then=True,
 					),
 					default=False,
 					output_field=BooleanField(),
@@ -160,11 +160,6 @@ class AchievementView(generics.ListAPIView):
 		sub_queryset = UserAchievement.objects.filter(user_id=user).values("achievement_id", "achievement_date")
 		queryset = (
 			Achievement.objects.annotate(
-				achievement_icon=Case(
-					When(Exists(sub_queryset.filter(achievement_id=OuterRef("id"))), then=F("icon")),
-					default=F("black_white_icon"),
-					output_field=ImageField(),
-				),
 				received=Exists(sub_queryset.filter(achievement_id=OuterRef("id"))),
 				achievement_date=Case(
 					When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
@@ -205,7 +200,7 @@ class HistoryView(generics.ListCreateAPIView):
 		return serializer.save()
 
 	def create(self, request: Request, *args, **kwargs) -> Response:
-		achievements = request.data.pop("achievements", None)  # noqa
+		achievements = request.data.pop("achievements", None)
 		HistorySerializer.validate_achievements(self, achievements)
 		# XXX Тут можно начать просчёт ачивок.
 
