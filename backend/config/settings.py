@@ -184,5 +184,9 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True")
 
-
-LOGGING = LOGGING_SETTINGS
+# logging
+IS_LOGGING = os.getenv("IS_LOGGING", False) == "True"
+if IS_LOGGING is True:
+	LOGGING = LOGGING_SETTINGS
+else:
+	LOGGING = None
