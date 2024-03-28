@@ -143,12 +143,24 @@ SPECTACULAR_SETTINGS = {
 	"SERVE_INCLUDE_SCHEMA": False,
 }
 
+REDIS_LOCATION = f"redis://{os.getenv('REDIS_HOST', default='localhost')}:{os.getenv('REDIS_PORT', default='6379')}"
+
+CELERY_BROKER_URL = f"{REDIS_LOCATION}/0"
+CELERY_RESULT_BACKEND = f"{REDIS_LOCATION}/0"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 5 * 60
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = os.getenv("TIME_ZONE", default="Europe/Moscow")
+
 CACHES = {
 	"default": {
-		"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-		"LOCATION": "diary-localmemcache",
+		"BACKEND": "django.core.cache.backends.redis.RedisCache",
+		"LOCATION": REDIS_LOCATION,
 	}
 }
+
 
 # 100 years token lifetime
 
