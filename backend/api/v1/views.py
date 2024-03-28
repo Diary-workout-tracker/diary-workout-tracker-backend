@@ -1,30 +1,29 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, URLField, F, Q, When
+from django.db.models import BooleanField, Case, DateTimeField, Exists, F, OuterRef, Q, When
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from running.models import Achievement, Day, History
-from users.models import User as ClassUser
+from running.models import Achievement, Day, History, UserAchievement
 from users.constants import DEFAULT_AMOUNT_OF_SKIPS
+from users.models import User as ClassUser
 from utils import authcode, mailsender, motivation_phrase, users
+
 from .serializers import (
-	AchievementSerializer,
 	AchievementEndTrainingSerializer,
+	AchievementSerializer,
 	CustomTokenObtainSerializer,
+	HistorySerializer,
 	TrainingSerializer,
 	UserSerializer,
-	HistorySerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
-
 
 User = get_user_model()
 
@@ -129,7 +128,7 @@ class TrainingView(generics.ListAPIView):
 				completed=Case(
 					When(
 						Q(historis__training_day=F("day_number")) & Q(historis__user_id=user),
-						then=F("historis__completed"),
+						then=True,
 					),
 					default=False,
 					output_field=BooleanField(),
@@ -158,23 +157,21 @@ class AchievementView(generics.ListAPIView):
 	def get_queryset(self) -> QuerySet:
 		"""Формирует список ачивок c флагом получения и датой."""
 		user = self.request.user
-		return Achievement.objects.annotate(
-			achievement_icon=Case(
-				When(user_achievements__user_id=user, then=F("icon")),
-				default=F("black_white_icon"),
-				output_field=URLField(),
-			),
-			received=Case(
-				When(user_achievements__user_id=user, then=True),
-				default=False,
-				output_field=BooleanField(),
-			),
-			achievement_date=Case(
-				When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
-				default=None,
-				output_field=DateTimeField(),
-			),
-		).all()
+		sub_queryset = UserAchievement.objects.filter(user_id=user).values("achievement_id", "achievement_date")
+		queryset = (
+			Achievement.objects.annotate(
+				received=Exists(sub_queryset.filter(achievement_id=OuterRef("id"))),
+				achievement_date=Case(
+					When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
+					default=None,
+					output_field=DateTimeField(),
+				),
+			)
+			.all()
+			.order_by("id")
+			.distinct("id")
+		)
+		return queryset
 
 
 @extend_schema_view(
@@ -203,7 +200,7 @@ class HistoryView(generics.ListCreateAPIView):
 		return serializer.save()
 
 	def create(self, request: Request, *args, **kwargs) -> Response:
-		achievements = request.data.pop("achievements", None)  # noqa
+		achievements = request.data.pop("achievements", None)
 		HistorySerializer.validate_achievements(self, achievements)
 		# XXX Тут можно начать просчёт ачивок.
 
@@ -211,6 +208,7 @@ class HistoryView(generics.ListCreateAPIView):
 		serializer.is_valid(raise_exception=True)
 		history = self.perform_create(serializer)
 		self.request.user.last_completed_training = history
+		self.request.user.total_m_run += history.distance
 		self.request.user.save()
 		headers = self.get_success_headers(serializer.data)
 
@@ -271,13 +269,3 @@ class SkipView(APIView):
 		else:
 			self._clearing_user_training_data(user)
 		return response
-
-
-# from rest_framework.decorators import api_view
-# from utils.achievements import AchievementUpdater
-# @api_view(("POST", ))
-# def test(request):
-# 	user = request.user
-# 	updater = AchievementUpdater(user, request.data)
-# 	updater.update_achievements()
-# 	return Response('')

@@ -4,6 +4,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from .logs import LOGGING_SETTINGS
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 path_to_env = os.path.join(BASE_DIR, "..", "infra", ".env")
@@ -30,7 +32,6 @@ INSTALLED_APPS = [
 	"django.forms",
 	# lib
 	"rest_framework",
-	"rest_framework.authtoken",
 	"drf_spectacular",
 	# app
 	"api.apps.ApiConfig",
@@ -170,3 +171,6 @@ EMAIL_PORT = os.getenv("EMAIL_PORT", 465)
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True")
+
+
+LOGGING = LOGGING_SETTINGS

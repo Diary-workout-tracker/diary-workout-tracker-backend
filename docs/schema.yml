@@ -238,7 +238,12 @@ components:
       type: object
       description: Сериализатор достижения.
       properties:
-        achievement_icon:
+        id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        icon:
           type: string
           format: uri
         title:
@@ -263,8 +268,9 @@ components:
           type: boolean
       required:
       - achievement_date
-      - achievement_icon
       - description
+      - icon
+      - id
       - received
       - title
     AchievementEndTraining:
@@ -323,11 +329,6 @@ components:
           writeOnly: true
           title: Время окончания тренировки
           description: Дата и время окончания тренировки.
-        completed:
-          type: boolean
-          writeOnly: true
-          title: Завершено
-          description: Показывает, завершена ли тренировка или нет.
         training_day:
           type: integer
           maximum: 32767

@@ -3,16 +3,15 @@ from collections import OrderedDict
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from running.models import Achievement, Day, History, MotivationalPhrase
-from .constants import FORMAT_DATE, FORMAT_TIME
-from .validators import CustomUniqueValidator
-from .fields import Base64ImageField
-from users.models import User as ClassUser
 from users.constants import GENDER_CHOICES
+from users.models import User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
 
+from .constants import FORMAT_DATE, FORMAT_TIME
+from .fields import Base64ImageField
+from .validators import CustomUniqueValidator
 
 User = get_user_model()
 
@@ -25,7 +24,9 @@ class UserSerializer(serializers.ModelSerializer):
 	gender = serializers.ChoiceField(choices=GENDER_CHOICES, allow_blank=True, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
 	weight_kg = serializers.FloatField(allow_null=True, required=False)
-	last_completed_training = serializers.IntegerField(read_only=True)
+	last_completed_training = serializers.IntegerField(
+		source="last_completed_training.training_day.day_number", read_only=True
+	)
 	date_last_skips = serializers.DateTimeField(allow_null=True, required=False)
 	amount_of_skips = serializers.IntegerField(read_only=True)
 	avatar = Base64ImageField(allow_null=True, required=False)
@@ -112,12 +113,13 @@ class AchievementSerializer(serializers.ModelSerializer):
 
 	achievement_date = serializers.DateTimeField(format=FORMAT_DATE)
 	received = serializers.BooleanField()
-	achievement_icon = Base64ImageField()
+	icon = Base64ImageField()
 
 	class Meta:
 		model = Achievement
 		fields = (
-			"achievement_icon",
+			"id",
+			"icon",
 			"title",
 			"description",
 			"reward_points",
@@ -151,7 +153,6 @@ class HistorySerializer(serializers.ModelSerializer):
 		fields = (
 			"training_start",
 			"training_end",
-			"completed",
 			"training_day",
 			"image",
 			"motivation_phrase",
@@ -166,7 +167,6 @@ class HistorySerializer(serializers.ModelSerializer):
 		)
 		extra_kwargs = {
 			"training_end": {"write_only": True},
-			"completed": {"write_only": True},
 			"training_day": {"write_only": True},
 			"cities": {"write_only": True},
 			"max_speed": {"write_only": True, "min_value": 0},
@@ -183,12 +183,12 @@ class HistorySerializer(serializers.ModelSerializer):
 		return data
 
 	def validate_motivation_phrase(self, value: str) -> str:
-		if not MotivationalPhrase.objects.filter(text=value).count():
+		if not MotivationalPhrase.objects.filter(text=value).exists():
 			raise serializers.ValidationError("Данной мотивационной фразы не существует")
 		return value
 
 	def validate_achievements(self, value: list) -> list:
-		if value and len(value) > Achievement.objects.filter(title__in=value).count():
+		if value and len(value) > Achievement.objects.filter(id__in=value).count():
 			raise serializers.ValidationError({"achievements": ["Некорректные ачивки"]})
 		return value
 

@@ -4,6 +4,7 @@ volumes:
   pg_data:
   static:
   media:
+  logs:
 
 services:
   db:
@@ -31,6 +32,7 @@ services:
     volumes:
       - media:/app/media
       - static:/backend_static
+      - logs:/app/logs
 
   nginx:
     image: blakkheart/diary_gateway

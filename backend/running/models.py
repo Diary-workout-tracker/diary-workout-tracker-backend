@@ -68,12 +68,6 @@ class Achievement(models.Model):
 		db_comment=_("Иконка достижения."),
 		help_text=_("Иконка, представляющая достижение."),
 	)
-	black_white_icon = models.ImageField(
-		verbose_name=_("ЧБ иконка достижения"),
-		upload_to="achievement_icons/",
-		db_comment=_("ЧБ иконка достижения."),
-		help_text=_("ЧБ иконка, представляющая достижение."),
-	)
 	title = models.CharField(
 		verbose_name=_("Название достижения"),
 		max_length=100,
@@ -152,12 +146,6 @@ class History(models.Model):
 		verbose_name=_("Время окончания тренировки"),
 		help_text=_("Дата и время окончания тренировки."),
 		db_comment=_("Дата и время окончания тренировки."),
-	)
-	completed = models.BooleanField(
-		default=False,
-		verbose_name=_("Завершено"),
-		help_text=_("Показывает, завершена ли тренировка или нет."),
-		db_comment=_("Флаг, указывающий, завершена ли тренировка или нет."),
 	)
 	training_day = models.ForeignKey(
 		Day,

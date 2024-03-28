@@ -1,6 +1,7 @@
+from functools import partial
+
 from running.models import Achievement, UserAchievement
 from users.models import User
-
 
 # def equator(x): return x.user_history.last().training_day == 50
 # валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
@@ -20,13 +21,48 @@ def equator(user: User) -> bool:
 	return last_training.training_day.day_number == 50
 
 
-def persistent(x):
-	return True
+def validate_n_km_club(km_club_amount: int, user: User) -> bool:
+	"""Проверка достижений клуб N километров."""
+
+	return user.total_m_run // 1000 >= km_club_amount
+
+
+def n_km_club(km_club_amount: int) -> callable:
+	"""Используем partial, чтобы не плодить кучу одинаковых ф-ций."""
+
+
+	return partial(validate_n_km_club, km_club_amount=km_club_amount)
+
+
+def validate_goblet(amount_of_trainings: int, user: User) -> bool:
+	if not user.last_completed_training:
+		return False
+	return user.last_completed_training.training_day.day_number >= amount_of_trainings
+
+
+def goblet(amount_of_trainings: int) -> callable:
+	"""Валидатор достижения кубок со звездами."""
+
+	return partial(validate_goblet, amount_of_trainings=amount_of_trainings)
 
 
 VALIDATORS = {
-	3: equator,
-	22: traveler,
+	3: equator,  # Экватор
+	4: n_km_club(20),  # Клуб N км.
+	5: n_km_club(50),
+	6: n_km_club(100),
+	7: n_km_club(150),
+	8: n_km_club(200),
+	9: n_km_club(300),
+	10: n_km_club(500),
+	11: n_km_club(1000),
+	12: goblet(3),  # Кубок со звездами - 1, 3 тренировки
+	13: goblet(10),
+	14: goblet(30),
+	15: goblet(50),
+	16: goblet(70),
+	17: goblet(100),  # Большой кубок со звездами - 100 тренировок
+  22: traveler,  # Путешественник 
 }
 
 
@@ -62,7 +98,7 @@ class AchievementUpdater:
 		"""Проверка на выполнение достижений"""
 		for achievement in self._unfinished_achievements:
 			validator = VALIDATORS.get(achievement.id)
-			if validator is not None and validator(self._user) is True:
+			if validator is not None and validator(user=self._user) is True:
 				self._new_achievements.append(achievement)
 
 	def _check_for_new_ios_achievements(self):

@@ -2,8 +2,7 @@ from datetime import timedelta
 
 from django.db.models.query import QuerySet
 from django.utils import timezone
-
-from running.models import MotivationalPhrase, History
+from running.models import History, MotivationalPhrase
 from users.models import User
 
 
@@ -15,7 +14,7 @@ def get_count_training_last_week(user: User) -> int:
 	date_start_last_week = date_end_last_week - timedelta(days=6)
 	date_end_last_week += timedelta(hours=23, minutes=59, seconds=59)
 	return History.objects.filter(
-		user_id=user, completed=True, training_start__range=[date_start_last_week, date_end_last_week]
+		user_id=user, training_start__range=[date_start_last_week, date_end_last_week]
 	).count()
 
 

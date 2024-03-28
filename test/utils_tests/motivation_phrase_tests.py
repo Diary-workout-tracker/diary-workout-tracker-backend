@@ -1,19 +1,18 @@
 from datetime import timedelta
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from freezegun import freeze_time
-import pytest
+from running.models import Day, History, MotivationalPhrase  # noqa
 
-from running.models import Day, MotivationalPhrase, History  # noqa
 from backend.utils.motivation_phrase import (
 	get_count_training_last_week,
+	get_dynamic_list_motivation_phrase,
 	get_phrases,
 	get_rest_phrases_to_replace,
-	get_dynamic_list_motivation_phrase,
 	replaces_phrases,
 )
-
 
 User = get_user_model()
 
@@ -28,7 +27,6 @@ def more_five_history(user):
 			History(
 				training_start=timezone.localtime() - timedelta(days=8 - i),
 				training_end=timezone.localtime() - timedelta(days=8 - i),
-				completed=True,
 				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
 				cities=["Moscow"],
@@ -52,7 +50,6 @@ def more_five_history_last_training_morning(user):
 			History(
 				training_start=timezone.localtime() - timedelta(days=8 - i),
 				training_end=timezone.localtime() - timedelta(days=8 - i),
-				completed=True,
 				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
 				cities=["Moscow"],
@@ -76,7 +73,6 @@ def four_history(user):
 			History(
 				training_start=timezone.localtime() - timedelta(days=8 - i),
 				training_end=timezone.localtime() - timedelta(days=8 - i),
-				completed=True,
 				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
 				cities=["Moscow"],
@@ -100,7 +96,6 @@ def one_hundred_history(user):
 			History(
 				training_start=timezone.localtime() - timedelta(days=101 - i),
 				training_end=timezone.localtime() - timedelta(days=101 - i),
-				completed=True,
 				training_day=Day.objects.get(day_number=i),
 				motivation_phrase="Тестовая фраза",
 				cities=["Moscow"],

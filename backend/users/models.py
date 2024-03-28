@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from django.utils.html import mark_safe
+from django.utils.translation import gettext_lazy as _
 
 from .constants import DEFAULT_AMOUNT_OF_SKIPS, GENDER_CHOICES
 from .managers import CustomUserManager
@@ -32,6 +32,7 @@ class User(AbstractUser):
 		_("Количество доступных пропусков/заморозок"), default=DEFAULT_AMOUNT_OF_SKIPS
 	)
 	avatar = models.ImageField(_("Аватар"), upload_to="avatars/", null=True, blank=True)
+	total_m_run = models.IntegerField(_("Всего пробежал метров"), default=0)
 	objects = CustomUserManager()
 
 	class Meta:
