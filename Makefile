@@ -38,28 +38,25 @@ start-containers-dev: # Запуск контейнеров
 	@sleep 3;
 
 start-server-dev: # Запуск сервера
-	poetry run python backend/manage.py runserver
+	poetry run python backend/manage.py runserver;
+
+start-celery-dev: # Запуск Celery
+	cd backend/ && celery -A config worker -l info --without-gossip --without-mingle --without-heartbeat -Ofair --pool=solo
 
 migrate-dev: # Выполнить миграции Django
 	poetry run python backend/manage.py migrate
 
-collectstatic-dev: # Собрать статику Django
-	poetry run python backend/manage.py collectstatic --noinput
-
 createsuperuser-dev: # Создать супер пользователя
 	poetry run python backend/manage.py createsuperuser --noinput
 
-loadachievment-dev: # Загруска текстур ачивок
-	poetry run python manage.py loaddata fixture/achievements_fixture.json
+loadachievment-dev: # Загрузка фикстур ачивок
+	poetry run python backend/manage.py loaddata backend/fixture/achievements_fixture.json
 
 project-init-dev: # Инициализировать проект
-	make clear-volumes-dev start-containers-dev migrate-dev collectstatic-dev createsuperuser-dev loadachievment-dev start-server-dev
+	make clear-volumes-dev start-containers-dev migrate-dev createsuperuser-dev loadachievment-dev start-server-dev
 
 project-start-dev: # Запустить проект
 	make start-containers-dev start-server-dev
 
 containers-stop-dev: # Остановить контейнеры
 	docker compose -f docker-compose.dev.yml  --env-file ./infra/.env down;
-
-test-training: # Создаёт тестовые тренировки
-	poetry run python backend/manage.py test_training

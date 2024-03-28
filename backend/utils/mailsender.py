@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from django.conf import settings
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+
+from api.v1.tasks import send_code
 
 
 class MailSender(ABC):
@@ -21,11 +21,4 @@ class DefaultMailSender(MailSender):
 			},
 		)
 		msg_plain = strip_tags(msg_html)
-		send_mail(
-			subject="App code",
-			message=msg_plain,
-			from_email=settings.EMAIL_HOST_USER,
-			recipient_list=[mail_address],
-			html_message=msg_html,
-			fail_silently=False,
-		)
+		send_code.delay(msg_plain, [mail_address], msg_html)
