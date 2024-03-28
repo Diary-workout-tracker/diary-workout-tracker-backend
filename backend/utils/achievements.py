@@ -10,6 +10,8 @@ from users.models import User
 def traveler(user: User) -> bool:
 	"""Проверка достижения Путешественник."""
 	last_training = user.last_completed_training
+	if last_training is None:
+		return False
 	return len(set(last_training.cities)) >= 3
 
 
@@ -29,7 +31,6 @@ def validate_n_km_club(km_club_amount: int, user: User) -> bool:
 
 def n_km_club(km_club_amount: int) -> callable:
 	"""Используем partial, чтобы не плодить кучу одинаковых ф-ций."""
-
 
 	return partial(validate_n_km_club, km_club_amount=km_club_amount)
 
@@ -62,7 +63,7 @@ VALIDATORS = {
 	15: goblet(50),
 	16: goblet(70),
 	17: goblet(100),  # Большой кубок со звездами - 100 тренировок
-  22: traveler,  # Путешественник 
+	22: traveler,  # Путешественник
 }
 
 
