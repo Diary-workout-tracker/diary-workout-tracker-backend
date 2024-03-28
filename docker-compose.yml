@@ -4,10 +4,14 @@ volumes:
   pg_data:
   static:
   media:
+  redis_data:
+  redis_conf:
+  logs:
 
 services:
+
   db:
-    image: postgres:16.2
+    image: postgres:16.2-alpine
     env_file: ./infra/.env
     restart: always
     volumes:
@@ -19,6 +23,19 @@ services:
       retries: 3
       start_period: 3s
 
+  redis:
+    image: redis:alpine
+    env_file: ./infra/.env
+    restart: always
+    volumes:
+      - redis_data:/root/redis
+      - redis_conf:/usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
   backend:
     build:
       context: ./
@@ -27,16 +44,36 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     command:
         ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi"]
     volumes:
       - media:/app/media
       - static:/backend_static
+      - logs:/logs
+
+  celery-worker:
+    build:
+      context: ./
+      dockerfile: ./backend/Dockerfile
+    env_file: ./infra/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config worker -l info
+    volumes:
+      - media:/app/media
+      - static:/backend_static
+      - logs:/logs
 
   nginx:
     build: ./infra/
     depends_on:
       - backend
+      - celery-worker
     ports:
       - 8000:80
     volumes:

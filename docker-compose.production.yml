@@ -48,7 +48,23 @@ services:
     volumes:
       - media:/app/media
       - static:/backend_static
-      - logs:/app/logs
+      - logs:/logs
+
+  celery-worker:
+    image: blakkheart/diary_backend
+    env_file: ./infra/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    command: celery -A config worker -l info
+    volumes:
+      - media:/app/media
+      - static:/backend_static
+      - logs:/logs
 
   nginx:
     image: blakkheart/diary_gateway
