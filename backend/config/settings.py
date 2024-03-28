@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 	# lib
 	"rest_framework",
 	"drf_spectacular",
+	"storages",
 	# app
 	"api.apps.ApiConfig",
 	"running.apps.RunningConfig",
@@ -108,9 +109,38 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = "/static/"
-MEDIA_URL = "/media/"
+# s3 storage settings
+IS_AWS_ACTIVE = os.getenv("IS_AWS_ACTIVE", False) == "True"
+if IS_AWS_ACTIVE is True:
+	STORAGES = {
+		"default": {
+			"BACKEND": "storages.backends.s3.S3Storage",
+			"OPTIONS": {
+				"bucket_name": "running-app",
+				"location": "media",
+			},
+		},
+		"staticfiles": {
+			"BACKEND": "django.core.files.storage.FileSystemStorage",
+			"OPTIONS": {
+				"location": "/static",
+				"base_url": "/static/",
+			},
+		},
+	}
+	AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+	AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+	AWS_S3_ACCESS_KEY_ID = os.getenv("AWS_S3_ACCESS_KEY_ID")
+	AWS_S3_SECRET_ACCESS_KEY = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
+	AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION")
+
+	MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
+else:
+	MEDIA_URL = "/media/"
+
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+STATIC_URL = "/static/"
 if DEBUG:
 	STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 else:
