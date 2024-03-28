@@ -185,7 +185,7 @@ class HistorySerializer(serializers.ModelSerializer):
 		return data
 
 	def validate_motivation_phrase(self, value: str) -> str:
-		if not MotivationalPhrase.objects.filter(text=value).count():
+		if not MotivationalPhrase.objects.filter(text=value).exists():
 			raise serializers.ValidationError("Данной мотивационной фразы не существует")
 		return value
 
