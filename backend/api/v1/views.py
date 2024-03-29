@@ -251,16 +251,22 @@ class UpdateView(APIView):
 		user.save()
 		History.objects.filter(user_id=user).delete()
 
+	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
+		"""Обновзляет timezone ползователя."""
+		if user.timezone == user_timezone:
+			return
+		user.timezone = user_timezone
+
 	def post(self, request: Request, *args, **kwargs) -> Response:
 		user_timezone = request.data.get("timezone")
 		user = request.user
 		if not user_timezone:
 			return Response({"timezone": "Часовой пояс пользователя обязателен."}, status=status.HTTP_400_BAD_REQUEST)
-		user.timezone = user_timezone
-		user.save()
+		self._update_user_timezone_data(user, user_timezone)
 
 		response = Response({"updated": True}, status=status.HTTP_200_OK)
 		if not user.last_completed_training:
+			user.save()
 			return response
 
 		date_activity = self._get_date_activity(user)
@@ -268,6 +274,7 @@ class UpdateView(APIView):
 		date_day_ago = timezone.localtime() - timedelta(days=1)
 		days_missed = (date_day_ago.date() - date_activity.date()).days
 		if days_missed <= 0:
+			user.save()
 			return response
 
 		if amount_of_skips >= days_missed:
