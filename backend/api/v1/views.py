@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, Exists, F, OuterRef, Q, When
+from django.db.models import Case, DateTimeField, Exists, F, OuterRef, When
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -123,21 +123,14 @@ class TrainingView(generics.ListAPIView):
 		и флагом завершения тренировки.
 		"""
 		user = self.request.user
+		sub_queryset = History.objects.filter(user_id=user).values("training_day")
 		queryset = (
-			self.queryset.annotate(
-				completed=Case(
-					When(
-						Q(historis__training_day=F("day_number")) & Q(historis__user_id=user),
-						then=True,
-					),
-					default=False,
-					output_field=BooleanField(),
-				)
-			)
+			self.queryset.annotate(completed=Exists(sub_queryset.filter(training_day=OuterRef("day_number"))))
 			.all()
 			.order_by("day_number")
 		)
 		dynamic_motivation_phrase = motivation_phrase.get_dynamic_list_motivation_phrase(user)
+		print(len(queryset))
 		for i in range(len(queryset)):
 			queryset[i].motivation_phrase = dynamic_motivation_phrase[i]
 		return queryset
