@@ -144,22 +144,6 @@ paths:
       responses:
         '200':
           description: No response body
-  /api/v1/skip/:
-    get:
-      operationId: api_v1_skip_retrieve
-      description: Обновляет заморозки у пользователя
-      summary: Обновляет заморозки у пользователя
-      tags:
-      - Run
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                updated: true
-          description: ''
   /api/v1/token/refresh/:
     post:
       operationId: api_v1_token_refresh_create
@@ -204,6 +188,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Training'
+          description: ''
+  /api/v1/update/:
+    post:
+      operationId: api_v1_update_create
+      description: Обновляет заморозки у пользователя и сохраняет часовой пояс
+      summary: Обновляет заморозки у пользователя и сохраняет часовой пояс
+      tags:
+      - System
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                updated: true
           description: ''
   /api/v1/user/:
     post:
@@ -430,11 +430,12 @@ components:
           nullable: true
         amount_of_skips:
           type: integer
-          readOnly: true
         avatar:
           type: string
           format: uri
           nullable: true
+        timezone:
+          type: string
     Training:
       type: object
       description: Сериализатор тренировок.
@@ -491,13 +492,13 @@ components:
           nullable: true
         amount_of_skips:
           type: integer
-          readOnly: true
         avatar:
           type: string
           format: uri
           nullable: true
+        timezone:
+          type: string
       required:
-      - amount_of_skips
       - email
       - last_completed_training
   securitySchemes:

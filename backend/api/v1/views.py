@@ -220,14 +220,14 @@ class HistoryView(generics.ListCreateAPIView):
 
 
 @extend_schema_view(
-	get=extend_schema(
+	post=extend_schema(
 		responses={200: {"updated": True}},
-		summary="Обновляет заморозки у пользователя",
-		description="Обновляет заморозки у пользователя",
-		tags=("Run",),
+		summary="Обновляет заморозки у пользователя и сохраняет часовой пояс",
+		description="Обновляет заморозки у пользователя и сохраняет часовой пояс",
+		tags=("System",),
 	),
 )
-class SkipView(APIView):
+class UpdateView(APIView):
 	def _get_date_activity(self, user: ClassUser) -> datetime:
 		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
 		date_last_skips = user.date_last_skips
@@ -251,9 +251,15 @@ class SkipView(APIView):
 		user.save()
 		History.objects.filter(user_id=user).delete()
 
-	def get(self, request: Request, *args, **kwargs) -> Response:
+	def post(self, request: Request, *args, **kwargs) -> Response:
+		user_timezone = request.data.get("timezone")
 		user = request.user
-		response = Response({"updated": True})
+		if not user_timezone:
+			return Response({"timezone": "Часовой пояс пользователя обязателен."}, status=status.HTTP_400_BAD_REQUEST)
+		user.timezone = user_timezone
+		user.save()
+
+		response = Response({"updated": True}, status=status.HTTP_200_OK)
 		if not user.last_completed_training:
 			return response
 

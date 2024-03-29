@@ -28,8 +28,9 @@ class UserSerializer(serializers.ModelSerializer):
 		source="last_completed_training.training_day.day_number", read_only=True
 	)
 	date_last_skips = serializers.DateTimeField(allow_null=True, required=False)
-	amount_of_skips = serializers.IntegerField(read_only=True)
+	amount_of_skips = serializers.IntegerField(required=False)
 	avatar = Base64ImageField(allow_null=True, required=False)
+	timezone = serializers.CharField(required=False)
 
 	class Meta:
 		model = User
@@ -43,6 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
 			"date_last_skips",
 			"amount_of_skips",
 			"avatar",
+			"timezone",
 		)
 
 	def create(self, validated_data: dict) -> ClassUser:
