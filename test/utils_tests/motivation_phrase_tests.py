@@ -4,7 +4,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from freezegun import freeze_time
-from running.models import Day, History, MotivationalPhrase  # noqa
 
 from backend.utils.motivation_phrase import (
 	get_count_training_last_week,
@@ -13,6 +12,7 @@ from backend.utils.motivation_phrase import (
 	get_rest_phrases_to_replace,
 	replaces_phrases,
 )
+from running.models import Day, History, MotivationalPhrase  # noqa
 
 User = get_user_model()
 

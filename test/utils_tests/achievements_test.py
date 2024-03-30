@@ -2,9 +2,9 @@ from datetime import timedelta
 
 import pytest
 from django.utils import timezone
-from running.models import Day, History  # noqa
 
 from backend.utils.achievements import traveler
+from running.models import Day, History  # noqa
 
 
 @pytest.fixture

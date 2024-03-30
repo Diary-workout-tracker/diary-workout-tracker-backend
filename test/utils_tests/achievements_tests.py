@@ -3,9 +3,9 @@ from datetime import timedelta
 import pytest
 from django.core.management import call_command
 from django.utils import timezone
-from running.models import Achievement, Day, History  # noqa
 
 from backend.utils.achievements import AchievementUpdater, equator, n_km_club
+from running.models import Achievement, Day, History  # noqa
 
 
 @pytest.fixture
