@@ -140,7 +140,7 @@ if IS_AWS_ACTIVE:
 
 	MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
 else:
-	MEDIA_URL = f"{os.getenv('CSRF_TRUSTED_ORIGINS')}/media/"
+	MEDIA_URL = "/media/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
