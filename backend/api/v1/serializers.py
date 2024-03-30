@@ -21,13 +21,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 	email = serializers.EmailField(validators=(CustomUniqueValidator(queryset=User.objects.all()),))
 	name = serializers.CharField(required=False)
-	gender = serializers.ChoiceField(choices=GENDER_CHOICES, allow_blank=True, required=False)
+	gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
 	weight_kg = serializers.FloatField(allow_null=True, required=False)
 	last_completed_training = serializers.IntegerField(
 		source="last_completed_training.training_day.day_number", read_only=True
 	)
-	date_last_skips = serializers.DateTimeField(allow_null=True, required=False)
+	date_last_skips = serializers.DateTimeField(required=False)
 	amount_of_skips = serializers.IntegerField(required=False)
 	avatar = Base64ImageField(allow_null=True, required=False)
 	timezone = serializers.CharField(required=False)
