@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 
+from api.v1.tasks import send_code
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-
-from api.v1.tasks import send_code
 
 
 class MailSender(ABC):

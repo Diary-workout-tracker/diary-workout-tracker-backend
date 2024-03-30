@@ -164,6 +164,7 @@ REST_FRAMEWORK = {
 		"user": "10000/day",
 		"anon": "1000/day",
 	},
+	"EXCEPTION_HANDLER": "api.v1.exceptions.custom_exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {

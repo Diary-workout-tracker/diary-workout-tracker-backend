@@ -1,11 +1,11 @@
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.conf import settings
 from django.core.handlers.wsgi import WSGIRequest
 from django.utils.translation import gettext_lazy as _
-from .models import User as ClassUser
 
+from .models import User as ClassUser
 
 admin.site.unregister(Group)
 
