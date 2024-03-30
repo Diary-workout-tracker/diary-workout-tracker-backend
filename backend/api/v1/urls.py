@@ -8,7 +8,7 @@ from .views import (
 	MyInfoView,
 	RegisterUserView,
 	ResendCodeView,
-	SkipView,
+	UpdateView,
 	TokenRefreshView,
 	TrainingView,
 )
@@ -24,5 +24,5 @@ urlpatterns = (
 	path("resend_code/", ResendCodeView.as_view(), name="code-resend"),
 	path("training/", TrainingView.as_view(), name="training"),
 	path("history/", HistoryView.as_view(), name="history"),
-	path("skip/", SkipView.as_view(), name="skip"),
+	path("update/", UpdateView.as_view(), name="update"),
 )

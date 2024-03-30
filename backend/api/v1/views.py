@@ -213,21 +213,19 @@ class HistoryView(generics.ListCreateAPIView):
 
 
 @extend_schema_view(
-	get=extend_schema(
+	post=extend_schema(
 		responses={200: {"updated": True}},
-		summary="Обновляет заморозки у пользователя",
-		description="Обновляет заморозки у пользователя",
-		tags=("Run",),
+		summary="Обновляет заморозки у пользователя и сохраняет часовой пояс",
+		description="Обновляет заморозки у пользователя и сохраняет часовой пояс",
+		tags=("System",),
 	),
 )
-class SkipView(APIView):
+class UpdateView(APIView):
 	def _get_date_activity(self, user: ClassUser) -> datetime:
 		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
-		date_last_skips = user.date_last_skips
-		date_activity = user.last_completed_training.training_start
-		if date_last_skips:
-			date_activity = date_activity if date_activity > date_last_skips else date_last_skips
-		return date_activity
+		return max(
+			[date for date in [user.date_last_skips, user.last_completed_training.training_start] if date is not None]
+		)
 
 	def _updates_skip_data(
 		self, user: ClassUser, amount_of_skips: int, days_missed: int, date_day_ago: datetime
@@ -244,10 +242,22 @@ class SkipView(APIView):
 		user.save()
 		History.objects.filter(user_id=user).delete()
 
-	def get(self, request: Request, *args, **kwargs) -> Response:
+	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
+		"""Обновзляет timezone ползователя."""
+		if user.timezone == user_timezone:
+			return
+		user.timezone = user_timezone
+		user.save()
+
+	def post(self, request: Request, *args, **kwargs) -> Response:
+		user_timezone = request.data.get("timezone")
 		user = request.user
-		response = Response({"updated": True})
+		if not user_timezone:
+			return Response({"timezone": "Часовой пояс пользователя обязателен."}, status=status.HTTP_400_BAD_REQUEST)
+
+		response = Response({"updated": True}, status=status.HTTP_200_OK)
 		if not user.last_completed_training:
+			self._update_user_timezone_data(user, user_timezone)
 			return response
 
 		date_activity = self._get_date_activity(user)
@@ -255,8 +265,10 @@ class SkipView(APIView):
 		date_day_ago = timezone.localtime() - timedelta(days=1)
 		days_missed = (date_day_ago.date() - date_activity.date()).days
 		if days_missed <= 0:
+			self._update_user_timezone_data(user, user_timezone)
 			return response
 
+		user.timezone = user_timezone
 		if amount_of_skips >= days_missed:
 			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
 		else:

@@ -22,7 +22,16 @@ class CustomUserAdmin(admin.ModelAdmin):
 		(_("Личная информация"), {"fields": ("name",)}),
 		(
 			_("Кастомные поля"),
-			{"fields": ("last_completed_training", "date_last_skips", "amount_of_skips", "avatar", "total_m_run")},
+			{
+				"fields": (
+					"last_completed_training",
+					"date_last_skips",
+					"amount_of_skips",
+					"avatar",
+					"total_m_run",
+					"timezone",
+				)
+			},
 		),
 	)
 	add_fieldsets = (
@@ -45,6 +54,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 		readonly_fields = (
 			"last_completed_training",
 			"date_last_skips",
+			"timezone",
 			"email",
 		)
 	ordering = ("email",)
