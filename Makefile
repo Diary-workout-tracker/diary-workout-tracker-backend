@@ -20,13 +20,13 @@ loadachievment-prod: # Загруска текстур ачивок
 	docker compose exec backend poetry run python manage.py loaddata fixture/achievements_fixture.json
 
 project-init-prod: # Инициализировать проект
-	make clear-volumes-prod start-containers-prod migrate-prod collectstatic-prod createsuperuser-prod loadachievment-prod:
+	make clear-volumes-prod start-containers-prod migrate-prod collectstatic-prod createsuperuser-prod loadachievment-prod
 
 project-start-prod: # Запустить проект
 	make start-containers
 
 project-stop-prod: # Остановить проект
-	docker compose -f docker-compose.yml down;
+	docker compose -f docker-compose.yml down
 
 
 # Команды для dev
@@ -38,7 +38,7 @@ start-containers-dev: # Запуск контейнеров
 	@sleep 3;
 
 start-server-dev: # Запуск сервера
-	poetry run python backend/manage.py runserver;
+	poetry run python backend/manage.py runserver
 
 start-celery-dev: # Запуск Celery
 	cd backend/ && celery -A config worker -l info --without-gossip --without-mingle --without-heartbeat -Ofair --pool=solo
@@ -59,4 +59,4 @@ project-start-dev: # Запустить проект
 	make start-containers-dev start-server-dev
 
 containers-stop-dev: # Остановить контейнеры
-	docker compose -f docker-compose.dev.yml  --env-file ./infra/.env down;
+	docker compose -f docker-compose.dev.yml  --env-file ./infra/.env down

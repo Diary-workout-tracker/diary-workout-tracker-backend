@@ -4,7 +4,7 @@ import pytest
 from django.core.management import call_command
 from django.utils import timezone
 
-from backend.utils.achievements import AchievementUpdater, equator, n_km_club
+from backend.utils.achievements import AchievementUpdater, equator, n_km_club, traveler
 from running.models import Achievement, Day, History  # noqa
 
 
@@ -81,3 +81,19 @@ def test_all_goblet_achievements_are_received_on_last_training(history, user, lo
 	updater.update_achievements()
 	for km_achievement_id in goblet_achievement_ids:
 		assert Achievement(id=km_achievement_id) in updater.new_achievements
+
+
+@pytest.mark.django_db
+def test_user_1_cities_per_training(user, history):
+	user.last_completed_training = history
+	user.save()
+	assert traveler(user) is False
+
+
+@pytest.mark.django_db
+def test_user_3_cities_per_training(user, history):
+	history.cities = ["Moscow", "St. Petersburg", "Karaganda"]
+	history.save()
+	user.last_completed_training = history
+	user.save()
+	assert traveler(user) is True

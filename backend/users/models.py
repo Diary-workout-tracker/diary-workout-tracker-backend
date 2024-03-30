@@ -33,6 +33,7 @@ class User(AbstractUser):
 	)
 	avatar = models.ImageField(_("Аватар"), upload_to="avatars/", null=True, blank=True)
 	total_m_run = models.IntegerField(_("Всего пробежал метров"), default=0)
+	timezone = models.CharField(_("Часовой пояс пользователя"), max_length=100, null=True, blank=True)
 	objects = CustomUserManager()
 
 	class Meta:
