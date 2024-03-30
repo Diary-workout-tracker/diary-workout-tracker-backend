@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from distutils.util import strtobool
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -15,11 +16,14 @@ load_dotenv(path_to_env)
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 
-DEBUG = os.getenv("DEBUG", default=False)
+DEBUG = strtobool(os.getenv("DEBUG", default="False"))
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
 
 CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS", default="http://127.0.0.1")]
+
+if not DEBUG:
+	SECURE_SSL_REDIRECT = True
 
 
 INSTALLED_APPS = [
@@ -110,8 +114,8 @@ USE_TZ = True
 
 
 # s3 storage settings
-IS_AWS_ACTIVE = os.getenv("IS_AWS_ACTIVE", False) == "True"
-if IS_AWS_ACTIVE is True:
+IS_AWS_ACTIVE = strtobool(os.getenv("IS_AWS_ACTIVE", "False"))
+if IS_AWS_ACTIVE:
 	STORAGES = {
 		"default": {
 			"BACKEND": "storages.backends.s3.S3Storage",
@@ -136,7 +140,7 @@ if IS_AWS_ACTIVE is True:
 
 	MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
 else:
-	MEDIA_URL = "/media/"
+	MEDIA_URL = f"{os.getenv('CSRF_TRUSTED_ORIGINS')}/media/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
