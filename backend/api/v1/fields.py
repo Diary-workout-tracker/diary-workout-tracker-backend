@@ -1,8 +1,8 @@
 import base64
 import datetime
 
-from django.core.files.base import ContentFile
 from django.conf import settings
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 

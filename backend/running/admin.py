@@ -1,9 +1,9 @@
-import re
 import json
+import re
 
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.messages.storage import default_storage
-from django.conf import settings
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.html import format_html
@@ -11,7 +11,6 @@ from django.utils.translation import gettext_lazy as _
 
 from .forms import DayForm, HistoryForm
 from .models import Achievement, Day, History, MotivationalPhrase, UserAchievement
-
 
 DEBUG = settings.DEBUG
 

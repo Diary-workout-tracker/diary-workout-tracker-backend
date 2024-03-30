@@ -3,6 +3,7 @@ from collections import OrderedDict
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from running.models import Achievement, Day, History, MotivationalPhrase
 from users.constants import GENDER_CHOICES
 from users.models import User as ClassUser

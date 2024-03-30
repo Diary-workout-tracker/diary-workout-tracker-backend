@@ -32,6 +32,7 @@ exclude = [
 target-version = "py39"
 line-length = 120
 lint.ignore = ["D"]
+lint.isort.known-first-party = ["api", "core", "users", "running", "utils", "config"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -43,6 +44,7 @@ docstring-code-format = true
 pythonpath = "backend"
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = "tests.py test_*.py *_tests.py"
+
 
 
 [tool.poetry.dependencies]
