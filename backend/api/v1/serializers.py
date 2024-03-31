@@ -10,7 +10,7 @@ from users.models import User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
 
-from .constants import FORMAT_DATE, FORMAT_TIME
+from .constants import FORMAT_DATE, FORMAT_TIME, FORMAT_DATETIME
 from .fields import Base64ImageField
 from .validators import CustomUniqueValidator
 
@@ -177,6 +177,15 @@ class HistorySerializer(serializers.ModelSerializer):
 			"avg_speed": {"min_value": 0},
 			"route": {"required": False},
 		}
+
+	def to_representation(self, instance):
+		representation = super().to_representation(instance)
+		training_start = instance.training_start
+		representation["training_start"] = [
+			training_start.strftime(FORMAT_DATE),
+			training_start.strftime(FORMAT_DATETIME),
+		]
+		return representation
 
 	def validate(self, data: OrderedDict) -> OrderedDict:
 		if data["training_start"] >= data["training_end"]:
