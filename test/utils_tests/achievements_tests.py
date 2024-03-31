@@ -65,6 +65,7 @@ def test_all_km_achievements_are_received_on_single_big_distance(user, history_f
 	km_achievement_ids = 4, 5, 6, 7, 8, 9, 10, 11
 	user.total_m_run = 1_000_000
 	user.last_completed_training = history_first
+	user.save()
 	updater = AchievementUpdater(user, {})
 	for km_achievement_id in km_achievement_ids:
 		assert Achievement(id=km_achievement_id) not in updater.new_achievements
