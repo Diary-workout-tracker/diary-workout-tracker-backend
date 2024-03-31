@@ -189,7 +189,7 @@ class HistorySerializer(serializers.ModelSerializer):
 	def _validate_date(self, value: datetime, name_field: str) -> datetime:
 		last_completed_training = self.context["request"].user.last_completed_training
 		if last_completed_training and value.date() <= getattr(last_completed_training, name_field).date():
-			raise serializers.ValidationError("Дата должны быть больше прошлой тренировки.")
+			raise serializers.ValidationError("Дата должна быть больше прошлой тренировки.")
 		return value
 
 	def validate_training_start(self, value: datetime) -> datetime:
