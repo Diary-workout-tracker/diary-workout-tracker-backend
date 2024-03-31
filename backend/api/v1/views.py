@@ -194,16 +194,13 @@ class HistoryView(generics.ListCreateAPIView):
 		return serializer.save()
 
 	def create(self, request: Request, *args, **kwargs) -> Response:
-		achievements = request.data.pop("achievements", None)
-		HistorySerializer.validate_achievements(self, achievements)
-		# XXX Тут можно начать просчёт ачивок.
-
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		history = self.perform_create(serializer)
 		self.request.user.last_completed_training = history
 		self.request.user.total_m_run += history.distance
 		self.request.user.save()
+		achievements = request.data.pop("achievements", None)  # noqa
 		headers = self.get_success_headers(serializer.data)
 
 		new_achievements = AchievementEndTrainingSerializer(

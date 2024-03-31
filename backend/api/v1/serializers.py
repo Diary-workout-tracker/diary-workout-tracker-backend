@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from datetime import datetime
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -185,14 +186,36 @@ class HistorySerializer(serializers.ModelSerializer):
 			)
 		return data
 
+	def _validate_date(self, value: datetime, name_field: str) -> datetime:
+		last_completed_training = self.context["request"].user.last_completed_training
+		if last_completed_training and value <= getattr(last_completed_training, name_field):
+			raise serializers.ValidationError("Дата и время должны быть больше прошлой тренировки.")
+		return value
+
+	def validate_training_start(self, value: datetime) -> datetime:
+		return self._validate_date(value, "training_start")
+
+	def validate_training_end(self, value: datetime) -> datetime:
+		return self._validate_date(value, "training_end")
+
 	def validate_motivation_phrase(self, value: str) -> str:
 		if not MotivationalPhrase.objects.filter(text=value).exists():
 			raise serializers.ValidationError("Данной мотивационной фразы не существует")
 		return value
 
+	def validate_training_day(self, value: Day) -> Day:
+		last_completed_training = self.context["request"].user.last_completed_training
+		if last_completed_training:
+			day_number_last_training = last_completed_training.training_day.day_number
+			if value.day_number - 1 != day_number_last_training:
+				raise serializers.ValidationError(f"День тренирвки должен быть равен {day_number_last_training+1}")
+		elif value.day_number != 1:
+			raise serializers.ValidationError("День тренирвки должен быть равен 1")
+		return value
+
 	def validate_achievements(self, value: list) -> list:
 		if value and len(value) > Achievement.objects.filter(id__in=value).count():
-			raise serializers.ValidationError({"achievements": ["Некорректные ачивки"]})
+			raise serializers.ValidationError("Некорректные ачивки")
 		return value
 
 	def get_time(self, obj: History) -> int:
