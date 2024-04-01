@@ -10,9 +10,9 @@ from users.models import User
 def tourist(user: User) -> bool:
 	"""Проверка достижения Турист."""
 	if user.last_completed_training.training_day.day_number > 1:
-		city_last_training = user.last_completed_training.cities[0]
-		city_first_training = History.objects.filter(user_id=user).order_by("training_start").first().cities[0]
-		return city_last_training == city_first_training
+		city_last_training = set(user.last_completed_training.cities)
+		city_first_training = set(History.objects.filter(user_id=user).order_by("training_start").first().cities)
+		return not city_last_training.issubset(city_first_training)
 	return False
 
 

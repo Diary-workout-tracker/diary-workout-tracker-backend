@@ -125,15 +125,32 @@ def test_tourist_one_history(user, history_first):
 
 @pytest.mark.django_db
 def test_tourist_two_history_completed(user, history, history_first):
+	history.cities = ["St. Petersburg", "Moscow"]
+	history.save()
+	history_first.cities = ["St. Petersburg"]
+	history_first.save()
 	user.last_completed_training = history
 	user.save()
+	assert tourist(user)
+	history.cities = ["St. Petersburg"]
+	history.save()
+	history_first.cities = ["Tula"]
+	history_first.save()
+	assert tourist(user)
+	history.cities = ["St. Petersburg", "Tula"]
+	history.save()
+	history_first.cities = ["St. Petersburg", "Moscow"]
+	history_first.save()
 	assert tourist(user)
 
 
 @pytest.mark.django_db
 def test_tourist_two_history_not_completed(user, history, history_first):
-	history.cities = ["Tula"]
-	history.save()
 	user.last_completed_training = history
 	user.save()
+	assert not tourist(user)
+	history.cities = ["St. Petersburg"]
+	history.save()
+	history_first.cities = ["St. Petersburg", "Moscow"]
+	history_first.save()
 	assert not tourist(user)
