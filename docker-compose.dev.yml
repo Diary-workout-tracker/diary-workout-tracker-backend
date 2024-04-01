@@ -2,6 +2,8 @@ version: '3'
 
 volumes:
   pg_data:
+  redis_data:
+  redis_conf:
 
 services:
 
@@ -18,4 +20,19 @@ services:
       retries: 3
       start_period: 3s
     ports:
-      - ${DOCKER_COMPOSER_PORT:-5432:5432}
+      - ${DOCKER_COMPOSER_PORT_DB:-5432:5432}
+
+  redis:
+    image: redis:alpine
+    env_file: ./infra/.env
+    restart: always
+    volumes:
+      - redis_data:/root/redis
+      - redis_conf:/usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    ports:
+      - ${DOCKER_COMPOSER_PORT_REDIS:-6379:6379}

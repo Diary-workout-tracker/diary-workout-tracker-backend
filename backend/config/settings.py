@@ -1,3 +1,4 @@
+from distutils.util import strtobool
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -15,7 +16,7 @@ load_dotenv(path_to_env)
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 
-DEBUG = os.getenv("DEBUG", default=False)
+DEBUG = strtobool(os.getenv("DEBUG", default="False"))
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
 
@@ -110,8 +111,8 @@ USE_TZ = True
 
 
 # s3 storage settings
-IS_AWS_ACTIVE = os.getenv("IS_AWS_ACTIVE", False) == "True"
-if IS_AWS_ACTIVE is True:
+IS_AWS_ACTIVE = strtobool(os.getenv("IS_AWS_ACTIVE", default="False"))
+if IS_AWS_ACTIVE:
 	STORAGES = {
 		"default": {
 			"BACKEND": "storages.backends.s3.S3Storage",
@@ -164,6 +165,7 @@ REST_FRAMEWORK = {
 		"user": "10000/day",
 		"anon": "1000/day",
 	},
+	"EXCEPTION_HANDLER": "api.v1.exceptions.custom_exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {
@@ -173,12 +175,24 @@ SPECTACULAR_SETTINGS = {
 	"SERVE_INCLUDE_SCHEMA": False,
 }
 
+REDIS_LOCATION = f"redis://{os.getenv('REDIS_HOST', default='localhost')}:{os.getenv('REDIS_PORT', default='6379')}"
+
+CELERY_BROKER_URL = f"{REDIS_LOCATION}/0"
+CELERY_RESULT_BACKEND = f"{REDIS_LOCATION}/0"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 5 * 60
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = os.getenv("TIME_ZONE", default="Europe/Moscow")
+
 CACHES = {
 	"default": {
-		"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-		"LOCATION": "diary-localmemcache",
+		"BACKEND": "django.core.cache.backends.redis.RedisCache",
+		"LOCATION": REDIS_LOCATION,
 	}
 }
+
 
 # 100 years token lifetime
 
@@ -202,5 +216,9 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True")
 
-
-LOGGING = LOGGING_SETTINGS
+# logging
+IS_LOGGING = strtobool(os.getenv("IS_LOGGING", default="False"))
+if IS_LOGGING:
+	LOGGING = LOGGING_SETTINGS
+else:
+	LOGGING = None

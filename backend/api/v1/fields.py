@@ -1,8 +1,9 @@
 import base64
 import datetime
+import re
 
-from django.core.files.base import ContentFile
 from django.conf import settings
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 
@@ -23,6 +24,9 @@ class Base64ImageField(serializers.ImageField):
 	def to_representation(self, value):
 		"""Возвращает полный url изображения."""
 		if value:
-			return self.context["request"].build_absolute_uri(
+			uri = self.context["request"].build_absolute_uri(
 				f"{settings.MEDIA_URL}{value}" if isinstance(value, str) else value.url
 			)
+			if set(settings.CSRF_TRUSTED_ORIGINS).issubset(("http://127.0.0.1", "http://localhost")):
+				return uri
+			return re.sub("http", "https", uri, 1)

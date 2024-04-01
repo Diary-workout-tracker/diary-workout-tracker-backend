@@ -9,6 +9,15 @@ from users.models import User
 # валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
 
 
+def tourist(user: User) -> bool:
+	"""Проверка достижения Турист."""
+	if user.last_completed_training.training_day.day_number == 1:
+		return False
+	city_last_training = set(user.last_completed_training.cities)
+	city_first_training = set(History.objects.filter(user_id=user).order_by("training_start").first().cities)
+	return not city_last_training.issubset(city_first_training)
+
+
 def traveler(user: User) -> bool:
 	"""Проверка достижения Путешественник."""
 	last_training = user.last_completed_training
@@ -88,6 +97,7 @@ VALIDATORS = {
 	15: goblet(50),
 	16: goblet(70),
 	17: goblet(100),  # Большой кубок со звездами - 100 тренировок
+	21: tourist,  # Турист
 	22: traveler,  # Путешественник
 }
 

@@ -2,6 +2,8 @@ version: '3'
 
 volumes:
   pg_data:
+  redis_data:
+  redis_conf:
   static:
   media:
   logs:
@@ -20,6 +22,18 @@ services:
       retries: 3
       start_period: 3s
 
+  redis:
+    image: redis:alpine
+    env_file: .env
+    restart: always
+    volumes:
+      - redis_data:/root/redis
+      - redis_conf:/usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
 
   backend:
     image: blakkheart/diary_backend
@@ -27,17 +41,34 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     command:
         ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi"]
     volumes:
       - media:/app/media
       - static:/backend_static
-      - logs:/app/logs
+      - logs:/logs
+
+  celery-worker:
+    image: blakkheart/diary_backend
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config worker -l info
+    volumes:
+      - media:/app/media
+      - static:/backend_static
+      - logs:/logs
 
   nginx:
     image: blakkheart/diary_gateway
     depends_on:
       - backend
+      - celery-worker
     ports:
       - 8000:80
     volumes:

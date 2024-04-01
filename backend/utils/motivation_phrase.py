@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.db.models.query import QuerySet
 from django.utils import timezone
+
 from running.models import History, MotivationalPhrase
 from users.models import User
 
