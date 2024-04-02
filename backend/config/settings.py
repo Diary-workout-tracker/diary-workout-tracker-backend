@@ -1,3 +1,4 @@
+from distutils.util import strtobool
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -15,7 +16,7 @@ load_dotenv(path_to_env)
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 
-DEBUG = os.getenv("DEBUG", default=False) == "True"
+DEBUG = strtobool(os.getenv("DEBUG", default="False"))
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
 
@@ -110,8 +111,8 @@ USE_TZ = True
 
 
 # s3 storage settings
-IS_AWS_ACTIVE = os.getenv("IS_AWS_ACTIVE", False) == "True"
-if IS_AWS_ACTIVE is True:
+IS_AWS_ACTIVE = strtobool(os.getenv("IS_AWS_ACTIVE", default="False"))
+if IS_AWS_ACTIVE:
 	STORAGES = {
 		"default": {
 			"BACKEND": "config.storage.S3MediaStorage",
@@ -171,6 +172,7 @@ REST_FRAMEWORK = {
 		"user": "10000/day",
 		"anon": "1000/day",
 	},
+	"EXCEPTION_HANDLER": "api.v1.exceptions.custom_exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {
@@ -222,8 +224,8 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True")
 
 # logging
-IS_LOGGING = os.getenv("IS_LOGGING", False) == "True"
-if IS_LOGGING is True:
+IS_LOGGING = strtobool(os.getenv("IS_LOGGING", default="False"))
+if IS_LOGGING:
 	LOGGING = LOGGING_SETTINGS
 else:
 	LOGGING = None

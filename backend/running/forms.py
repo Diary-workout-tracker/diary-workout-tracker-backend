@@ -1,12 +1,11 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from .fields import CastomJSONField
 from .models import Day, History
 from .widgets import WorkoutWidget
-from .fields import CastomJSONField
-
 
 DEBUG = settings.DEBUG
 
