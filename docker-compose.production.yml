@@ -95,7 +95,6 @@ services:
     image: blakkheart/diary_gateway
     depends_on:
       - backend
-      - celery-worker
       - minio
       - celery-worker
     ports:
