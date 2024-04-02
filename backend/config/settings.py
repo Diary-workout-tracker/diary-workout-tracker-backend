@@ -115,34 +115,41 @@ IS_AWS_ACTIVE = strtobool(os.getenv("IS_AWS_ACTIVE", default="False"))
 if IS_AWS_ACTIVE:
 	STORAGES = {
 		"default": {
-			"BACKEND": "storages.backends.s3.S3Storage",
-			"OPTIONS": {
-				"bucket_name": "running-app",
-				"location": "media",
-			},
+			"BACKEND": "config.storage.S3MediaStorage",
 		},
 		"staticfiles": {
-			"BACKEND": "django.core.files.storage.FileSystemStorage",
-			"OPTIONS": {
-				"location": "/static",
-				"base_url": "/static/",
-			},
+			"BACKEND": "config.storage.StaticS3Boto3Storage",
 		},
 	}
-	AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-	AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
-	AWS_S3_ACCESS_KEY_ID = os.getenv("AWS_S3_ACCESS_KEY_ID")
-	AWS_S3_SECRET_ACCESS_KEY = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
-	AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION")
 
-	MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
-else:
-	MEDIA_URL = "/media/"
+	STATICFILES_LOCATION = "static"
+	MEDIAFILES_LOCATION = "media"
+
+	MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER")
+	MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD")
+	MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME")
+	MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+	MINIO_ACCESS_URL = os.getenv("MINIO_ACCESS_URL")
+	MINIO_STORAGE_USE_HTTPS = os.getenv("MINIO_STORAGE_USE_HTTPS", False) == "True"
+	MINIO_S3_SECURE_URLS = os.getenv("MINIO_S3_SECURE_URLS", False) == "True"
+
+	AWS_ACCESS_KEY_ID = MINIO_ACCESS_KEY
+	AWS_SECRET_ACCESS_KEY = MINIO_SECRET_KEY
+	AWS_STORAGE_BUCKET_NAME = MINIO_BUCKET_NAME
+	AWS_S3_ENDPOINT_URL = MINIO_ENDPOINT
+	AWS_S3_FILE_OVERWRITE = os.getenv("AWS_S3_FILE_OVERWRITE", False) == "True"
+	AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION")
+	AWS_S3_USE_SSL = os.getenv("AWS_S3_USE_SSL", False) == "True"
+	AWS_S3_SECURE_URLS = os.getenv("AWS_S3_SECURE_URLS", False) == "True"
+	AWS_S3_URL_PROTOCOL = os.getenv("AWS_S3_URL_PROTOCOL", "http:")
+
+MEDIA_URL = "/media/"
+STATIC_URL = "/static/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-STATIC_URL = "/static/"
-if DEBUG:
+
+if DEBUG is True:
 	STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 else:
 	STATIC_ROOT = os.path.join(BASE_DIR, "static")
