@@ -187,7 +187,7 @@ class HistoryView(generics.ListCreateAPIView):
 
 	def get_queryset(self) -> QuerySet:
 		"""Формирует список историй тренировок пользователя."""
-		return self.request.user.user_history.all().order_by("training_day")
+		return self.request.user.user_history.order_by("training_day")
 
 	def perform_create(self, serializer: HistorySerializer) -> History:
 		"""Создаёт новую историю."""
@@ -202,7 +202,7 @@ class HistoryView(generics.ListCreateAPIView):
 		self.request.user.total_m_run += history.distance
 		self.request.user.save()
 
-		updater = AchievementUpdater(self.request.user, achievements)
+		updater = AchievementUpdater(self.request.user, achievements, history)
 		updater.update_achievements()
 		headers = self.get_success_headers(serializer.data)
 

@@ -137,7 +137,7 @@ class UserAchievement(models.Model):
 		verbose_name_plural = _("Достижения пользователей")
 
 	def __str__(self) -> str:
-		return f"{self.user_id.username} - {self.achievement_id.title}"
+		return f"{self.user_id.email} - {self.achievement_id.title}"
 
 
 class History(models.Model):

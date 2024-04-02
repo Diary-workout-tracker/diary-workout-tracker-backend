@@ -4,7 +4,8 @@ import pytest
 from django.utils import timezone
 
 from backend.utils.achievements import AchievementUpdater, equator, n_km_club, tourist, traveler
-from running.models import Achievement, Day, History  # noqa
+from backend.utils.constants import IOS_ACHIEVEMENTS
+from running.models import Achievement, Day, History, UserAchievement  # noqa
 
 
 @pytest.fixture
@@ -37,6 +38,10 @@ def history_first(user):
 		height_difference=1,
 		user_id=user,
 	)
+
+
+def achievement_by_id(_id: int):
+	return Achievement.objects.get(id=_id)
 
 
 @pytest.mark.django_db
@@ -145,3 +150,29 @@ def test_tourist_two_history_not_completed(user, history, history_first):
 	history_first.cities = ["St. Petersburg", "Moscow"]
 	history_first.save()
 	assert not tourist(user)
+
+
+@pytest.mark.django_db
+def test_query_returns_correct_achievements(history, user, load_achievement_fixtures):
+	"""Проверяет, что query вернет правильные ачивки для дальнейшей проверки.
+	А именно:
+	- в query не будет iOS-ачивок,
+	- разовые будут только в том случае, если они еще не выполнены,
+	- многократные - будут даже если они уже есть в выполненых.
+	"""
+
+	user.last_completed_training = history
+	user.save()
+	updater = AchievementUpdater(user)
+	updater._query_unfinished_achievements()
+	assert len(updater.unfinished_achievements) == len(Achievement.objects.all()) - len(IOS_ACHIEVEMENTS)
+	for ios_achievement_id in IOS_ACHIEVEMENTS:
+		assert Achievement.objects.get(id=ios_achievement_id) not in updater.unfinished_achievements
+	UserAchievement.objects.create(user_id=user, achievement_id=achievement_by_id(19))  # штормбрейкер recurring_ios
+	UserAchievement.objects.create(user_id=user, achievement_id=achievement_by_id(2))  # машина recurring_non_ios
+	UserAchievement.objects.create(user_id=user, achievement_id=achievement_by_id(20))  # пионер single_ios
+	UserAchievement.objects.create(user_id=user, achievement_id=achievement_by_id(3))  # экватор single_non_ios
+	updater._query_unfinished_achievements()
+	assert Achievement.objects.get(id=3) not in updater.unfinished_achievements
+	assert Achievement.objects.get(id=2) in updater.unfinished_achievements
+	assert len(updater.unfinished_achievements) == len(Achievement.objects.all()) - len(IOS_ACHIEVEMENTS) - 1
