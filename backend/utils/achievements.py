@@ -114,7 +114,6 @@ class AchievementUpdater:
 		self._ios_achievements = [
 			Achievement.objects.get(id=int(ios_achievement)) for ios_achievement in ios_achievements
 		]
-		print(self._ios_achievements)
 		self._new_achievements = []
 		self._unfinished_achievements = None
 
