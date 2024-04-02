@@ -132,7 +132,6 @@ class TrainingView(generics.ListAPIView):
 			.order_by("day_number")
 		)
 		dynamic_motivation_phrase = motivation_phrase.get_dynamic_list_motivation_phrase(user)
-		print(len(queryset))
 		for i in range(len(queryset)):
 			queryset[i].motivation_phrase = dynamic_motivation_phrase[i]
 		return queryset
@@ -220,11 +219,12 @@ class HistoryView(generics.ListCreateAPIView):
 	),
 )
 class UpdateView(APIView):
-	def _get_date_activity(self, user: ClassUser) -> datetime:
+	def _get_date_activity(self, user: ClassUser, user_timezone: str) -> datetime:
 		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
-		return max(
+		date_activity = max(
 			[date for date in [user.date_last_skips, user.last_completed_training.training_start] if date is not None]
 		)
+		return date_activity.astimezone(pytz.timezone(user_timezone))
 
 	def _updates_skip_data(
 		self, user: ClassUser, amount_of_skips: int, days_missed: int, date_day_ago: datetime
@@ -242,7 +242,7 @@ class UpdateView(APIView):
 		History.objects.filter(user_id=user).delete()
 
 	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
-		"""Обновзляет timezone ползователя."""
+		"""Обновляет timezone ползователя."""
 		if user.timezone == user_timezone:
 			return
 		user.timezone = user_timezone
@@ -259,9 +259,9 @@ class UpdateView(APIView):
 			self._update_user_timezone_data(user, user_timezone)
 			return response
 
-		date_activity = self._get_date_activity(user)
+		date_activity = self._get_date_activity(user, user_timezone)
 		amount_of_skips = user.amount_of_skips
-		date_day_ago = timezone.localtime(timezone=pytz.timezone(user.timezone)) - timedelta(days=1)
+		date_day_ago = timezone.localtime(timezone=pytz.timezone(user_timezone)) - timedelta(days=1)
 		days_missed = (date_day_ago.date() - date_activity.date()).days
 		if days_missed <= 0:
 			self._update_user_timezone_data(user, user_timezone)

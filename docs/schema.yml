@@ -428,8 +428,6 @@ components:
           type: string
           format: uri
           nullable: true
-        timezone:
-          type: string
     Training:
       type: object
       description: Сериализатор тренировок.
@@ -487,8 +485,6 @@ components:
           type: string
           format: uri
           nullable: true
-        timezone:
-          type: string
       required:
       - email
       - last_completed_training
