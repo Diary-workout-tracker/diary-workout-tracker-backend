@@ -1,10 +1,21 @@
+from datetime import timedelta
 from functools import partial
 
-from running.models import Achievement, UserAchievement
+from django.utils import timezone
+from running.models import Achievement, UserAchievement, History
 from users.models import User
 
 # def equator(x): return x.user_history.last().training_day == 50
 # валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
+
+
+def tourist(user: User) -> bool:
+	"""Проверка достижения Турист."""
+	if user.last_completed_training.training_day.day_number == 1:
+		return False
+	city_last_training = set(user.last_completed_training.cities)
+	city_first_training = set(History.objects.filter(user_id=user).order_by("training_start").first().cities)
+	return not city_last_training.issubset(city_first_training)
 
 
 def traveler(user: User) -> bool:
@@ -21,6 +32,27 @@ def equator(user: User) -> bool:
 	if last_training is None:
 		return False
 	return last_training.training_day.day_number == 50
+
+
+def get_count_training_current_week(user: User) -> int:
+	"""Возвращает количество пройденных тренировок на текущей неделе."""
+	date_now = timezone.localtime()
+	date_now_number_day_week = date_now.weekday()
+	date_start_current_week = (date_now - timedelta(days=date_now_number_day_week)).replace(
+		hour=0, minute=0, second=0, microsecond=0
+	)
+
+	return History.objects.filter(user_id=user, training_start__range=[date_start_current_week, date_now]).count()
+
+
+def persistent(user: User) -> bool:
+	"""Проверка достижения Упорный."""
+	return get_count_training_current_week(user) == 4
+
+
+def machine(user: User) -> bool:
+	"""Проверка достижения Машина."""
+	return get_count_training_current_week(user) == 5
 
 
 def validate_n_km_club(km_club_amount: int, user: User) -> bool:
@@ -48,6 +80,8 @@ def goblet(amount_of_trainings: int) -> callable:
 
 
 VALIDATORS = {
+	1: persistent,  # Упорный
+	2: machine,  # Машина
 	3: equator,  # Экватор
 	4: n_km_club(20),  # Клуб N км.
 	5: n_km_club(50),
@@ -63,6 +97,7 @@ VALIDATORS = {
 	15: goblet(50),
 	16: goblet(70),
 	17: goblet(100),  # Большой кубок со звездами - 100 тренировок
+	21: tourist,  # Турист
 	22: traveler,  # Путешественник
 }
 
