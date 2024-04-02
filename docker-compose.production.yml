@@ -97,6 +97,7 @@ services:
       - backend
       - celery-worker
       - minio
+      - celery-worker
     ports:
       - 8000:80
     volumes:

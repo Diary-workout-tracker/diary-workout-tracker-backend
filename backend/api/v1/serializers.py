@@ -1,15 +1,17 @@
 from collections import OrderedDict
+from datetime import datetime
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from running.models import Achievement, Day, History, MotivationalPhrase
 from users.constants import GENDER_CHOICES
 from users.models import User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
 
-from .constants import FORMAT_DATE, FORMAT_TIME
+from .constants import FORMAT_DATE, FORMAT_TIME, FORMAT_DATETIME
 from .fields import Base64ImageField
 from .validators import CustomUniqueValidator
 
@@ -21,15 +23,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 	email = serializers.EmailField(validators=(CustomUniqueValidator(queryset=User.objects.all()),))
 	name = serializers.CharField(required=False)
-	gender = serializers.ChoiceField(choices=GENDER_CHOICES, allow_blank=True, required=False)
+	gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
 	weight_kg = serializers.FloatField(allow_null=True, required=False)
 	last_completed_training = serializers.IntegerField(
 		source="last_completed_training.training_day.day_number", read_only=True
 	)
-	date_last_skips = serializers.DateTimeField(allow_null=True, required=False)
-	amount_of_skips = serializers.IntegerField(read_only=True)
+	date_last_skips = serializers.DateTimeField(required=False)
+	amount_of_skips = serializers.IntegerField(required=False)
 	avatar = Base64ImageField(allow_null=True, required=False)
+	timezone = serializers.CharField(required=False)
 
 	class Meta:
 		model = User
@@ -43,6 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
 			"date_last_skips",
 			"amount_of_skips",
 			"avatar",
+			"timezone",
 		)
 
 	def create(self, validated_data: dict) -> ClassUser:
@@ -175,6 +179,15 @@ class HistorySerializer(serializers.ModelSerializer):
 			"route": {"required": False},
 		}
 
+	def to_representation(self, instance):
+		representation = super().to_representation(instance)
+		training_start = instance.training_start
+		representation["training_start"] = [
+			training_start.strftime(FORMAT_DATE),
+			training_start.strftime(FORMAT_DATETIME),
+		]
+		return representation
+
 	def validate(self, data: OrderedDict) -> OrderedDict:
 		if data["training_start"] >= data["training_end"]:
 			raise serializers.ValidationError(
@@ -182,14 +195,36 @@ class HistorySerializer(serializers.ModelSerializer):
 			)
 		return data
 
+	def _validate_date(self, value: datetime, name_field: str) -> datetime:
+		last_completed_training = self.context["request"].user.last_completed_training
+		if last_completed_training and value.date() <= getattr(last_completed_training, name_field).date():
+			raise serializers.ValidationError("Дата должна быть больше прошлой тренировки.")
+		return value
+
+	def validate_training_start(self, value: datetime) -> datetime:
+		return self._validate_date(value, "training_start")
+
+	def validate_training_end(self, value: datetime) -> datetime:
+		return self._validate_date(value, "training_end")
+
 	def validate_motivation_phrase(self, value: str) -> str:
 		if not MotivationalPhrase.objects.filter(text=value).exists():
 			raise serializers.ValidationError("Данной мотивационной фразы не существует")
 		return value
 
+	def validate_training_day(self, value: Day) -> Day:
+		last_completed_training = self.context["request"].user.last_completed_training
+		if last_completed_training:
+			day_number_last_training = last_completed_training.training_day.day_number
+			if value.day_number - 1 != day_number_last_training:
+				raise serializers.ValidationError(f"День тренирвки должен быть равен {day_number_last_training+1}")
+		elif value.day_number != 1:
+			raise serializers.ValidationError("День тренирвки должен быть равен 1")
+		return value
+
 	def validate_achievements(self, value: list) -> list:
 		if value and len(value) > Achievement.objects.filter(id__in=value).count():
-			raise serializers.ValidationError({"achievements": ["Некорректные ачивки"]})
+			raise serializers.ValidationError("Некорректные ачивки")
 		return value
 
 	def get_time(self, obj: History) -> int:

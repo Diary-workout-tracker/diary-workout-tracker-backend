@@ -1,11 +1,11 @@
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.conf import settings
 from django.core.handlers.wsgi import WSGIRequest
 from django.utils.translation import gettext_lazy as _
-from .models import User as ClassUser
 
+from .models import User as ClassUser
 
 admin.site.unregister(Group)
 
@@ -22,7 +22,16 @@ class CustomUserAdmin(admin.ModelAdmin):
 		(_("Личная информация"), {"fields": ("name",)}),
 		(
 			_("Кастомные поля"),
-			{"fields": ("last_completed_training", "date_last_skips", "amount_of_skips", "avatar", "total_m_run")},
+			{
+				"fields": (
+					"last_completed_training",
+					"date_last_skips",
+					"amount_of_skips",
+					"avatar",
+					"total_m_run",
+					"timezone",
+				)
+			},
 		),
 	)
 	add_fieldsets = (
@@ -45,6 +54,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 		readonly_fields = (
 			"last_completed_training",
 			"date_last_skips",
+			"timezone",
 			"email",
 		)
 	ordering = ("email",)
