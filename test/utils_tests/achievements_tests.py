@@ -1,19 +1,10 @@
 from datetime import timedelta
 
 import pytest
-from django.core.management import call_command
 from django.utils import timezone
 
 from backend.utils.achievements import AchievementUpdater, equator, n_km_club, tourist, traveler
 from running.models import Achievement, Day, History  # noqa
-
-
-@pytest.fixture
-def load_achievement_fixtures():
-	call_command(
-		"loaddata",
-		"backend/fixture/achievements_fixture.json",
-	)
 
 
 @pytest.fixture

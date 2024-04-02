@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -54,3 +55,11 @@ def achievement_to_user(user, achievements) -> UserAchievement:
 		achievement_date=timezone.localtime(),
 	)
 	return to_user
+
+
+@pytest.fixture
+def load_achievement_fixtures():
+	call_command(
+		"loaddata",
+		"backend/fixture/achievements_fixture.json",
+	)

@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from running.models import Achievement, History, UserAchievement
 from users.models import User
+from utils.constants import IOS_ACHIEVEMENTS
 
 
 def tourist(user: User) -> bool:
@@ -111,9 +112,8 @@ class AchievementUpdater:
 
 	def __init__(self, user, ios_achievements: List[int] = None) -> None:
 		self._user = user
-		self._ios_achievements = [
-			Achievement.objects.get(id=int(ios_achievement)) for ios_achievement in ios_achievements
-		]
+		ios_int_ids = [int(ios_achievement) for ios_achievement in ios_achievements]
+		self._new_ios_achievements = [Achievement.objects.get(id=_id) for _id in ios_int_ids if _id in IOS_ACHIEVEMENTS]
 		self._new_achievements = []
 		self._unfinished_achievements = None
 
@@ -140,8 +140,8 @@ class AchievementUpdater:
 
 	def _check_for_new_ios_achievements(self):
 		"""Добавление внешних достиженией"""
-		if self._ios_achievements is not None:
-			self._new_achievements.extend(self._ios_achievements)
+		if self._new_ios_achievements is not None:
+			self._new_achievements.extend(self._new_ios_achievements)
 
 	def _query_unfinished_achievements(self):
 		"""Извлечение неполученных ачивок"""
