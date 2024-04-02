@@ -152,6 +152,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 REST_FRAMEWORK = {
+	"DATETIME_INPUT_FORMATS": ["%Y-%m-%d %H:%M:%S"],
 	"DEFAULT_PERMISSION_CLASSES": [
 		"rest_framework.permissions.IsAuthenticated",
 	],

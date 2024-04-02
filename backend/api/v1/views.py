@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import pytz
 
 from django.contrib.auth import get_user_model
 from django.db.models import Case, DateTimeField, Exists, F, OuterRef, When
@@ -263,7 +264,7 @@ class UpdateView(APIView):
 
 		date_activity = self._get_date_activity(user)
 		amount_of_skips = user.amount_of_skips
-		date_day_ago = timezone.localtime() - timedelta(days=1)
+		date_day_ago = timezone.localtime(timezone=pytz.timezone(user.timezone)) - timedelta(days=1)
 		days_missed = (date_day_ago.date() - date_activity.date()).days
 		if days_missed <= 0:
 			self._update_user_timezone_data(user, user_timezone)

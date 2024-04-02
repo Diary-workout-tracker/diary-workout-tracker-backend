@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import pytz
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -181,9 +182,10 @@ class HistorySerializer(serializers.ModelSerializer):
 	def to_representation(self, instance):
 		representation = super().to_representation(instance)
 		training_start = instance.training_start
+		user = self.context["request"].user
 		representation["training_start"] = [
-			training_start.strftime(FORMAT_DATE),
-			training_start.strftime(FORMAT_DATETIME),
+			training_start.astimezone(pytz.timezone(user.timezone)).strftime(FORMAT_DATE),
+			training_start.astimezone(pytz.timezone(user.timezone)).strftime(FORMAT_DATETIME),
 		]
 		return representation
 
