@@ -132,7 +132,6 @@ class TrainingView(generics.ListAPIView):
 			.order_by("day_number")
 		)
 		dynamic_motivation_phrase = motivation_phrase.get_dynamic_list_motivation_phrase(user)
-		print(len(queryset))
 		for i in range(len(queryset)):
 			queryset[i].motivation_phrase = dynamic_motivation_phrase[i]
 		return queryset
@@ -210,7 +209,6 @@ class HistoryView(generics.ListCreateAPIView):
 		new_achievements = AchievementEndTrainingSerializer(
 			updater.new_achievements, many=True, context={"request": request}
 		).data  # XXX Тут в будущем вместо всех ачивок надо добавить новые.
-		print(updater.new_achievements)
 		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
 
 
