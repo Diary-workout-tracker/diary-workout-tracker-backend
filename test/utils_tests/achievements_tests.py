@@ -4,7 +4,7 @@ import pytest
 from django.core.management import call_command
 from django.utils import timezone
 
-from backend.utils.achievements import AchievementUpdater, equator, n_km_club, traveler, tourist
+from backend.utils.achievements import AchievementUpdater, equator, n_km_club, tourist, traveler
 from running.models import Achievement, Day, History  # noqa
 
 

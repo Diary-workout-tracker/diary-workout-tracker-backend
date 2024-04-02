@@ -1,12 +1,11 @@
 from datetime import timedelta
 from functools import partial
+from typing import List
 
 from django.utils import timezone
-from running.models import Achievement, UserAchievement, History
-from users.models import User
 
-# def equator(x): return x.user_history.last().training_day == 50
-# валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
+from running.models import Achievement, History, UserAchievement
+from users.models import User
 
 
 def tourist(user: User) -> bool:
@@ -110,9 +109,12 @@ class AchievementUpdater:
 	вернет список свежеполученных ачивок для дальнейшей десериализации.
 	"""
 
-	def __init__(self, user, data) -> None:
+	def __init__(self, user, ios_achievements: List[int] = None) -> None:
 		self._user = user
-		self._data = data
+		self._ios_achievements = [
+			Achievement.objects.get(id=int(ios_achievement)) for ios_achievement in ios_achievements
+		]
+		print(self._ios_achievements)
 		self._new_achievements = []
 		self._unfinished_achievements = None
 
@@ -139,10 +141,8 @@ class AchievementUpdater:
 
 	def _check_for_new_ios_achievements(self):
 		"""Добавление внешних достиженией"""
-		ios_achievements = self._data.get("achievements")
-		if ios_achievements is not None:
-			# при условии, что по этому ключу будет список с id-шнниками новых иос-ачивок. Если будут названия, надо написать сравнение с названиями из query
-			self._new_achievements.extend(ios_achievements)
+		if self._ios_achievements is not None:
+			self._new_achievements.extend(self._ios_achievements)
 
 	def _query_unfinished_achievements(self):
 		"""Извлечение неполученных ачивок"""

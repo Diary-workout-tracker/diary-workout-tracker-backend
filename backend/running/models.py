@@ -86,6 +86,12 @@ class Achievement(models.Model):
 		help_text=_("Количество заморозок за достижение."),
 		db_comment=_("Количество заморозок за достижение."),
 	)
+	recurring = models.BooleanField(
+		verbose_name=_("Повторяющееся"),
+		default=False,
+		help_text=_("Повторяющееся ли достижение"),
+		db_comment=_("Повторяющееся ли достижение"),
+	)
 
 	class Meta:
 		ordering = ("title",)

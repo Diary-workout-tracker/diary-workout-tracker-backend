@@ -8,9 +8,9 @@ from .views import (
 	MyInfoView,
 	RegisterUserView,
 	ResendCodeView,
-	UpdateView,
 	TokenRefreshView,
 	TrainingView,
+	UpdateView,
 )
 
 urlpatterns = (
