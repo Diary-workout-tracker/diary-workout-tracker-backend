@@ -135,15 +135,18 @@ class AchievementUpdater:
 		"""Обновляем БД по списку новых ачивок.
 		Логика следующая:
 		        - для одноразовых ачивок создается запись в UserAchievement
-		        - для многоразовых ачивок если записи нет, создается, если есть, обновляется дата"""
+		        - для многоразовых ачивок если записи нет, создается, если есть, пересоздается."""
 
 		if not self._new_achievements:
 			return
 		user_achievements = [
 			UserAchievement(user_id=self._user, achievement_id=achievement) for achievement in self._new_achievements
 		]
+		achievements = [ua.achievement_id for ua in user_achievements]
 		with transaction.atomic():
-			UserAchievement.objects.filter(user_id=self._user).exclude(achievement_id__recurring=False).delete()
+			UserAchievement.objects.filter(user_id=self._user, achievement_id__in=achievements).exclude(
+				achievement_id__recurring=False
+			).delete()
 			UserAchievement.objects.bulk_create(user_achievements)
 
 	def _check_for_new_backend_achievements(self):
