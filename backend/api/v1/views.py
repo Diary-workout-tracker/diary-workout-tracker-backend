@@ -201,7 +201,6 @@ class HistoryView(generics.ListCreateAPIView):
 		self.request.user.last_completed_training = history
 		self.request.user.total_m_run += history.distance
 		self.request.user.save()
-
 		updater = AchievementUpdater(self.request.user, achievements, history)
 		updater.update_achievements()
 		headers = self.get_success_headers(serializer.data)

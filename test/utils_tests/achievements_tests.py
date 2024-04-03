@@ -46,14 +46,14 @@ def achievement_by_id(_id: int):
 
 @pytest.mark.django_db
 def test_user_last_day_is_50(user, history):
-	assert equator(user) is True
+	assert equator(user, history) is True
 
 
 @pytest.mark.django_db
 def test_user_training_day_is_not_50(user, history):
 	history.training_day = Day.objects.get(day_number=30)
 	history.save()
-	assert equator(user) is False
+	assert equator(user, history) is False
 
 
 @pytest.mark.django_db
@@ -62,7 +62,7 @@ def test_all_km_achievements_are_received_on_single_big_distance(user, history_f
 	user.total_m_run = 1_000_000
 	user.last_completed_training = history_first
 	user.save()
-	updater = AchievementUpdater(user, {})
+	updater = AchievementUpdater(user, {}, user.last_completed_training)
 	for km_achievement_id in km_achievement_ids:
 		assert Achievement(id=km_achievement_id) not in updater.new_achievements
 	updater.update_achievements()
@@ -88,7 +88,7 @@ def test_all_goblet_achievements_are_received_on_last_training(history, history_
 	history.save()
 	user.last_completed_training = history
 	user.save()
-	updater = AchievementUpdater(user, {})
+	updater = AchievementUpdater(user, {}, history)
 	for km_achievement_id in goblet_achievement_ids:
 		assert Achievement(id=km_achievement_id) not in updater.new_achievements
 	updater.update_achievements()
@@ -109,14 +109,14 @@ def test_user_3_cities_per_training(user, history):
 	history.save()
 	user.last_completed_training = history
 	user.save()
-	assert traveler(user) is True
+	assert traveler(user, history) is True
 
 
 @pytest.mark.django_db
 def test_tourist_one_history(user, history_first):
 	user.last_completed_training = history_first
 	user.save()
-	assert not tourist(user)
+	assert not tourist(user, history_first)
 
 
 @pytest.mark.django_db
@@ -127,29 +127,29 @@ def test_tourist_two_history_completed(user, history, history_first):
 	history_first.save()
 	user.last_completed_training = history
 	user.save()
-	assert tourist(user)
+	assert tourist(user, history)
 	history.cities = ["St. Petersburg"]
 	history.save()
 	history_first.cities = ["Tula"]
 	history_first.save()
-	assert tourist(user)
+	assert tourist(user, history)
 	history.cities = ["St. Petersburg", "Tula"]
 	history.save()
 	history_first.cities = ["St. Petersburg", "Moscow"]
 	history_first.save()
-	assert tourist(user)
+	assert tourist(user, history)
 
 
 @pytest.mark.django_db
 def test_tourist_two_history_not_completed(user, history, history_first):
 	user.last_completed_training = history
 	user.save()
-	assert not tourist(user)
+	assert not tourist(user, history)
 	history.cities = ["St. Petersburg"]
 	history.save()
 	history_first.cities = ["St. Petersburg", "Moscow"]
 	history_first.save()
-	assert not tourist(user)
+	assert not tourist(user, history)
 
 
 @pytest.mark.django_db

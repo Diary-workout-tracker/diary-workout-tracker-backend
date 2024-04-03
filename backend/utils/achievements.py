@@ -11,27 +11,26 @@ from utils.constants import IOS_ACHIEVEMENTS
 
 def tourist(user: User, history: History = None) -> bool:
 	"""Проверка достижения Турист."""
-	if user.last_completed_training.training_day.day_number == 1:
+	if history.training_day.day_number == 1:
 		return False
-	city_last_training = set(user.last_completed_training.cities)
+	city_last_training = set(history.cities)
 	city_first_training = set(History.objects.filter(user_id=user).order_by("training_start").first().cities)
 	return not city_last_training.issubset(city_first_training)
 
 
 def traveler(user: User, history: History = None) -> bool:
 	"""Проверка достижения Путешественник."""
-	last_training = user.last_completed_training
-	if last_training is None:
+	if history is None:
 		return False
-	return len(set(last_training.cities)) >= 3
+	return len(set(history.cities)) >= 3
 
 
 def equator(user: User, history: History = None) -> bool:
 	"""Проверка достижения Экватор"""
-	last_training = user.user_history.last()
-	if last_training is None:
+
+	if history is None:
 		return False
-	return last_training.training_day.day_number == 50
+	return history.training_day.day_number == 50
 
 
 def get_count_training_current_week(user: User) -> int:
@@ -69,9 +68,9 @@ def n_km_club(km_club_amount: int) -> callable:
 
 
 def validate_goblet(amount_of_trainings: int, user: User, history: History = None) -> bool:
-	if not user.last_completed_training:
+	if not history:
 		return False
-	return user.last_completed_training.training_day.day_number >= amount_of_trainings
+	return history.training_day.day_number >= amount_of_trainings
 
 
 def goblet(amount_of_trainings: int) -> callable:
@@ -117,7 +116,7 @@ class AchievementUpdater:
 		self._new_achievements = []
 		self._unfinished_achievements = None
 		self._new_ios_achievements = None
-		if ios_achievements is not None and isinstance(ios_achievements, list):
+		if ios_achievements and isinstance(ios_achievements, list):
 			self._new_ios_achievements = list(
 				Achievement.objects.filter(
 					id__in=[_id for _id in map(int, ios_achievements) if _id in IOS_ACHIEVEMENTS]
@@ -168,7 +167,7 @@ class AchievementUpdater:
 		unfinished_non_ios = non_ios_achievements.exclude(
 			id__in=UserAchievement.objects.filter(user_id=self._user.id).values("achievement_id")
 		)
-		self._unfinished_achievements = unfinished_non_ios.union(recurring_non_ios)
+		self._unfinished_achievements = unfinished_non_ios | recurring_non_ios
 
 	@property
 	def unfinished_achievements(self):
