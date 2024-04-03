@@ -117,13 +117,11 @@ class AchievementUpdater:
 		self._history = history
 		self._new_achievements = []
 		self._unfinished_achievements = None
+		self._new_ios_achievements = None
 		if ios_achievements is not None and isinstance(ios_achievements, list):
-			ios_int_ids = [int(ios_achievement) for ios_achievement in ios_achievements]
 			self._new_ios_achievements = [
-				Achievement.objects.get(id=_id) for _id in ios_int_ids if _id in IOS_ACHIEVEMENTS
+				Achievement.objects.get(id=_id) for _id in map(int, ios_achievements) if _id in IOS_ACHIEVEMENTS
 			]
-		else:
-			self._new_ios_achievements = None
 
 	def update_achievements(self):
 		self._query_unfinished_achievements()
