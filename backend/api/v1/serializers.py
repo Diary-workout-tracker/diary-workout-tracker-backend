@@ -1,7 +1,9 @@
 from collections import OrderedDict
 from datetime import datetime
+import pytz
 
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -22,6 +24,16 @@ class UserSerializer(serializers.ModelSerializer):
 	"""Сериализатор кастомного пользователя."""
 
 	email = serializers.EmailField(validators=(CustomUniqueValidator(queryset=User.objects.all()),))
+
+	class Meta:
+		model = User
+		fields = ("email",)
+
+
+class MeSerializer(serializers.ModelSerializer):
+	"""Сериализатор Me пользователя."""
+
+	email = serializers.EmailField(read_only=True)
 	name = serializers.CharField(required=False)
 	gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
@@ -32,7 +44,6 @@ class UserSerializer(serializers.ModelSerializer):
 	date_last_skips = serializers.DateTimeField(required=False)
 	amount_of_skips = serializers.IntegerField(required=False)
 	avatar = Base64ImageField(allow_null=True, required=False)
-	timezone = serializers.CharField(required=False)
 
 	class Meta:
 		model = User
@@ -46,8 +57,48 @@ class UserSerializer(serializers.ModelSerializer):
 			"date_last_skips",
 			"amount_of_skips",
 			"avatar",
-			"timezone",
 		)
+
+	def to_representation(self, instance: ClassUser) -> dict:
+		representation = super().to_representation(instance)
+		date_last_skips = instance.date_last_skips
+		if date_last_skips:
+			user_timezone = pytz.timezone(self.context["request"].user.timezone)
+			representation["date_last_skips"] = date_last_skips.astimezone(user_timezone).strftime(FORMAT_DATE)
+		return representation
+
+	def validate(self, data: OrderedDict) -> OrderedDict:
+		date_last_skips = data.get("date_last_skips")
+		amount_of_skips = data.get("amount_of_skips")
+		if [date_last_skips, amount_of_skips].count(None) == 1:
+			raise serializers.ValidationError(
+				{"date_last_skips_amount_of_skips": ["Поля должны присутствовать одновременно."]}
+			)
+		return data
+
+	def validate_amount_of_skips(self, value: int) -> int:
+		amount_of_skips = self.context["request"].user.amount_of_skips
+		if not amount_of_skips:
+			raise serializers.ValidationError("У пользователя отсутсвуют заморозки.")
+		new_amount_of_skips = amount_of_skips - 1
+		if new_amount_of_skips != value:
+			raise serializers.ValidationError(f"Заморозки должны быть равны {new_amount_of_skips}.")
+		return value
+
+	def validate_date_last_skips(self, value: datetime) -> datetime:
+		user = self.context["request"].user
+		date_last_skips = user.date_last_skips
+		user_timezone = pytz.timezone(user.timezone)
+		localdate = timezone.localdate(timezone=user_timezone)
+		user_timezone_value = value.astimezone(user_timezone).date()
+		if not date_last_skips:
+			if localdate != user_timezone_value:
+				raise serializers.ValidationError("День заморозки должен быть равен текущему дню.")
+			return value
+		date_last_skips = date_last_skips.astimezone(user_timezone).date()
+		if date_last_skips >= user_timezone_value:
+			raise serializers.ValidationError(f"День заморозки должен быть больше {date_last_skips}.")
+		return value
 
 	def create(self, validated_data: dict) -> ClassUser:
 		"""Создаёт нового пользователя."""
@@ -131,6 +182,14 @@ class AchievementSerializer(serializers.ModelSerializer):
 			"received",
 		)
 
+	def to_representation(self, instance: Achievement) -> dict:
+		representation = super().to_representation(instance)
+		achievement_date = instance.achievement_date
+		if achievement_date:
+			user_timezone = pytz.timezone(self.context["request"].user.timezone)
+			representation["achievement_date"] = achievement_date.astimezone(user_timezone).strftime(FORMAT_DATE)
+		return representation
+
 
 class AchievementEndTrainingSerializer(serializers.ModelSerializer):
 	"""Сериализатор достижения конца тренировки."""
@@ -179,12 +238,14 @@ class HistorySerializer(serializers.ModelSerializer):
 			"route": {"required": False},
 		}
 
-	def to_representation(self, instance):
+	def to_representation(self, instance: History) -> dict:
 		representation = super().to_representation(instance)
 		training_start = instance.training_start
+		user = self.context["request"].user
+		user_timezone = pytz.timezone(user.timezone)
 		representation["training_start"] = [
-			training_start.strftime(FORMAT_DATE),
-			training_start.strftime(FORMAT_DATETIME),
+			training_start.astimezone(user_timezone).strftime(FORMAT_DATE),
+			training_start.astimezone(user_timezone).strftime(FORMAT_DATETIME),
 		]
 		return representation
 
@@ -196,8 +257,14 @@ class HistorySerializer(serializers.ModelSerializer):
 		return data
 
 	def _validate_date(self, value: datetime, name_field: str) -> datetime:
-		last_completed_training = self.context["request"].user.last_completed_training
-		if last_completed_training and value.date() <= getattr(last_completed_training, name_field).date():
+		user = self.context["request"].user
+		last_completed_training = user.last_completed_training
+		user_timezone = pytz.timezone(user.timezone)
+		if (
+			last_completed_training
+			and value.astimezone(user_timezone).date()
+			<= getattr(last_completed_training, name_field).astimezone(user_timezone).date()
+		):
 			raise serializers.ValidationError("Дата должна быть больше прошлой тренировки.")
 		return value
 

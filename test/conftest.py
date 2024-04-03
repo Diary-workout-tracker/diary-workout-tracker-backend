@@ -11,7 +11,7 @@ User = get_user_model()
 
 @pytest.fixture
 def user():
-	return User.objects.create(email="test@test.ru", name="Tester John")
+	return User.objects.create(email="test@test.ru", name="Tester John", timezone="Europe/Moscow")
 
 
 @pytest.fixture

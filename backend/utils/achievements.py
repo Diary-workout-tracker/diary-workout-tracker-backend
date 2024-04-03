@@ -1,5 +1,6 @@
 from datetime import timedelta
 from functools import partial
+import pytz
 
 from django.utils import timezone
 from running.models import Achievement, UserAchievement, History
@@ -36,12 +37,11 @@ def equator(user: User) -> bool:
 
 def get_count_training_current_week(user: User) -> int:
 	"""Возвращает количество пройденных тренировок на текущей неделе."""
-	date_now = timezone.localtime()
+	date_now = timezone.localtime(timezone=pytz.timezone(user.timezone))
 	date_now_number_day_week = date_now.weekday()
 	date_start_current_week = (date_now - timedelta(days=date_now_number_day_week)).replace(
 		hour=0, minute=0, second=0, microsecond=0
 	)
-
 	return History.objects.filter(user_id=user, training_start__range=[date_start_current_week, date_now]).count()
 
 
