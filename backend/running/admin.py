@@ -49,6 +49,7 @@ class AchievementAdmin(admin.ModelAdmin):
 		"reward_points",
 		"recurring",
 	)
+	readonly_fields = ("recurring",)
 	search_fields = (
 		"title",
 		"description",

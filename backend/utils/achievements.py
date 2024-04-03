@@ -1,6 +1,5 @@
 from datetime import timedelta
 from functools import partial
-from typing import List
 
 from django.db import transaction
 from django.utils import timezone
@@ -112,16 +111,18 @@ class AchievementUpdater:
 	вернет список свежеполученных ачивок для дальнейшей десериализации.
 	"""
 
-	def __init__(self, user, ios_achievements: List[int] = None, history: History = None) -> None:
+	def __init__(self, user, ios_achievements: list[int] = None, history: History = None) -> None:
 		self._user = user
 		self._history = history
 		self._new_achievements = []
 		self._unfinished_achievements = None
 		self._new_ios_achievements = None
 		if ios_achievements is not None and isinstance(ios_achievements, list):
-			self._new_ios_achievements = [
-				Achievement.objects.get(id=_id) for _id in map(int, ios_achievements) if _id in IOS_ACHIEVEMENTS
-			]
+			self._new_ios_achievements = list(
+				Achievement.objects.filter(
+					id__in=[_id for _id in map(int, ios_achievements) if _id in IOS_ACHIEVEMENTS]
+				)
+			)
 
 	def update_achievements(self):
 		self._query_unfinished_achievements()
@@ -151,7 +152,7 @@ class AchievementUpdater:
 
 		for achievement in self._unfinished_achievements:
 			validator = VALIDATORS.get(achievement.id)
-			if validator is not None and validator(user=self._user, history=self._history) is True:
+			if validator is not None and validator(user=self._user, history=self._history):
 				self._new_achievements.append(achievement)
 
 	def _check_for_new_ios_achievements(self):
