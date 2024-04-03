@@ -9,6 +9,7 @@ volumes:
   logs:
 
 services:
+
   db:
     image: postgres:16.2
     env_file: .env
@@ -64,10 +65,37 @@ services:
       - static:/backend_static
       - logs:/logs
 
+  minio:
+    image: minio/minio:latest
+    hostname: running.myddns.me
+    environment:
+      - MINIO_SERVER_URL=https://running.myddns.me:9000
+    volumes:
+      - ./minio:/minio_files
+      - /home/capwell/diary-training/minio/certs/:/opt/minio/certs
+    env_file: .env
+    command: 'minio server --certs-dir /opt/minio/certs /minio_files --console-address ":9001"'
+    ports:
+      - 9000:9000
+      - 9001:9001
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    env_file: .env
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add --quiet --api s3v4 s3 https://running.myddns.me:9000 minioadmin minioadmin;
+      /usr/bin/mc mb --quiet s3/running-app;
+      /usr/bin/mc anonymous set public s3/running-app;
+      "
+
   nginx:
     image: blakkheart/diary_gateway
     depends_on:
       - backend
+      - minio
       - celery-worker
     ports:
       - 8000:80
