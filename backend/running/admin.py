@@ -41,7 +41,14 @@ class MotivationalPhraseAdmin(admin.ModelAdmin):
 class AchievementAdmin(admin.ModelAdmin):
 	"""Отображение в админ панели Достижений."""
 
-	list_display = ("id", "title", "description", "show_icon", "reward_points", "recurring")
+	list_display = (
+		"id",
+		"title",
+		"description",
+		"show_icon",
+		"reward_points",
+		"recurring",
+	)
 	search_fields = (
 		"title",
 		"description",
