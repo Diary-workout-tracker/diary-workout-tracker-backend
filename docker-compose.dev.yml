@@ -36,3 +36,25 @@ services:
       retries: 5
     ports:
       - ${DOCKER_COMPOSER_PORT_REDIS:-6379:6379}
+
+  minio:
+    image: minio/minio:latest
+    volumes:
+      - ./minio:/minio_files
+    env_file: ./infra/.env
+    command: 'minio server /minio_files --console-address ":9001"'
+    ports:
+      - 9000:9000
+      - 9001:9001
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    env_file: ./infra/.env
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add --quiet --api s3v4 s3 http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb --quiet s3/running-app;
+      /usr/bin/mc anonymous set public s3/running-app;
+      "

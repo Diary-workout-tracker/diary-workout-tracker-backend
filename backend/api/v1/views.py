@@ -197,6 +197,8 @@ class HistoryView(generics.ListCreateAPIView):
 	def create(self, request: Request, *args, **kwargs) -> Response:
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
+		if "achievements" in serializer._validated_data.keys():
+			serializer._validated_data.pop("achievements")
 		history = self.perform_create(serializer)
 		self.request.user.last_completed_training = history
 		self.request.user.total_m_run += history.distance
