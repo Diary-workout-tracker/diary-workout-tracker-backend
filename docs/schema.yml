@@ -98,7 +98,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Me'
           description: ''
     patch:
       operationId: api_v1_me_partial_update
@@ -108,13 +108,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedUser'
+              $ref: '#/components/schemas/PatchedMe'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedUser'
+              $ref: '#/components/schemas/PatchedMe'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedUser'
+              $ref: '#/components/schemas/PatchedMe'
       security:
       - jwtAuth: []
       responses:
@@ -122,7 +122,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Me'
           description: ''
     delete:
       operationId: api_v1_me_destroy
@@ -398,13 +398,48 @@ components:
       - training_day
       - training_end
       - training_start
-    PatchedUser:
+    Me:
       type: object
-      description: Сериализатор кастомного пользователя.
+      description: Сериализатор Me пользователя.
       properties:
         email:
           type: string
           format: email
+          readOnly: true
+        name:
+          type: string
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        height_cm:
+          type: integer
+          nullable: true
+        weight_kg:
+          type: number
+          format: double
+          nullable: true
+        last_completed_training:
+          type: integer
+          readOnly: true
+        date_last_skips:
+          type: string
+          format: date-time
+        amount_of_skips:
+          type: integer
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - email
+      - last_completed_training
+    PatchedMe:
+      type: object
+      description: Сериализатор Me пользователя.
+      properties:
+        email:
+          type: string
+          format: email
+          readOnly: true
         name:
           type: string
         gender:
@@ -462,32 +497,8 @@ components:
         email:
           type: string
           format: email
-        name:
-          type: string
-        gender:
-          $ref: '#/components/schemas/GenderEnum'
-        height_cm:
-          type: integer
-          nullable: true
-        weight_kg:
-          type: number
-          format: double
-          nullable: true
-        last_completed_training:
-          type: integer
-          readOnly: true
-        date_last_skips:
-          type: string
-          format: date-time
-        amount_of_skips:
-          type: integer
-        avatar:
-          type: string
-          format: uri
-          nullable: true
       required:
       - email
-      - last_completed_training
   securitySchemes:
     jwtAuth:
       type: http

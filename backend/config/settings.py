@@ -71,6 +71,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+TIME_ZONE = "UTC"
+
 DATABASES = {
 	"default": {
 		"ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.postgresql"),
@@ -80,7 +82,7 @@ DATABASES = {
 		"HOST": os.getenv("DB_HOST", default="localhost"),
 		"PORT": os.getenv("DB_PORT", default=5432),
 		"PG_USER": os.getenv("PG_USER", default="user"),
-		"TIME_ZONE": "UTC",
+		"TIME_ZONE": TIME_ZONE,
 	}
 }
 
@@ -102,8 +104,6 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "ru-RU"
-
-TIME_ZONE = "UTC"
 
 USE_I18N = True
 

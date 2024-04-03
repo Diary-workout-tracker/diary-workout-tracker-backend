@@ -3,7 +3,6 @@ from datetime import datetime
 import pytz
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -25,6 +24,16 @@ class UserSerializer(serializers.ModelSerializer):
 	"""Сериализатор кастомного пользователя."""
 
 	email = serializers.EmailField(validators=(CustomUniqueValidator(queryset=User.objects.all()),))
+
+	class Meta:
+		model = User
+		fields = ("email",)
+
+
+class MeSerializer(serializers.ModelSerializer):
+	"""Сериализатор Me пользователя."""
+
+	email = serializers.EmailField(read_only=True)
 	name = serializers.CharField(required=False)
 	gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False)
 	height_cm = serializers.IntegerField(allow_null=True, required=False)
@@ -52,13 +61,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 	def to_representation(self, instance: ClassUser) -> dict:
 		representation = super().to_representation(instance)
-		user = self.context["request"].user
-		user_timezone = None
-		if not isinstance(user, AnonymousUser):
-			user_timezone = user.timezone
 		date_last_skips = instance.date_last_skips
 		if date_last_skips:
-			user_timezone = pytz.timezone(user_timezone)
+			user_timezone = pytz.timezone(self.context["request"].user.timezone)
 			representation["date_last_skips"] = date_last_skips.astimezone(user_timezone).strftime(FORMAT_DATE)
 		return representation
 

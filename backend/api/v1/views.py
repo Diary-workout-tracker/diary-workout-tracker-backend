@@ -23,6 +23,7 @@ from .serializers import (
 	CustomTokenObtainSerializer,
 	HistorySerializer,
 	TrainingSerializer,
+	MeSerializer,
 	UserSerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
@@ -86,7 +87,7 @@ class TokenRefreshView(APIView):
 
 
 class MyInfoView(APIView):
-	serializer_class = UserSerializer
+	serializer_class = MeSerializer
 
 	def get(self, request, *args, **kwargs):
 		user = request.user
@@ -243,10 +244,9 @@ class UpdateView(APIView):
 
 	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
 		"""Обновляет timezone ползователя."""
-		if user.timezone == user_timezone:
-			return
-		user.timezone = user_timezone
-		user.save()
+		if user.timezone != user_timezone:
+			user.timezone = user_timezone
+			user.save()
 
 	def post(self, request: Request, *args, **kwargs) -> Response:
 		user_timezone = request.data.get("timezone")
