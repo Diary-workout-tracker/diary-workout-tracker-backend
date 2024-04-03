@@ -142,10 +142,9 @@ class AchievementUpdater:
 		user_achievements = [
 			UserAchievement(user_id=self._user, achievement_id=achievement) for achievement in self._new_achievements
 		]
-		achievements = [ua.achievement_id for ua in user_achievements]
 		with transaction.atomic():
-			UserAchievement.objects.filter(user_id=self._user, achievement_id__in=achievements).exclude(
-				achievement_id__recurring=False
+			UserAchievement.objects.filter(
+				user_id=self._user, achievement_id__in=self._new_achievements, achievement_id__recurring=True
 			).delete()
 			UserAchievement.objects.bulk_create(user_achievements)
 
