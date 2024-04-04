@@ -1,6 +1,6 @@
-from distutils.util import strtobool
 import os
 from datetime import timedelta
+from distutils.util import strtobool
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -171,7 +171,7 @@ REST_FRAMEWORK = {
 	],
 	"DEFAULT_THROTTLE_RATES": {
 		"user": "10000/day",
-		"anon": "1000/day",
+		"anon": "2000/day",
 	},
 	"EXCEPTION_HANDLER": "api.v1.exceptions.custom_exception_handler",
 }
@@ -212,7 +212,7 @@ ACCESS_RESTORE_CODE_TTL_SECONDS = 300
 
 ACCESS_RESTORE_CODE_THROTTLING = {
 	"duration": timedelta(minutes=10),
-	"num_requests": 5,
+	"num_requests": 6,
 	"cooldown": timedelta(minutes=5),
 }
 

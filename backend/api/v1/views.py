@@ -12,6 +12,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from backend.utils.achievements import AchievementUpdater
 from running.models import Achievement, Day, History, UserAchievement
 from users.constants import DEFAULT_AMOUNT_OF_SKIPS
 from users.models import User as ClassUser
@@ -188,13 +189,14 @@ class HistoryView(generics.ListCreateAPIView):
 
 	def get_queryset(self) -> QuerySet:
 		"""Формирует список историй тренировок пользователя."""
-		return self.request.user.user_history.all().order_by("training_day")
+		return self.request.user.user_history.order_by("training_day")
 
 	def perform_create(self, serializer: HistorySerializer) -> History:
 		"""Создаёт новую историю."""
 		return serializer.save()
 
 	def create(self, request: Request, *args, **kwargs) -> Response:
+		achievements = request.data.pop("achievements", None)  # noqa
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		if "achievements" in serializer._validated_data.keys():
@@ -203,13 +205,13 @@ class HistoryView(generics.ListCreateAPIView):
 		self.request.user.last_completed_training = history
 		self.request.user.total_m_run += history.distance
 		self.request.user.save()
-		achievements = request.data.pop("achievements", None)  # noqa
+		updater = AchievementUpdater(self.request.user, achievements, history)
+		updater.update_achievements()
 		headers = self.get_success_headers(serializer.data)
 
 		new_achievements = AchievementEndTrainingSerializer(
-			Achievement.objects.all(), many=True, context={"request": request}
-		).data  # XXX Тут в будущем вместо всех ачивок надо добавить новые.
-
+			updater.new_achievements, many=True, context={"request": request}
+		).data
 		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
 
 

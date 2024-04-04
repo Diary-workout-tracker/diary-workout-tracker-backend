@@ -2,37 +2,36 @@ from datetime import timedelta
 from functools import partial
 import pytz
 
+from django.db import transaction
 from django.utils import timezone
-from running.models import Achievement, UserAchievement, History
+
+from running.models import Achievement, History, UserAchievement
 from users.models import User
-
-# def equator(x): return x.user_history.last().training_day == 50
-# валидаторы ачивок. могут быть и лямбдами, и обычными функциями, возвращают для пользователя булево значение - выполнена ли ачивка
+from utils.constants import IOS_ACHIEVEMENTS
 
 
-def tourist(user: User) -> bool:
+def tourist(user: User, history: History = None) -> bool:
 	"""Проверка достижения Турист."""
-	if user.last_completed_training.training_day.day_number == 1:
+	if history.training_day.day_number == 1:
 		return False
-	city_last_training = set(user.last_completed_training.cities)
+	city_last_training = set(history.cities)
 	city_first_training = set(History.objects.filter(user_id=user).order_by("training_start").first().cities)
 	return not city_last_training.issubset(city_first_training)
 
 
-def traveler(user: User) -> bool:
+def traveler(user: User, history: History = None) -> bool:
 	"""Проверка достижения Путешественник."""
-	last_training = user.last_completed_training
-	if last_training is None:
+	if history is None:
 		return False
-	return len(set(last_training.cities)) >= 3
+	return len(set(history.cities)) >= 3
 
 
-def equator(user: User) -> bool:
+def equator(user: User, history: History = None) -> bool:
 	"""Проверка достижения Экватор"""
-	last_training = user.user_history.last()
-	if last_training is None:
+
+	if history is None:
 		return False
-	return last_training.training_day.day_number == 50
+	return history.training_day.day_number == 50
 
 
 def get_count_training_current_week(user: User) -> int:
@@ -45,17 +44,18 @@ def get_count_training_current_week(user: User) -> int:
 	return History.objects.filter(user_id=user, training_start__range=[date_start_current_week, date_now]).count()
 
 
-def persistent(user: User) -> bool:
+def persistent(user: User, history: History) -> bool:
 	"""Проверка достижения Упорный."""
 	return get_count_training_current_week(user) == 4
 
 
-def machine(user: User) -> bool:
+def machine(user: User, history: History) -> bool:
 	"""Проверка достижения Машина."""
+
 	return get_count_training_current_week(user) == 5
 
 
-def validate_n_km_club(km_club_amount: int, user: User) -> bool:
+def validate_n_km_club(km_club_amount: int, user: User, history: History = None) -> bool:
 	"""Проверка достижений клуб N километров."""
 
 	return user.total_m_run // 1000 >= km_club_amount
@@ -67,10 +67,10 @@ def n_km_club(km_club_amount: int) -> callable:
 	return partial(validate_n_km_club, km_club_amount=km_club_amount)
 
 
-def validate_goblet(amount_of_trainings: int, user: User) -> bool:
-	if not user.last_completed_training:
+def validate_goblet(amount_of_trainings: int, user: User, history: History = None) -> bool:
+	if not history:
 		return False
-	return user.last_completed_training.training_day.day_number >= amount_of_trainings
+	return history.training_day.day_number >= amount_of_trainings
 
 
 def goblet(amount_of_trainings: int) -> callable:
@@ -110,11 +110,18 @@ class AchievementUpdater:
 	вернет список свежеполученных ачивок для дальнейшей десериализации.
 	"""
 
-	def __init__(self, user, data) -> None:
+	def __init__(self, user, ios_achievements: list[int] = None, history: History = None) -> None:
 		self._user = user
-		self._data = data
+		self._history = history
 		self._new_achievements = []
 		self._unfinished_achievements = None
+		self._new_ios_achievements = None
+		if ios_achievements and isinstance(ios_achievements, list):
+			self._new_ios_achievements = list(
+				Achievement.objects.filter(
+					id__in=[_id for _id in map(int, ios_achievements) if _id in IOS_ACHIEVEMENTS]
+				)
+			)
 
 	def update_achievements(self):
 		self._query_unfinished_achievements()
@@ -123,32 +130,60 @@ class AchievementUpdater:
 		self._update_database()
 
 	def _update_database(self):
+		"""Обновляем БД по списку новых ачивок.
+		Логика следующая:
+		        - для одноразовых ачивок создается запись в UserAchievement
+		        - для многоразовых ачивок если записи нет, создается, если есть, пересоздается."""
+
 		if not self._new_achievements:
 			return
 		user_achievements = [
 			UserAchievement(user_id=self._user, achievement_id=achievement) for achievement in self._new_achievements
 		]
-		UserAchievement.objects.bulk_create(user_achievements)
+		with transaction.atomic():
+			UserAchievement.objects.filter(
+				user_id=self._user, achievement_id__in=self._new_achievements, achievement_id__recurring=True
+			).delete()
+			UserAchievement.objects.bulk_create(user_achievements)
 
 	def _check_for_new_backend_achievements(self):
 		"""Проверка на выполнение достижений"""
+
 		for achievement in self._unfinished_achievements:
 			validator = VALIDATORS.get(achievement.id)
-			if validator is not None and validator(user=self._user) is True:
+			if validator is not None and validator(user=self._user, history=self._history):
 				self._new_achievements.append(achievement)
 
 	def _check_for_new_ios_achievements(self):
 		"""Добавление внешних достиженией"""
-		ios_achievements = self._data.get("achievements")
-		if ios_achievements is not None:
-			# при условии, что по этому ключу будет список с id-шнниками новых иос-ачивок. Если будут названия, надо написать сравнение с названиями из query
-			self._new_achievements.extend(ios_achievements)
+		if self._new_ios_achievements is not None:
+			self._new_achievements.extend(self._new_ios_achievements)
 
 	def _query_unfinished_achievements(self):
 		"""Извлечение неполученных ачивок"""
-		self._unfinished_achievements = Achievement.objects.exclude(
+
+		non_ios_achievements = Achievement.objects.exclude(id__in=IOS_ACHIEVEMENTS).prefetch_related(
+			"user_achievements"
+		)
+		recurring_non_ios = non_ios_achievements.filter(recurring=True)
+		unfinished_non_ios = non_ios_achievements.exclude(
 			id__in=UserAchievement.objects.filter(user_id=self._user.id).values("achievement_id")
 		)
+		self._unfinished_achievements = unfinished_non_ios | recurring_non_ios
+		# from django.db.models import Q
+		# self._unfinished_achievements = Achievement.objects.exclude(
+		#     Q(id__in=UserAchievement.objects.filter(
+		#         user_id=self._user.id, achievement_id__recurring=False
+		#     ).values("achievement_id")) | Q(id__in=IOS_ACHIEVEMENTS)
+		# )
+		# self._unfinished_achievements = Achievement.objects.exclude(
+		#     id__in=UserAchievement.objects.filter(
+		#         user_id=self._user.id, achievement_id__recurring=False).values("achievement_id")
+		# )
+
+	@property
+	def unfinished_achievements(self):
+		return self._unfinished_achievements
 
 	@property
 	def new_achievements(self):

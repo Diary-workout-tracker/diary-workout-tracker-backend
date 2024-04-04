@@ -13,7 +13,7 @@ from users.models import User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
 
-from .constants import FORMAT_DATE, FORMAT_TIME, FORMAT_DATETIME
+from .constants import FORMAT_DATE, FORMAT_DATETIME, FORMAT_TIME
 from .fields import Base64ImageField
 from .validators import CustomUniqueValidator
 
@@ -284,9 +284,9 @@ class HistorySerializer(serializers.ModelSerializer):
 		if last_completed_training:
 			day_number_last_training = last_completed_training.training_day.day_number
 			if value.day_number - 1 != day_number_last_training:
-				raise serializers.ValidationError(f"День тренирвки должен быть равен {day_number_last_training+1}")
+				raise serializers.ValidationError(f"День тренировки должен быть равен {day_number_last_training+1}")
 		elif value.day_number != 1:
-			raise serializers.ValidationError("День тренирвки должен быть равен 1")
+			raise serializers.ValidationError("День тренировки должен быть равен 1")
 		return value
 
 	def validate_achievements(self, value: list) -> list:

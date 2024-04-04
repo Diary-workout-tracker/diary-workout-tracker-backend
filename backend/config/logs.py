@@ -28,7 +28,7 @@ LOGGING_SETTINGS = {
 			"filename": PATH_TO_LOGS,
 			"formatter": "formatter",
 			"when": "midnight",
-			"backupCount": "30",
+			"backupCount": 30,
 		},
 	},
 	"loggers": {
