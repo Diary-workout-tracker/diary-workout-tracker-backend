@@ -1,6 +1,6 @@
 from datetime import timedelta
-import pytz
 
+import pytz
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
