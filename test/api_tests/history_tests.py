@@ -21,8 +21,8 @@ def achievement_title_in_response(response: list[dict], title: str):
 @pytest.fixture
 def training_end_data():
 	return {
-		"training_start": "2024-10-11T14:30:00",
-		"training_end": "2024-10-11T15:31:00",
+		"training_start": "2024-10-11 14:30:00",
+		"training_end": "2024-10-11 15:31:00",
 		"training_day": 1,
 		"cities": ["Питер", "Волгоград"],
 		"distance": 66600,
@@ -38,7 +38,9 @@ def user_achievement_count_by_id(user, _id):
 
 
 def add_1_day_to_str(date: str) -> str:
-	return (datetime.fromisoformat(date) + timedelta(days=1)).isoformat()
+	dt = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+	dt += timedelta(days=1)
+	return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
 @pytest.mark.django_db

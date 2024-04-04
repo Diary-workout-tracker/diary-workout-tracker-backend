@@ -1,7 +1,7 @@
 from datetime import timedelta
 from functools import partial
-import pytz
 
+import pytz
 from django.db import transaction
 from django.utils import timezone
 
