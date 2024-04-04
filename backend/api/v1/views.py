@@ -207,7 +207,7 @@ class HistoryView(generics.ListCreateAPIView):
 
 		new_achievements = AchievementEndTrainingSerializer(
 			updater.new_achievements, many=True, context={"request": request}
-		).data  # XXX Тут в будущем вместо всех ачивок надо добавить новые.
+		).data
 		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
 
 

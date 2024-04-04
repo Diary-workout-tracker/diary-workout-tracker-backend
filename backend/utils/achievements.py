@@ -162,12 +162,24 @@ class AchievementUpdater:
 	def _query_unfinished_achievements(self):
 		"""Извлечение неполученных ачивок"""
 
-		non_ios_achievements = Achievement.objects.exclude(id__in=IOS_ACHIEVEMENTS)
+		non_ios_achievements = Achievement.objects.exclude(id__in=IOS_ACHIEVEMENTS).prefetch_related(
+			"user_achievements"
+		)
 		recurring_non_ios = non_ios_achievements.filter(recurring=True)
 		unfinished_non_ios = non_ios_achievements.exclude(
 			id__in=UserAchievement.objects.filter(user_id=self._user.id).values("achievement_id")
 		)
 		self._unfinished_achievements = unfinished_non_ios | recurring_non_ios
+		# from django.db.models import Q
+		# self._unfinished_achievements = Achievement.objects.exclude(
+		#     Q(id__in=UserAchievement.objects.filter(
+		#         user_id=self._user.id, achievement_id__recurring=False
+		#     ).values("achievement_id")) | Q(id__in=IOS_ACHIEVEMENTS)
+		# )
+		# self._unfinished_achievements = Achievement.objects.exclude(
+		#     id__in=UserAchievement.objects.filter(
+		#         user_id=self._user.id, achievement_id__recurring=False).values("achievement_id")
+		# )
 
 	@property
 	def unfinished_achievements(self):
