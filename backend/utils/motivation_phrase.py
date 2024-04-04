@@ -1,4 +1,5 @@
 from datetime import timedelta
+import pytz
 
 from django.db.models.query import QuerySet
 from django.utils import timezone
@@ -9,7 +10,9 @@ from users.models import User
 
 def get_count_training_last_week(user: User) -> int:
 	"""Возвращает кол-во тренировок на прошлой неделе."""
-	date_now = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
+	date_now = timezone.localtime(timezone=pytz.timezone(user.timezone)).replace(
+		hour=0, minute=0, second=0, microsecond=0
+	)
 	date_now_number_day_week = date_now.weekday() + 1
 	date_end_last_week = date_now - timedelta(days=date_now_number_day_week)
 	date_start_last_week = date_end_last_week - timedelta(days=6)
@@ -61,7 +64,8 @@ def get_dynamic_list_motivation_phrase(user: User) -> list:
 	count_training = get_count_training_last_week(user)
 	if count_training < 4:
 		return motivational_phrases
-	date_now_number_day_week = timezone.localtime().weekday() + 1
+	user_timezone = pytz.timezone(user.timezone)
+	date_now_number_day_week = timezone.localtime(timezone=user_timezone).weekday() + 1
 	day_last_training = last_training.training_day.day_number
 	if count_training == 4:
 		shift_wednesday = 3 - date_now_number_day_week
@@ -79,7 +83,7 @@ def get_dynamic_list_motivation_phrase(user: User) -> list:
 	shift_first_rest = 1 - date_now_number_day_week
 	shift_second_rest = 3 - date_now_number_day_week
 	shift_third_rest = 5 - date_now_number_day_week
-	date_last_training_week = last_training.training_start.weekday() + 1
+	date_last_training_week = last_training.training_start.astimezone(user_timezone).weekday() + 1
 	if date_last_training_week == 7:
 		shift_first_rest += 1
 		shift_second_rest += 1

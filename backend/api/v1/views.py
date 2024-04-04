@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import pytz
 
 from django.contrib.auth import get_user_model
 from django.db.models import Case, DateTimeField, Exists, F, OuterRef, When
@@ -23,6 +24,7 @@ from .serializers import (
 	CustomTokenObtainSerializer,
 	HistorySerializer,
 	TrainingSerializer,
+	MeSerializer,
 	UserSerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
@@ -86,7 +88,7 @@ class TokenRefreshView(APIView):
 
 
 class MyInfoView(APIView):
-	serializer_class = UserSerializer
+	serializer_class = MeSerializer
 
 	def get(self, request, *args, **kwargs):
 		user = request.user
@@ -197,6 +199,8 @@ class HistoryView(generics.ListCreateAPIView):
 		achievements = request.data.pop("achievements", None)  # noqa
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
+		if "achievements" in serializer._validated_data.keys():
+			serializer._validated_data.pop("achievements")
 		history = self.perform_create(serializer)
 		self.request.user.last_completed_training = history
 		self.request.user.total_m_run += history.distance
@@ -220,11 +224,12 @@ class HistoryView(generics.ListCreateAPIView):
 	),
 )
 class UpdateView(APIView):
-	def _get_date_activity(self, user: ClassUser) -> datetime:
+	def _get_date_activity(self, user: ClassUser, user_timezone: str) -> datetime:
 		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
-		return max(
+		date_activity = max(
 			[date for date in [user.date_last_skips, user.last_completed_training.training_start] if date is not None]
 		)
+		return date_activity.astimezone(pytz.timezone(user_timezone))
 
 	def _updates_skip_data(
 		self, user: ClassUser, amount_of_skips: int, days_missed: int, date_day_ago: datetime
@@ -242,11 +247,10 @@ class UpdateView(APIView):
 		History.objects.filter(user_id=user).delete()
 
 	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
-		"""Обновзляет timezone ползователя."""
-		if user.timezone == user_timezone:
-			return
-		user.timezone = user_timezone
-		user.save()
+		"""Обновляет timezone ползователя."""
+		if user.timezone != user_timezone:
+			user.timezone = user_timezone
+			user.save()
 
 	def post(self, request: Request, *args, **kwargs) -> Response:
 		user_timezone = request.data.get("timezone")
@@ -259,9 +263,9 @@ class UpdateView(APIView):
 			self._update_user_timezone_data(user, user_timezone)
 			return response
 
-		date_activity = self._get_date_activity(user)
+		date_activity = self._get_date_activity(user, user_timezone)
 		amount_of_skips = user.amount_of_skips
-		date_day_ago = timezone.localtime() - timedelta(days=1)
+		date_day_ago = timezone.localtime(timezone=pytz.timezone(user_timezone)) - timedelta(days=1)
 		days_missed = (date_day_ago.date() - date_activity.date()).days
 		if days_missed <= 0:
 			self._update_user_timezone_data(user, user_timezone)

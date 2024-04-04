@@ -71,6 +71,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+TIME_ZONE = "UTC"
+
 DATABASES = {
 	"default": {
 		"ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.postgresql"),
@@ -80,7 +82,7 @@ DATABASES = {
 		"HOST": os.getenv("DB_HOST", default="localhost"),
 		"PORT": os.getenv("DB_PORT", default=5432),
 		"PG_USER": os.getenv("PG_USER", default="user"),
-		"TIME_ZONE": os.getenv("TIME_ZONE", default="Europe/Moscow"),
+		"TIME_ZONE": TIME_ZONE,
 	}
 }
 
@@ -103,8 +105,6 @@ AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "ru-RU"
 
-TIME_ZONE = os.getenv("TIME_ZONE", default="Europe/Moscow")
-
 USE_I18N = True
 
 USE_TZ = True
@@ -115,34 +115,41 @@ IS_AWS_ACTIVE = strtobool(os.getenv("IS_AWS_ACTIVE", default="False"))
 if IS_AWS_ACTIVE:
 	STORAGES = {
 		"default": {
-			"BACKEND": "storages.backends.s3.S3Storage",
-			"OPTIONS": {
-				"bucket_name": "running-app",
-				"location": "media",
-			},
+			"BACKEND": "config.storage.S3MediaStorage",
 		},
 		"staticfiles": {
-			"BACKEND": "django.core.files.storage.FileSystemStorage",
-			"OPTIONS": {
-				"location": "/static",
-				"base_url": "/static/",
-			},
+			"BACKEND": "config.storage.StaticS3Boto3Storage",
 		},
 	}
-	AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-	AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
-	AWS_S3_ACCESS_KEY_ID = os.getenv("AWS_S3_ACCESS_KEY_ID")
-	AWS_S3_SECRET_ACCESS_KEY = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
-	AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION")
 
-	MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
-else:
-	MEDIA_URL = "/media/"
+	STATICFILES_LOCATION = "static"
+	MEDIAFILES_LOCATION = "media"
+
+	MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER")
+	MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD")
+	MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME")
+	MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+	MINIO_ACCESS_URL = os.getenv("MINIO_ACCESS_URL")
+	MINIO_STORAGE_USE_HTTPS = os.getenv("MINIO_STORAGE_USE_HTTPS", False) == "True"
+	MINIO_S3_SECURE_URLS = os.getenv("MINIO_S3_SECURE_URLS", False) == "True"
+
+	AWS_ACCESS_KEY_ID = MINIO_ACCESS_KEY
+	AWS_SECRET_ACCESS_KEY = MINIO_SECRET_KEY
+	AWS_STORAGE_BUCKET_NAME = MINIO_BUCKET_NAME
+	AWS_S3_ENDPOINT_URL = MINIO_ENDPOINT
+	AWS_S3_FILE_OVERWRITE = os.getenv("AWS_S3_FILE_OVERWRITE", False) == "True"
+	AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION")
+	AWS_S3_USE_SSL = os.getenv("AWS_S3_USE_SSL", False) == "True"
+	AWS_S3_SECURE_URLS = os.getenv("AWS_S3_SECURE_URLS", False) == "True"
+	AWS_S3_URL_PROTOCOL = os.getenv("AWS_S3_URL_PROTOCOL", "http:")
+
+MEDIA_URL = "/media/"
+STATIC_URL = "/static/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-STATIC_URL = "/static/"
-if DEBUG:
+
+if DEBUG is True:
 	STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 else:
 	STATIC_ROOT = os.path.join(BASE_DIR, "static")
@@ -152,6 +159,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 REST_FRAMEWORK = {
+	"DATETIME_INPUT_FORMATS": ["%Y-%m-%d %H:%M:%S"],
 	"DEFAULT_PERMISSION_CLASSES": [
 		"rest_framework.permissions.IsAuthenticated",
 	],
