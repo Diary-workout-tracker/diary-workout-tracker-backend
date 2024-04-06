@@ -254,12 +254,15 @@ class UpdateView(APIView):
 
 	def post(self, request: Request, *args, **kwargs) -> Response:
 		user_timezone = request.data.get("timezone")
-		user = request.user
+
 		if not user_timezone:
 			return Response({"timezone": "Часовой пояс пользователя обязателен."}, status=status.HTTP_400_BAD_REQUEST)
-
 		response = Response({"updated": True}, status=status.HTTP_200_OK)
-		if not user.last_completed_training:
+
+		user = request.user
+		last_traning = user.last_completed_training
+
+		if not last_traning:
 			self._update_user_timezone_data(user, user_timezone)
 			return response
 
@@ -272,8 +275,9 @@ class UpdateView(APIView):
 			return response
 
 		user.timezone = user_timezone
-		if amount_of_skips >= days_missed:
-			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
-		else:
-			self._clearing_user_training_data(user)
+		if last_traning.training_day.day_number < 100:
+			if amount_of_skips >= days_missed:
+				self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
+			else:
+				self._clearing_user_training_data(user)
 		return response
