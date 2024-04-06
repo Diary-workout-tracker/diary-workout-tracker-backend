@@ -112,7 +112,7 @@ class DayAdmin(admin.ModelAdmin):
 				duration = request.POST.get(f"duration-{i}")
 				if not pace or not duration:
 					continue
-				workout["workout_program"].append({"pace": pace, "duration": duration})
+				workout["workout_program"].append({"pace": pace, "duration": int(duration)})
 				total_duration += int(duration)
 			workout["total_duration"] = total_duration
 			copy_values = request.POST.copy()
