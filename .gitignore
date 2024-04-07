@@ -173,4 +173,3 @@ history_images/
 #logs
 logs/django*
 *minio
-

@@ -5,7 +5,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from running.models import Achievement, UserAchievement
+from running.models import Achievement, UserAchievement  # noqa
 
 User = get_user_model()
 
