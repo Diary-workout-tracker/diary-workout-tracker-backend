@@ -145,7 +145,8 @@ class AchievementUpdater:
 		)  # XXX: проверить и прорефакторить
 		self._user.amount_of_skips += rewards
 		with transaction.atomic():
-			self._user.save()
+			if rewards > 0:
+				self._user.save()
 			UserAchievement.objects.filter(
 				user_id=self._user, achievement_id__in=self._new_achievements, achievement_id__recurring=True
 			).delete()
@@ -175,17 +176,6 @@ class AchievementUpdater:
 			id__in=UserAchievement.objects.filter(user_id=self._user.id).values("achievement_id")
 		)
 		self._unfinished_achievements = unfinished_non_ios | recurring_non_ios
-
-		# from django.db.models import Q
-		# self._unfinished_achievements = Achievement.objects.exclude(
-		#     Q(id__in=UserAchievement.objects.filter(
-		#         user_id=self._user.id, achievement_id__recurring=False
-		#     ).values("achievement_id")) | Q(id__in=IOS_ACHIEVEMENTS)
-		# )
-		# self._unfinished_achievements = Achievement.objects.exclude(
-		#     id__in=UserAchievement.objects.filter(
-		#         user_id=self._user.id, achievement_id__recurring=False).values("achievement_id")
-		# )
 
 	@property
 	def unfinished_achievements(self):
