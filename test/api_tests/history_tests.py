@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -127,3 +128,29 @@ def test_recurring_non_ios_achievement_does_not_delete_old_recurring_ios(
 
 	for a in achievements:
 		assert user_achievement_count_by_id(user, a) == 1
+
+
+@pytest.mark.parametrize(
+	("achievement_id", "expected_freezes"),
+	(
+		(1, 2),  # упорный
+		(2, 1),  # машина
+		(18, 0),  # остальные по нулям
+		(26, 0),
+		(6, 0),
+		(17, 0),
+	),
+)
+@pytest.mark.django_db
+def test_achievement_adds_freezes_to_a_user(
+	achievement_id, expected_freezes, user: User, user_client, load_achievement_fixtures, training_end_data
+):
+	old_freezes = user.amount_of_skips
+	training_end_data["achievements"] = [
+		achievement_id
+	]  # на всякий случай проверяем и в iOS достижении, если по какой-то причине за них вдруг начислятся заморозки
+	patched_validator = {achievement_id: lambda user, history: True}
+	with patch("utils.achievements.VALIDATORS", patched_validator):
+		user_client.post(url, training_end_data, format="json").data
+		user.refresh_from_db()
+		assert user.amount_of_skips == old_freezes + expected_freezes
