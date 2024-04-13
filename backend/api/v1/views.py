@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 
+import pytz
 from django.contrib.auth import get_user_model
-from django.db.models import BooleanField, Case, DateTimeField, Exists, F, OuterRef, Q, When, ImageField
+from django.db.models import Case, DateTimeField, Exists, F, OuterRef, When
 from django.db.models.query import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -10,16 +11,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from running.models import Achievement, Day, History, UserAchievement
 from users.constants import DEFAULT_AMOUNT_OF_SKIPS
 from users.models import User as ClassUser
 from utils import authcode, mailsender, motivation_phrase, users
+from utils.achievements import AchievementUpdater
 
 from .serializers import (
 	AchievementEndTrainingSerializer,
 	AchievementSerializer,
 	CustomTokenObtainSerializer,
 	HistorySerializer,
+	MeSerializer,
 	TrainingSerializer,
 	UserSerializer,
 )
@@ -84,7 +88,7 @@ class TokenRefreshView(APIView):
 
 
 class MyInfoView(APIView):
-	serializer_class = UserSerializer
+	serializer_class = MeSerializer
 
 	def get(self, request, *args, **kwargs):
 		user = request.user
@@ -123,17 +127,9 @@ class TrainingView(generics.ListAPIView):
 		и флагом завершения тренировки.
 		"""
 		user = self.request.user
+		sub_queryset = History.objects.filter(user_id=user).values("training_day")
 		queryset = (
-			self.queryset.annotate(
-				completed=Case(
-					When(
-						Q(historis__training_day=F("day_number")) & Q(historis__user_id=user),
-						then=F("historis__completed"),
-					),
-					default=False,
-					output_field=BooleanField(),
-				)
-			)
+			self.queryset.annotate(completed=Exists(sub_queryset.filter(training_day=OuterRef("day_number"))))
 			.all()
 			.order_by("day_number")
 		)
@@ -160,11 +156,6 @@ class AchievementView(generics.ListAPIView):
 		sub_queryset = UserAchievement.objects.filter(user_id=user).values("achievement_id", "achievement_date")
 		queryset = (
 			Achievement.objects.annotate(
-				achievement_icon=Case(
-					When(Exists(sub_queryset.filter(achievement_id=OuterRef("id"))), then=F("icon")),
-					default=F("black_white_icon"),
-					output_field=ImageField(),
-				),
 				received=Exists(sub_queryset.filter(achievement_id=OuterRef("id"))),
 				achievement_date=Case(
 					When(user_achievements__user_id=user, then=F("user_achievements__achievement_date")),
@@ -198,7 +189,7 @@ class HistoryView(generics.ListCreateAPIView):
 
 	def get_queryset(self) -> QuerySet:
 		"""Формирует список историй тренировок пользователя."""
-		return self.request.user.user_history.all().order_by("training_day")
+		return self.request.user.user_history.order_by("training_day")
 
 	def perform_create(self, serializer: HistorySerializer) -> History:
 		"""Создаёт новую историю."""
@@ -206,39 +197,39 @@ class HistoryView(generics.ListCreateAPIView):
 
 	def create(self, request: Request, *args, **kwargs) -> Response:
 		achievements = request.data.pop("achievements", None)  # noqa
-		HistorySerializer.validate_achievements(self, achievements)
-		# XXX Тут можно начать просчёт ачивок.
-
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
+		if "achievements" in serializer._validated_data.keys():
+			serializer._validated_data.pop("achievements")
 		history = self.perform_create(serializer)
 		self.request.user.last_completed_training = history
+		self.request.user.total_m_run += history.distance
 		self.request.user.save()
+		updater = AchievementUpdater(self.request.user, achievements, history)
+		updater.update_achievements()
 		headers = self.get_success_headers(serializer.data)
 
 		new_achievements = AchievementEndTrainingSerializer(
-			Achievement.objects.all(), many=True, context={"request": request}
-		).data  # XXX Тут в будущем вместо всех ачивок надо добавить новые.
-
+			updater.new_achievements, many=True, context={"request": request}
+		).data
 		return Response(new_achievements, status=status.HTTP_201_CREATED, headers=headers)
 
 
 @extend_schema_view(
-	get=extend_schema(
+	post=extend_schema(
 		responses={200: {"updated": True}},
-		summary="Обновляет заморозки у пользователя",
-		description="Обновляет заморозки у пользователя",
-		tags=("Run",),
+		summary="Обновляет заморозки у пользователя и сохраняет часовой пояс",
+		description="Обновляет заморозки у пользователя и сохраняет часовой пояс",
+		tags=("System",),
 	),
 )
-class SkipView(APIView):
-	def _get_date_activity(self, user: ClassUser) -> datetime:
+class UpdateView(APIView):
+	def _get_date_activity(self, user: ClassUser, user_timezone: str) -> datetime:
 		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
-		date_last_skips = user.date_last_skips
-		date_activity = user.last_completed_training.training_start
-		if date_last_skips:
-			date_activity = date_activity if date_activity > date_last_skips else date_last_skips
-		return date_activity
+		date_activity = max(
+			[date for date in [user.date_last_skips, user.last_completed_training.training_start] if date is not None]
+		)
+		return date_activity.astimezone(pytz.timezone(user_timezone))
 
 	def _updates_skip_data(
 		self, user: ClassUser, amount_of_skips: int, days_missed: int, date_day_ago: datetime
@@ -255,21 +246,38 @@ class SkipView(APIView):
 		user.save()
 		History.objects.filter(user_id=user).delete()
 
-	def get(self, request: Request, *args, **kwargs) -> Response:
+	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
+		"""Обновляет timezone ползователя."""
+		if user.timezone != user_timezone:
+			user.timezone = user_timezone
+			user.save()
+
+	def post(self, request: Request, *args, **kwargs) -> Response:
+		user_timezone = request.data.get("timezone")
+
+		if not user_timezone:
+			return Response({"timezone": "Часовой пояс пользователя обязателен."}, status=status.HTTP_400_BAD_REQUEST)
+		response = Response({"updated": True}, status=status.HTTP_200_OK)
+
 		user = request.user
-		response = Response({"updated": True})
-		if not user.last_completed_training:
+		last_traning = user.last_completed_training
+
+		if not last_traning:
+			self._update_user_timezone_data(user, user_timezone)
 			return response
 
-		date_activity = self._get_date_activity(user)
+		date_activity = self._get_date_activity(user, user_timezone)
 		amount_of_skips = user.amount_of_skips
-		date_day_ago = timezone.localtime() - timedelta(days=1)
+		date_day_ago = timezone.localtime(timezone=pytz.timezone(user_timezone)) - timedelta(days=1)
 		days_missed = (date_day_ago.date() - date_activity.date()).days
 		if days_missed <= 0:
+			self._update_user_timezone_data(user, user_timezone)
 			return response
 
-		if amount_of_skips >= days_missed:
-			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
-		else:
-			self._clearing_user_training_data(user)
+		user.timezone = user_timezone
+		if last_traning.training_day.day_number < 100:
+			if amount_of_skips >= days_missed:
+				self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
+			else:
+				self._clearing_user_training_data(user)
 		return response

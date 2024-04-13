@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from distutils.util import strtobool
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ load_dotenv(path_to_env)
 
 SECRET_KEY = os.getenv("SECRET_KEY", default="secret_key")
 
-DEBUG = os.getenv("DEBUG", default=False)
+DEBUG = strtobool(os.getenv("DEBUG", default="False"))
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", default="127.0.0.1").split(",")
 
@@ -32,8 +33,8 @@ INSTALLED_APPS = [
 	"django.forms",
 	# lib
 	"rest_framework",
-	"rest_framework.authtoken",
 	"drf_spectacular",
+	"storages",
 	# app
 	"api.apps.ApiConfig",
 	"running.apps.RunningConfig",
@@ -70,6 +71,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+TIME_ZONE = "UTC"
+
 DATABASES = {
 	"default": {
 		"ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.postgresql"),
@@ -79,7 +82,7 @@ DATABASES = {
 		"HOST": os.getenv("DB_HOST", default="localhost"),
 		"PORT": os.getenv("DB_PORT", default=5432),
 		"PG_USER": os.getenv("PG_USER", default="user"),
-		"TIME_ZONE": os.getenv("TIME_ZONE", default="Europe/Moscow"),
+		"TIME_ZONE": TIME_ZONE,
 	}
 }
 
@@ -102,17 +105,51 @@ AUTH_USER_MODEL = "users.User"
 
 LANGUAGE_CODE = "ru-RU"
 
-TIME_ZONE = os.getenv("TIME_ZONE", default="Europe/Moscow")
-
 USE_I18N = True
 
 USE_TZ = True
 
 
-STATIC_URL = "/static/"
+# s3 storage settings
+IS_AWS_ACTIVE = strtobool(os.getenv("IS_AWS_ACTIVE", default="False"))
+if IS_AWS_ACTIVE:
+	STORAGES = {
+		"default": {
+			"BACKEND": "config.storage.S3MediaStorage",
+		},
+		"staticfiles": {
+			"BACKEND": "config.storage.StaticS3Boto3Storage",
+		},
+	}
+
+	STATICFILES_LOCATION = "static"
+	MEDIAFILES_LOCATION = "media"
+
+	MINIO_ACCESS_KEY = os.getenv("MINIO_ROOT_USER")
+	MINIO_SECRET_KEY = os.getenv("MINIO_ROOT_PASSWORD")
+	MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME")
+	MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+	MINIO_ACCESS_URL = os.getenv("MINIO_ACCESS_URL")
+	MINIO_STORAGE_USE_HTTPS = os.getenv("MINIO_STORAGE_USE_HTTPS", False) == "True"
+	MINIO_S3_SECURE_URLS = os.getenv("MINIO_S3_SECURE_URLS", False) == "True"
+
+	AWS_ACCESS_KEY_ID = MINIO_ACCESS_KEY
+	AWS_SECRET_ACCESS_KEY = MINIO_SECRET_KEY
+	AWS_STORAGE_BUCKET_NAME = MINIO_BUCKET_NAME
+	AWS_S3_ENDPOINT_URL = MINIO_ENDPOINT
+	AWS_S3_FILE_OVERWRITE = os.getenv("AWS_S3_FILE_OVERWRITE", False) == "True"
+	AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION")
+	AWS_S3_USE_SSL = os.getenv("AWS_S3_USE_SSL", False) == "True"
+	AWS_S3_SECURE_URLS = os.getenv("AWS_S3_SECURE_URLS", False) == "True"
+	AWS_S3_URL_PROTOCOL = os.getenv("AWS_S3_URL_PROTOCOL", "http:")
+
 MEDIA_URL = "/media/"
+STATIC_URL = "/static/"
+
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-if DEBUG:
+
+
+if DEBUG is True:
 	STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 else:
 	STATIC_ROOT = os.path.join(BASE_DIR, "static")
@@ -122,6 +159,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 REST_FRAMEWORK = {
+	"DATETIME_INPUT_FORMATS": ["%Y-%m-%d %H:%M:%S"],
 	"DEFAULT_PERMISSION_CLASSES": [
 		"rest_framework.permissions.IsAuthenticated",
 	],
@@ -133,8 +171,9 @@ REST_FRAMEWORK = {
 	],
 	"DEFAULT_THROTTLE_RATES": {
 		"user": "10000/day",
-		"anon": "1000/day",
+		"anon": "2000/day",
 	},
+	"EXCEPTION_HANDLER": "api.v1.exceptions.custom_exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {
@@ -144,12 +183,24 @@ SPECTACULAR_SETTINGS = {
 	"SERVE_INCLUDE_SCHEMA": False,
 }
 
+REDIS_LOCATION = f"redis://{os.getenv('REDIS_HOST', default='localhost')}:{os.getenv('REDIS_PORT', default='6379')}"
+
+CELERY_BROKER_URL = f"{REDIS_LOCATION}/0"
+CELERY_RESULT_BACKEND = f"{REDIS_LOCATION}/0"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 5 * 60
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = os.getenv("TIME_ZONE", default="Europe/Moscow")
+
 CACHES = {
 	"default": {
-		"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-		"LOCATION": "diary-localmemcache",
+		"BACKEND": "django.core.cache.backends.redis.RedisCache",
+		"LOCATION": REDIS_LOCATION,
 	}
 }
+
 
 # 100 years token lifetime
 
@@ -161,7 +212,7 @@ ACCESS_RESTORE_CODE_TTL_SECONDS = 300
 
 ACCESS_RESTORE_CODE_THROTTLING = {
 	"duration": timedelta(minutes=10),
-	"num_requests": 5,
+	"num_requests": 6,
 	"cooldown": timedelta(minutes=5),
 }
 
@@ -173,5 +224,9 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True")
 
-
-LOGGING = LOGGING_SETTINGS
+# logging
+IS_LOGGING = strtobool(os.getenv("IS_LOGGING", default="False"))
+if IS_LOGGING:
+	LOGGING = LOGGING_SETTINGS
+else:
+	LOGGING = None

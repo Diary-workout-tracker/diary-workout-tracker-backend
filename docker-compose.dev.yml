@@ -2,6 +2,8 @@ version: '3'
 
 volumes:
   pg_data:
+  redis_data:
+  redis_conf:
 
 services:
 
@@ -18,4 +20,41 @@ services:
       retries: 3
       start_period: 3s
     ports:
-      - ${DOCKER_COMPOSER_PORT:-5432:5432}
+      - ${DOCKER_COMPOSER_PORT_DB:-5432:5432}
+
+  redis:
+    image: redis:alpine
+    env_file: ./infra/.env
+    restart: always
+    volumes:
+      - redis_data:/root/redis
+      - redis_conf:/usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    ports:
+      - ${DOCKER_COMPOSER_PORT_REDIS:-6379:6379}
+
+  minio:
+    image: minio/minio:latest
+    volumes:
+      - ./minio:/minio_files
+    env_file: ./infra/.env
+    command: 'minio server /minio_files --console-address ":9001"'
+    ports:
+      - 9000:9000
+      - 9001:9001
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    env_file: ./infra/.env
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add --quiet --api s3v4 s3 http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb --quiet s3/running-app;
+      /usr/bin/mc anonymous set public s3/running-app;
+      "

@@ -1,5 +1,10 @@
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 LOG_ERRORS_TO_FILE_LEVEL = "WARNING"
-PATH_TO_LOGS = "logs/django.log"
+PATH_TO_LOGS = os.path.join(BASE_DIR, "logs/django.log")
 
 LOGGING_SETTINGS = {
 	"version": 1,
@@ -23,7 +28,7 @@ LOGGING_SETTINGS = {
 			"filename": PATH_TO_LOGS,
 			"formatter": "formatter",
 			"when": "midnight",
-			"backupCount": "30",
+			"backupCount": 30,
 		},
 	},
 	"loggers": {

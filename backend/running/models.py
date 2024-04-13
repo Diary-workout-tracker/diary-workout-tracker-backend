@@ -68,12 +68,6 @@ class Achievement(models.Model):
 		db_comment=_("Иконка достижения."),
 		help_text=_("Иконка, представляющая достижение."),
 	)
-	black_white_icon = models.ImageField(
-		verbose_name=_("ЧБ иконка достижения"),
-		upload_to="achievement_icons/",
-		db_comment=_("ЧБ иконка достижения."),
-		help_text=_("ЧБ иконка, представляющая достижение."),
-	)
 	title = models.CharField(
 		verbose_name=_("Название достижения"),
 		max_length=100,
@@ -91,6 +85,12 @@ class Achievement(models.Model):
 		default=0,
 		help_text=_("Количество заморозок за достижение."),
 		db_comment=_("Количество заморозок за достижение."),
+	)
+	recurring = models.BooleanField(
+		verbose_name=_("Повторяющееся"),
+		default=False,
+		help_text=_("Повторяющееся ли достижение"),
+		db_comment=_("Повторяющееся ли достижение"),
 	)
 
 	class Meta:
@@ -137,7 +137,7 @@ class UserAchievement(models.Model):
 		verbose_name_plural = _("Достижения пользователей")
 
 	def __str__(self) -> str:
-		return f"{self.user_id.username} - {self.achievement_id.title}"
+		return f"{self.user_id.email} - {self.achievement_id.title}"
 
 
 class History(models.Model):
@@ -152,12 +152,6 @@ class History(models.Model):
 		verbose_name=_("Время окончания тренировки"),
 		help_text=_("Дата и время окончания тренировки."),
 		db_comment=_("Дата и время окончания тренировки."),
-	)
-	completed = models.BooleanField(
-		default=False,
-		verbose_name=_("Завершено"),
-		help_text=_("Показывает, завершена ли тренировка или нет."),
-		db_comment=_("Флаг, указывающий, завершена ли тренировка или нет."),
 	)
 	training_day = models.ForeignKey(
 		Day,

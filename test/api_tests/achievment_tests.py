@@ -3,9 +3,9 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
-from running.models import UserAchievement  # noqa
 
 from backend.api.v1.constants import FORMAT_DATE
+from running.models import UserAchievement  # noqa
 
 User = get_user_model()
 

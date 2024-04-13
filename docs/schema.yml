@@ -98,7 +98,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Me'
           description: ''
     patch:
       operationId: api_v1_me_partial_update
@@ -108,13 +108,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedUser'
+              $ref: '#/components/schemas/PatchedMe'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedUser'
+              $ref: '#/components/schemas/PatchedMe'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedUser'
+              $ref: '#/components/schemas/PatchedMe'
       security:
       - jwtAuth: []
       responses:
@@ -122,7 +122,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Me'
           description: ''
     delete:
       operationId: api_v1_me_destroy
@@ -144,22 +144,6 @@ paths:
       responses:
         '200':
           description: No response body
-  /api/v1/skip/:
-    get:
-      operationId: api_v1_skip_retrieve
-      description: Обновляет заморозки у пользователя
-      summary: Обновляет заморозки у пользователя
-      tags:
-      - Run
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                updated: true
-          description: ''
   /api/v1/token/refresh/:
     post:
       operationId: api_v1_token_refresh_create
@@ -205,6 +189,22 @@ paths:
                 items:
                   $ref: '#/components/schemas/Training'
           description: ''
+  /api/v1/update/:
+    post:
+      operationId: api_v1_update_create
+      description: Обновляет заморозки у пользователя и сохраняет часовой пояс
+      summary: Обновляет заморозки у пользователя и сохраняет часовой пояс
+      tags:
+      - System
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                updated: true
+          description: ''
   /api/v1/user/:
     post:
       operationId: api_v1_user_create
@@ -243,7 +243,7 @@ components:
           maximum: 9223372036854775807
           minimum: 0
           format: int64
-        achievement_icon:
+        icon:
           type: string
           format: uri
         title:
@@ -268,8 +268,8 @@ components:
           type: boolean
       required:
       - achievement_date
-      - achievement_icon
       - description
+      - icon
       - id
       - received
       - title
@@ -288,9 +288,6 @@ components:
       required:
       - icon
       - title
-    BlankEnum:
-      enum:
-      - ''
     CustomTokenObtain:
       type: object
       properties:
@@ -329,11 +326,6 @@ components:
           writeOnly: true
           title: Время окончания тренировки
           description: Дата и время окончания тренировки.
-        completed:
-          type: boolean
-          writeOnly: true
-          title: Завершено
-          description: Показывает, завершена ли тренировка или нет.
         training_day:
           type: integer
           maximum: 32767
@@ -406,19 +398,18 @@ components:
       - training_day
       - training_end
       - training_start
-    PatchedUser:
+    Me:
       type: object
-      description: Сериализатор кастомного пользователя.
+      description: Сериализатор Me пользователя.
       properties:
         email:
           type: string
           format: email
+          readOnly: true
         name:
           type: string
         gender:
-          oneOf:
-          - $ref: '#/components/schemas/GenderEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          $ref: '#/components/schemas/GenderEnum'
         height_cm:
           type: integer
           nullable: true
@@ -432,10 +423,42 @@ components:
         date_last_skips:
           type: string
           format: date-time
-          nullable: true
         amount_of_skips:
           type: integer
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - email
+      - last_completed_training
+    PatchedMe:
+      type: object
+      description: Сериализатор Me пользователя.
+      properties:
+        email:
+          type: string
+          format: email
           readOnly: true
+        name:
+          type: string
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        height_cm:
+          type: integer
+          nullable: true
+        weight_kg:
+          type: number
+          format: double
+          nullable: true
+        last_completed_training:
+          type: integer
+          readOnly: true
+        date_last_skips:
+          type: string
+          format: date-time
+        amount_of_skips:
+          type: integer
         avatar:
           type: string
           format: uri
@@ -474,37 +497,8 @@ components:
         email:
           type: string
           format: email
-        name:
-          type: string
-        gender:
-          oneOf:
-          - $ref: '#/components/schemas/GenderEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-        height_cm:
-          type: integer
-          nullable: true
-        weight_kg:
-          type: number
-          format: double
-          nullable: true
-        last_completed_training:
-          type: integer
-          readOnly: true
-        date_last_skips:
-          type: string
-          format: date-time
-          nullable: true
-        amount_of_skips:
-          type: integer
-          readOnly: true
-        avatar:
-          type: string
-          format: uri
-          nullable: true
       required:
-      - amount_of_skips
       - email
-      - last_completed_training
   securitySchemes:
     jwtAuth:
       type: http

@@ -11,265 +11,265 @@ def create_workout(apps, schema_editor):
             day_number=1,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 15},{"pace": "бег", "duration": 5},'
                      '{"pace": "ходьба", "duration": 15}],"running_pace": "легкий","total_duration": 35}'),
-            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы. Темп — легкий.",
+            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы.",
         ),
         Day(
             day_number=2,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 15},{"pace": "бег", "duration": 5},'
                      '{"pace": "ходьба", "duration": 15}],"running_pace": "легкий","total_duration": 35}'),
-            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы. Темп — легкий.",
+            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы.",
         ),
         Day(
             day_number=3,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 20},{"pace": "бег", "duration": 10}]'
                      ',"running_pace": "легкий","total_duration": 30}'),
-            workout_info="20 минут ходьбы + 10 минут бега. Темп — легкий.",
+            workout_info="20 минут ходьбы + 10 минут бега.",
         ),
         Day(
             day_number=4,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 20},{"pace": "бег", "duration": 10}]'
                      ',"running_pace": "легкий","total_duration": 30}'),
-            workout_info="20 минут ходьбы + 10 минут бега. Темп — легкий.",
+            workout_info="20 минут ходьбы + 10 минут бега.",
         ),
         Day(
             day_number=5,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 15},{"pace": "бег", "duration": 5},'
                      '{"pace": "ходьба", "duration": 15}],"running_pace": "легкий","total_duration": 35}'),
-            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы. Темп — легкий.",
+            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы.",
         ),
         Day(
             day_number=6,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 20},{"pace": "бег", "duration": 10}]'
                      ',"running_pace": "легкий","total_duration": 30}'),
-            workout_info="20 минут ходьбы + 10 минут бега. Темп — легкий.",
+            workout_info="20 минут ходьбы + 10 минут бега.",
         ),
         Day(
             day_number=7,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 15},{"pace": "бег", "duration": 5},'
                      '{"pace": "ходьба", "duration": 15}],"running_pace": "легкий","total_duration": 35}'),
-            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы. Темп — легкий.",
+            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы.",
         ),
         Day(
             day_number=8,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 15},{"pace": "бег", "duration": 5},'
                      '{"pace": "ходьба", "duration": 15}],"running_pace": "легкий","total_duration": 35}'),
-            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы. Темп — легкий.",
+            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы.",
         ),
         Day(
             day_number=9,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 15},{"pace": "бег", "duration": 5},'
                      '{"pace": "ходьба", "duration": 15}],"running_pace": "легкий","total_duration": 35}'),
-            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы. Темп — легкий.",
+            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы.",
         ),
         Day(
             day_number=10,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 20},{"pace": "бег", "duration": 10}]'
                      ',"running_pace": "легкий","total_duration": 30}'),
-            workout_info="20 минут ходьбы + 10 минут бега. Темп — легкий.",
+            workout_info="20 минут ходьбы + 10 минут бега.",
         ),
         Day(
             day_number=11,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 20},{"pace": "бег", "duration": 10}]'
                      ',"running_pace": "легкий","total_duration": 30}'),
-            workout_info="20 минут ходьбы + 10 минут бега. Темп — легкий.",
+            workout_info="20 минут ходьбы + 10 минут бега.",
         ),
         Day(
             day_number=12,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 15},{"pace": "бег", "duration": 5},'
                      '{"pace": "ходьба", "duration": 15}],"running_pace": "легкий","total_duration": 35}'),
-            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы. Темп — легкий.",
+            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы.",
         ),
         Day(
             day_number=13,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 20},{"pace": "бег", "duration": 10}]'
                      ',"running_pace": "легкий","total_duration": 30}'),
-            workout_info="20 минут ходьбы + 10 минут бега. Темп — легкий.",
+            workout_info="20 минут ходьбы + 10 минут бега.",
         ),
         Day(
             day_number=14,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 15},{"pace": "бег", "duration": 5},'
                      '{"pace": "ходьба", "duration": 15}],"running_pace": "легкий","total_duration": 35}'),
-            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы. Темп — легкий.",
+            workout_info="15 минут ходьбы + 5 минут бега + 15 минут ходьбы.",
         ),
         Day(
             day_number=15,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 10},{"pace": "бег", "duration": 10},'
                      '{"pace": "ходьба", "duration": 10}],"running_pace": "легкий","total_duration": 30}'),
-            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы. Темп — легкий.",
+            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы.",
         ),
         Day(
             day_number=16,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 10},{"pace": "бег", "duration": 10},'
                      '{"pace": "ходьба", "duration": 10}],"running_pace": "легкий","total_duration": 30}'),
-            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы. Темп — легкий.",
+            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы.",
         ),
         Day(
             day_number=17,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 15},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "легкий","total_duration": 25}'),
-            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы. Темп — легкий.",
+            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=18,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 15},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "легкий","total_duration": 25}'),
-            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы. Темп — легкий.",
+            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=19,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 10},{"pace": "бег", "duration": 10},'
                      '{"pace": "ходьба", "duration": 10}],"running_pace": "легкий","total_duration": 30}'),
-            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы. Темп — легкий.",
+            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы.",
         ),
         Day(
             day_number=20,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 15},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "легкий","total_duration": 25}'),
-            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы. Темп — легкий.",
+            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=21,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 10},{"pace": "бег", "duration": 10},'
                      '{"pace": "ходьба", "duration": 10}],"running_pace": "легкий","total_duration": 30}'),
-            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы. Темп — легкий.",
+            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы.",
         ),
         Day(
             day_number=22,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 10},{"pace": "бег", "duration": 10},'
                      '{"pace": "ходьба", "duration": 10}],"running_pace": "легкий","total_duration": 30}'),
-            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы. Темп — легкий.",
+            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы.",
         ),
         Day(
             day_number=23,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 10},{"pace": "бег", "duration": 10},'
                      '{"pace": "ходьба", "duration": 10}],"running_pace": "легкий","total_duration": 30}'),
-            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы. Темп — легкий.",
+            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы.",
         ),
         Day(
             day_number=24,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 15},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "легкий","total_duration": 25}'),
-            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы. Темп — легкий.",
+            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=25,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 15},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "легкий","total_duration": 25}'),
-            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы. Темп — легкий.",
+            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=26,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 10},{"pace": "бег", "duration": 10},'
                      '{"pace": "ходьба", "duration": 10}],"running_pace": "легкий","total_duration": 30}'),
-            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы. Темп — легкий.",
+            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы.",
         ),
         Day(
             day_number=27,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 15},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "легкий","total_duration": 25}'),
-            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы. Темп — легкий.",
+            workout_info="5 минут ходьбы + 15 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=28,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 10},{"pace": "бег", "duration": 10},'
                      '{"pace": "ходьба", "duration": 10}],"running_pace": "легкий","total_duration": 30}'),
-            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы. Темп — легкий.",
+            workout_info="10 минут ходьбы + 10 минут бега + 10 минут ходьбы.",
         ),
         Day(
             day_number=29,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 20}],'
                      '"running_pace": "легкий","total_duration": 20}'),
-            workout_info="20 минут бега без остановки. Темп — легкий.",
+            workout_info="20 минут бега без остановки.",
         ),
         Day(
             day_number=30,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 20}],'
                      '"running_pace": "легкий","total_duration": 20}'),
-            workout_info="20 минут бега без остановки. Темп — легкий.",
+            workout_info="20 минут бега без остановки.",
         ),
         Day(
             day_number=31,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 20},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы. Темп — умеренный.",
+            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=32,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 20},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы. Темп — умеренный.",
+            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=33,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 20}],'
                      '"running_pace": "легкий","total_duration": 20}'),
-            workout_info="20 минут бега без остановки. Темп — легкий.",
+            workout_info="20 минут бега без остановки.",
         ),
         Day(
             day_number=34,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 20},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы. Темп — умеренный.",
+            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=35,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 20}],'
                      '"running_pace": "легкий","total_duration": 20}'),
-            workout_info="20 минут бега без остановки. Темп — легкий.",
+            workout_info="20 минут бега без остановки.",
         ),
         Day(
             day_number=36,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 20}],'
                      '"running_pace": "легкий","total_duration": 20}'),
-            workout_info="20 минут бега без остановки. Темп — легкий.",
+            workout_info="20 минут бега без остановки.",
         ),
         Day(
             day_number=37,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 20}],'
                      '"running_pace": "легкий","total_duration": 20}'),
-            workout_info="20 минут бега без остановки. Темп — легкий.",
+            workout_info="20 минут бега без остановки.",
         ),
         Day(
             day_number=38,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 20},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы. Темп — умеренный.",
+            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=39,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 20},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы. Темп — умеренный.",
+            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=40,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 20}],'
                      '"running_pace": "легкий","total_duration": 20}'),
-            workout_info="20 минут бега без остановки. Темп — легкий.",
+            workout_info="20 минут бега без остановки.",
         ),
         Day(
             day_number=41,
             workout=json.loads('{"workout_program": [{"pace": "ходьба", "duration": 5},{"pace": "бег", "duration": 20},'
                      '{"pace": "ходьба", "duration": 5}],"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы. Темп — умеренный.",
+            workout_info="5 минут ходьбы + 20 минут бега + 5 минут ходьбы.",
         ),
         Day(
             day_number=42,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 20}],'
                      '"running_pace": "легкий","total_duration": 20}'),
-            workout_info="20 минут бега без остановки. Темп — легкий.",
+            workout_info="20 минут бега без остановки.",
         ),
         Day(
             day_number=43,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 25}],'
                      '"running_pace": "умеренный","total_duration": 25}'),
-            workout_info="25 минут бега без остановки. Темп — умеренный.",
+            workout_info="25 минут бега без остановки.",
         ),
         Day(
             day_number=44,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 25}],'
                      '"running_pace": "умеренный","total_duration": 25}'),
-            workout_info="25 минут бега без остановки. Темп — умеренный.",
+            workout_info="25 минут бега без остановки.",
         ),
         Day(
             day_number=45,
@@ -285,7 +285,7 @@ def create_workout(apps, schema_editor):
             day_number=47,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 25}],'
                      '"running_pace": "умеренный","total_duration": 25}'),
-            workout_info="25 минут бега без остановки. Темп — умеренный.",
+            workout_info="25 минут бега без остановки.",
         ),
         Day(
             day_number=48,
@@ -296,19 +296,19 @@ def create_workout(apps, schema_editor):
             day_number=49,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 25}],'
                      '"running_pace": "умеренный","total_duration": 25}'),
-            workout_info="25 минут бега без остановки. Темп — умеренный.",
+            workout_info="25 минут бега без остановки.",
         ),
         Day(
             day_number=50,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 25}],'
                      '"running_pace": "умеренный","total_duration": 25}'),
-            workout_info="25 минут бега без остановки. Темп — умеренный.",
+            workout_info="25 минут бега без остановки.",
         ),
         Day(
             day_number=51,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 25}],'
                      '"running_pace": "умеренный","total_duration": 25}'),
-            workout_info="25 минут бега без остановки. Темп — умеренный.",
+            workout_info="25 минут бега без остановки.",
         ),
         Day(
             day_number=52,
@@ -324,7 +324,7 @@ def create_workout(apps, schema_editor):
             day_number=54,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 25}],'
                      '"running_pace": "умеренный","total_duration": 25}'),
-            workout_info="25 минут бега без остановки. Темп — умеренный.",
+            workout_info="25 минут бега без остановки.",
         ),
         Day(
             day_number=55,
@@ -335,103 +335,103 @@ def create_workout(apps, schema_editor):
             day_number=56,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 25}],'
                      '"running_pace": "умеренный","total_duration": 25}'),
-            workout_info="25 минут бега без остановки. Темп — умеренный.",
+            workout_info="25 минут бега без остановки.",
         ),
         Day(
             day_number=57,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=58,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=59,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=60,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=61,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=62,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=63,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=64,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=65,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=66,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=67,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=68,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=69,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=70,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=71,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=72,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 30}],'
                      '"running_pace": "умеренный","total_duration": 30}'),
-            workout_info="30 минут бега. Темп — умеренный.",
+            workout_info="30 минут бега.",
         ),
         Day(
             day_number=73,
@@ -455,7 +455,7 @@ def create_workout(apps, schema_editor):
             day_number=75,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 35}],'
                      '"running_pace": "умеренный","total_duration": 35}'),
-            workout_info="35 минут бега. Темп — умеренный.",
+            workout_info="35 минут бега.",
         ),
         Day(
             day_number=76,
@@ -469,19 +469,19 @@ def create_workout(apps, schema_editor):
             day_number=77,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 35}],'
                      '"running_pace": "умеренный","total_duration": 35}'),
-            workout_info="35 минут бега. Темп — умеренный.",
+            workout_info="35 минут бега.",
         ),
         Day(
             day_number=78,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 35}],'
                      '"running_pace": "умеренный","total_duration": 35}'),
-            workout_info="35 минут бега. Темп — умеренный.",
+            workout_info="35 минут бега.",
         ),
         Day(
             day_number=79,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 35}],'
                      '"running_pace": "умеренный","total_duration": 35}'),
-            workout_info="35 минут бега. Темп — умеренный.",
+            workout_info="35 минут бега.",
         ),
         Day(
             day_number=80,
@@ -503,7 +503,7 @@ def create_workout(apps, schema_editor):
             day_number=82,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 35}],'
                      '"running_pace": "умеренный","total_duration": 35}'),
-            workout_info="35 минут бега. Темп — умеренный.",
+            workout_info="35 минут бега.",
         ),
         Day(
             day_number=83,
@@ -517,25 +517,25 @@ def create_workout(apps, schema_editor):
             day_number=84,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 35}],'
                      '"running_pace": "умеренный","total_duration": 35}'),
-            workout_info="35 минут бега. Темп — умеренный.",
+            workout_info="35 минут бега.",
         ),
         Day(
             day_number=85,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 40}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 40}'),
-            workout_info="40 минут бега. Темп — умеренный/быстрый.",
+            workout_info="40 минут бега.",
         ),
         Day(
             day_number=86,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 40}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 40}'),
-            workout_info="40 минут бега. Темп — умеренный/быстрый.",
+            workout_info="40 минут бега.",
         ),
         Day(
             day_number=87,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 45}],'
                      '"running_pace": "умеренный","total_duration": 45}'),
-            workout_info="45 минут бега. Темп — умеренный.",
+            workout_info="45 минут бега.",
         ),
         Day(
             day_number=88,
@@ -549,7 +549,7 @@ def create_workout(apps, schema_editor):
             day_number=89,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 40}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 40}'),
-            workout_info="40 минут бега. Темп — умеренный/быстрый.",
+            workout_info="40 минут бега.",
         ),
         Day(
             day_number=90,
@@ -564,25 +564,25 @@ def create_workout(apps, schema_editor):
             day_number=91,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 40}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 40}'),
-            workout_info="40 минут бега. Темп — умеренный/быстрый.",
+            workout_info="40 минут бега.",
         ),
         Day(
             day_number=92,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 40}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 40}'),
-            workout_info="40 минут бега. Темп — умеренный/быстрый.",
+            workout_info="40 минут бега.",
         ),
         Day(
             day_number=93,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 40}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 40}'),
-            workout_info="40 минут бега. Темп — умеренный/быстрый.",
+            workout_info="40 минут бега.",
         ),
         Day(
             day_number=94,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 45}],'
                      '"running_pace": "умеренный","total_duration": 45}'),
-            workout_info="45 минут бега. Темп — умеренный.",
+            workout_info="45 минут бега.",
         ),
         Day(
             day_number=95,
@@ -596,7 +596,7 @@ def create_workout(apps, schema_editor):
             day_number=96,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 40}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 40}'),
-            workout_info="40 минут бега. Темп — умеренный/быстрый.",
+            workout_info="40 минут бега.",
         ),
         Day(
             day_number=97,
@@ -610,19 +610,19 @@ def create_workout(apps, schema_editor):
             day_number=98,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 40}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 40}'),
-            workout_info="40 минут бега. Темп — умеренный/быстрый.",
+            workout_info="40 минут бега.",
         ),
         Day(
             day_number=99,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 45}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 45}'),
-            workout_info="45 минут бега. Темп — умеренный/быстрый.",
+            workout_info="45 минут бега.",
         ),
         Day(
             day_number=100,
             workout=json.loads('{"workout_program": [{"pace": "бег", "duration": 45}],'
                      '"running_pace": "умеренный/быстрый","total_duration": 45}'),
-            workout_info="45 минут бега. Темп — умеренный/быстрый.",
+            workout_info="45 минут бега.",
         ),
     )
     Day.objects.bulk_create(workout)
