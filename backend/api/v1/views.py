@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Any, Optional
 
 import pytz
 from django.contrib.auth import get_user_model
@@ -13,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from running.models import Achievement, Day, History, UserAchievement
-from users.constants import DEFAULT_AMOUNT_OF_SKIPS
+from users.constants import DEFAULT_AMOUNT_OF_SKIPS, MAX_LEN_NAME
 from users.models import User as ClassUser
 from utils import authcode, mailsender, motivation_phrase, users
 from utils.achievements import AchievementUpdater
@@ -195,17 +196,21 @@ class HistoryView(generics.ListCreateAPIView):
 		"""Создаёт новую историю."""
 		return serializer.save()
 
+	def _update_data_user(self, user: ClassUser, history: History) -> None:
+		user.last_completed_training = history
+		user.total_m_run += history.distance
+		user.save()
+
 	def create(self, request: Request, *args, **kwargs) -> Response:
-		achievements = request.data.pop("achievements", None)  # noqa
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		if "achievements" in serializer._validated_data.keys():
 			serializer._validated_data.pop("achievements")
 		history = self.perform_create(serializer)
-		self.request.user.last_completed_training = history
-		self.request.user.total_m_run += history.distance
-		self.request.user.save()
-		updater = AchievementUpdater(self.request.user, achievements, history)
+		user = self.request.user
+		achievements = request.data.get("achievements")
+		self._update_data_user(user, history)
+		updater = AchievementUpdater(user, achievements, history)
 		updater.update_achievements()
 		headers = self.get_success_headers(serializer.data)
 
@@ -252,17 +257,30 @@ class UpdateView(APIView):
 			user.timezone = user_timezone
 			user.save()
 
+	def _validate_data(self, data: Any) -> Optional[Response]:
+		"""Валидирует данные."""
+		error = None
+		status_error = status.HTTP_400_BAD_REQUEST
+		if not isinstance(data, dict):
+			error = Response({"data": "Данные должны быть в виде словаря."}, status=status_error)
+		elif not data.get("timezone"):
+			error = Response({"timezone": "Часовой пояс пользователя обязателен."}, status=status_error)
+		elif not isinstance(data.get("timezone"), str):
+			error = Response({"timezone": "Часовой пояс должен быть в виде строки."}, status=status_error)
+		elif MAX_LEN_NAME < len(data.get("timezone")):
+			error = Response({"timezone": "Часовой пояс должен быть не длиннее 100 символов."}, status=status_error)
+		return error
+
 	def post(self, request: Request, *args, **kwargs) -> Response:
+		error = self._validate_data(request.data)
+		if error:
+			return error
 		user_timezone = request.data.get("timezone")
-
-		if not user_timezone:
-			return Response({"timezone": "Часовой пояс пользователя обязателен."}, status=status.HTTP_400_BAD_REQUEST)
 		response = Response({"updated": True}, status=status.HTTP_200_OK)
-
 		user = request.user
 		last_traning = user.last_completed_training
 
-		if not last_traning:
+		if not last_traning or last_traning.training_day.day_number == 100:
 			self._update_user_timezone_data(user, user_timezone)
 			return response
 
@@ -275,9 +293,8 @@ class UpdateView(APIView):
 			return response
 
 		user.timezone = user_timezone
-		if last_traning.training_day.day_number < 100:
-			if amount_of_skips >= days_missed:
-				self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
-			else:
-				self._clearing_user_training_data(user)
+		if amount_of_skips >= days_missed:
+			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
+		else:
+			self._clearing_user_training_data(user)
 		return response

@@ -408,14 +408,18 @@ components:
           readOnly: true
         name:
           type: string
+          maxLength: 150
         gender:
           $ref: '#/components/schemas/GenderEnum'
         height_cm:
           type: integer
+          maximum: 32767
+          minimum: 0
           nullable: true
         weight_kg:
           type: number
           format: double
+          minimum: 0
           nullable: true
         last_completed_training:
           type: integer
@@ -442,14 +446,18 @@ components:
           readOnly: true
         name:
           type: string
+          maxLength: 150
         gender:
           $ref: '#/components/schemas/GenderEnum'
         height_cm:
           type: integer
+          maximum: 32767
+          minimum: 0
           nullable: true
         weight_kg:
           type: number
           format: double
+          minimum: 0
           nullable: true
         last_completed_training:
           type: integer

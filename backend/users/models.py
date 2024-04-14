@@ -3,7 +3,15 @@ from django.db import models
 from django.utils.html import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from .constants import DEFAULT_AMOUNT_OF_SKIPS, GENDER_CHOICES
+from .constants import (
+	DEFAULT_AMOUNT_OF_SKIPS,
+	GENDER_CHOICES,
+	MAX_LEN_EMAIL,
+	MAX_LEN_NAME,
+	MAX_LEN_PASSWORD,
+	MAX_LEN_GENDER,
+	MAX_LEN_TIMEZONE,
+)
 from .managers import CustomUserManager
 
 
@@ -14,10 +22,10 @@ class User(AbstractUser):
 	REQUIRED_FIELDS = ()
 	username = None
 
-	email = models.EmailField(_("Адрес электронной почты"), unique=True, max_length=254)
-	name = models.CharField(_("Полное имя"), max_length=150, null=True, blank=True)
-	password = models.CharField(_("Пароль"), max_length=128, null=True)
-	gender = models.CharField(_("Пол"), max_length=2, choices=GENDER_CHOICES, blank=True, null=True)
+	email = models.EmailField(_("Адрес электронной почты"), unique=True, max_length=MAX_LEN_EMAIL)
+	name = models.CharField(_("Полное имя"), max_length=MAX_LEN_NAME, null=True, blank=True)
+	password = models.CharField(_("Пароль"), max_length=MAX_LEN_PASSWORD, null=True)
+	gender = models.CharField(_("Пол"), max_length=MAX_LEN_GENDER, choices=GENDER_CHOICES, blank=True, null=True)
 	height_cm = models.PositiveSmallIntegerField(_("Рост в см"), null=True, blank=True)
 	weight_kg = models.FloatField(_("Вес в кг"), null=True, blank=True)
 	last_completed_training = models.ForeignKey(
@@ -32,8 +40,8 @@ class User(AbstractUser):
 		_("Количество доступных пропусков/заморозок"), default=DEFAULT_AMOUNT_OF_SKIPS
 	)
 	avatar = models.ImageField(_("Аватар"), upload_to="avatars/", null=True, blank=True)
-	total_m_run = models.IntegerField(_("Всего пробежал метров"), default=0)
-	timezone = models.CharField(_("Часовой пояс пользователя"), max_length=100, null=True, blank=True)
+	total_m_run = models.FloatField(_("Всего пробежал метров"), default=0)
+	timezone = models.CharField(_("Часовой пояс пользователя"), max_length=MAX_LEN_TIMEZONE, null=True, blank=True)
 	objects = CustomUserManager()
 
 	class Meta:

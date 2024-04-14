@@ -127,7 +127,7 @@ class DayAdmin(admin.ModelAdmin):
 		data = obj.workout
 		if data:
 			for workout in data["workout_program"]:
-				stage_column.append(f"{workout['pace']} - {workout['duration']} c.")
+				stage_column.append(f"{workout['pace']} - {workout['duration']} мин.")
 			running_pace = data.get("running_pace")
 			if running_pace:
 				stage_column.append(running_pace)
