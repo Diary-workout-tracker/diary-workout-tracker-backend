@@ -257,6 +257,7 @@ class UpdateView(APIView):
 			user.timezone = user_timezone
 			user.save()
 
+
 	def _validate_data(self, data: Any) -> Optional[Response]:
 		"""Валидирует данные."""
 		error = None
