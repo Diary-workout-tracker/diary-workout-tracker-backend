@@ -8,7 +8,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from running.models import Achievement, Day, History, MotivationalPhrase
-from users.constants import GENDER_CHOICES
+from users.constants import GENDER_CHOICES, MAX_LEN_NAME
 from users.models import User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
@@ -34,10 +34,10 @@ class MeSerializer(serializers.ModelSerializer):
 	"""Сериализатор Me пользователя."""
 
 	email = serializers.EmailField(read_only=True)
-	name = serializers.CharField(required=False)
+	name = serializers.CharField(required=False, max_length=MAX_LEN_NAME)
 	gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False)
-	height_cm = serializers.IntegerField(allow_null=True, required=False)
-	weight_kg = serializers.FloatField(allow_null=True, required=False)
+	height_cm = serializers.IntegerField(min_value=0, max_value=32767, allow_null=True, required=False)
+	weight_kg = serializers.FloatField(min_value=0, allow_null=True, required=False)
 	last_completed_training = serializers.IntegerField(
 		source="last_completed_training.training_day.day_number", read_only=True
 	)

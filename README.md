@@ -4,7 +4,9 @@
 ![Workflow](https://github.com/Diary-workout-tracker/diary-workout-tracker-backend/actions/workflows/cd.yml/badge.svg)
 
 ### Описание
-Научись бегать за 100 дней.
+Backend приложения "100 дней бега".
+
+Возможности: функционал работы с пользователем(регистрация, авторизация, аутентификация), получение тренировок, ачивок, истории, сохранение истории.
 
 ### Технологии
 
@@ -19,10 +21,6 @@
 ---
 [![Ruff](https://img.shields.io/badge/Ruff-%5E0.2.1-blue?style=flat)](https://pypi.org/project/ruff/)
 [![Pytest](https://img.shields.io/badge/Pytest-%5E8.0.0-blue?style=flat&logo=pytest&logoColor=white)](https://pypi.org/project/pytest/)
-
-## Структура базы данных
-
-![ER-диаграмма](docs/ER_model.svg)
 
 ## Запуск проекта
 
@@ -122,8 +120,6 @@
 [Оганин Петр](https://github.com/necroshizo)
 
 [Шапиро Алексей](https://github.com/holohup)
-
-[Шлемин Сергей](https://github.com/fluid1408)
 
 [Яременко Владислав](https://github.com/VladislavYar)
 
