@@ -51,6 +51,7 @@ class AuthCode:
 	def _send_code(self) -> None:
 		if not self._sender:
 			raise ValidationError("Невозможно отправить код: отправщик не установлен.")
+		print(self.code)
 		self._sender.send_code(self._user.email, self.code)
 
 	def set_sender(self, sender: MailSender) -> None:

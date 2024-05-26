@@ -30,6 +30,14 @@ class UserSerializer(serializers.ModelSerializer):
 		fields = ("email",)
 
 
+class UserTimezoneSerializer(serializers.ModelSerializer):
+	"""Сериализатор timezone пользователя."""
+
+	class Meta:
+		model = User
+		fields = ("timezone",)
+
+
 class MeSerializer(serializers.ModelSerializer):
 	"""Сериализатор Me пользователя."""
 
@@ -304,3 +312,9 @@ class HistorySerializer(serializers.ModelSerializer):
 	def create(self, validated_data: dict) -> History:
 		validated_data["user_id"] = self.context["request"].user
 		return super().create(validated_data)
+
+
+class BoolSerializer(serializers.Serializer):
+	"""Сериализатор bool значения."""
+
+	updated = serializers.BooleanField()
