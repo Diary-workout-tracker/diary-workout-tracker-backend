@@ -121,6 +121,6 @@ Backend приложения "100 дней бега".
 
 [Шапиро Алексей](https://github.com/holohup)
 
-[Яременко Владислав](https://github.com/VladislavYar)
+[Ярёменко Владислав](https://github.com/VladislavYar)
 
 [Ястребов Владислав](https://github.com/blakkheart)
