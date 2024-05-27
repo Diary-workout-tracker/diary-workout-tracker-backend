@@ -11,6 +11,7 @@ from .views import (
 	TokenRefreshView,
 	TrainingView,
 	UpdateView,
+	UserDefaultView,
 )
 
 urlpatterns = (
@@ -25,4 +26,5 @@ urlpatterns = (
 	path("training/", TrainingView.as_view(), name="training"),
 	path("history/", HistoryView.as_view(), name="history"),
 	path("update/", UpdateView.as_view(), name="update"),
+	path("user-default/", UserDefaultView.as_view(), name="user-default"),
 )

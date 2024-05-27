@@ -7,9 +7,9 @@ from .constants import (
 	DEFAULT_AMOUNT_OF_SKIPS,
 	GENDER_CHOICES,
 	MAX_LEN_EMAIL,
+	MAX_LEN_GENDER,
 	MAX_LEN_NAME,
 	MAX_LEN_PASSWORD,
-	MAX_LEN_GENDER,
 	MAX_LEN_TIMEZONE,
 )
 from .managers import CustomUserManager

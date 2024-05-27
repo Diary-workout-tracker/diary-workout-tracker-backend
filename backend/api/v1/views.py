@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Any, Optional
 
 import pytz
 from django.contrib.auth import get_user_model
@@ -14,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from running.models import Achievement, Day, History, UserAchievement
-from users.constants import DEFAULT_AMOUNT_OF_SKIPS, MAX_LEN_NAME
+from users.constants import DEFAULT_AMOUNT_OF_SKIPS
 from users.models import User as ClassUser
 from utils import authcode, mailsender, motivation_phrase, users
 from utils.achievements import AchievementUpdater
@@ -22,11 +21,13 @@ from utils.achievements import AchievementUpdater
 from .serializers import (
 	AchievementEndTrainingSerializer,
 	AchievementSerializer,
+	BoolSerializer,
 	CustomTokenObtainSerializer,
 	HistorySerializer,
 	MeSerializer,
 	TrainingSerializer,
 	UserSerializer,
+	UserTimezoneSerializer,
 )
 from .throttling import DurationCooldownRequestThrottle
 
@@ -45,7 +46,6 @@ class HealthCheckView(APIView):
 	@extend_schema(
 		summary="Проверка работы",
 		description="Проверка работы АПИ",
-		responses={200: {"Health": "OK"}},
 		tags=("System",),
 	)
 	def get(self, request):
@@ -65,9 +65,17 @@ class RegisterUserView(APIView):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema_view(
+	post=extend_schema(
+		summary="Повторная отправка кода",
+		description="Повторная отправка кода",
+		tags=("api",),
+	),
+)
 class ResendCodeView(APIView):
 	permission_classes = (AllowAny,)
 	throttle_classes = (DurationCooldownRequestThrottle,)
+	serializer_class = UserSerializer
 
 	def post(self, request):
 		user = users.get_user_by_email_or_404(request.data.get("email"))
@@ -221,14 +229,16 @@ class HistoryView(generics.ListCreateAPIView):
 
 
 @extend_schema_view(
-	post=extend_schema(
-		responses={200: {"updated": True}},
+	patch=extend_schema(
+		responses={200: BoolSerializer()},
 		summary="Обновляет заморозки у пользователя и сохраняет часовой пояс",
 		description="Обновляет заморозки у пользователя и сохраняет часовой пояс",
 		tags=("System",),
 	),
 )
 class UpdateView(APIView):
+	serializer_class = UserTimezoneSerializer
+
 	def _get_date_activity(self, user: ClassUser, user_timezone: str) -> datetime:
 		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
 		date_activity = max(
@@ -257,25 +267,9 @@ class UpdateView(APIView):
 			user.timezone = user_timezone
 			user.save()
 
-
-	def _validate_data(self, data: Any) -> Optional[Response]:
-		"""Валидирует данные."""
-		error = None
-		status_error = status.HTTP_400_BAD_REQUEST
-		if not isinstance(data, dict):
-			error = Response({"data": "Данные должны быть в виде словаря."}, status=status_error)
-		elif not data.get("timezone"):
-			error = Response({"timezone": "Часовой пояс пользователя обязателен."}, status=status_error)
-		elif not isinstance(data.get("timezone"), str):
-			error = Response({"timezone": "Часовой пояс должен быть в виде строки."}, status=status_error)
-		elif MAX_LEN_NAME < len(data.get("timezone")):
-			error = Response({"timezone": "Часовой пояс должен быть не длиннее 100 символов."}, status=status_error)
-		return error
-
-	def post(self, request: Request, *args, **kwargs) -> Response:
-		error = self._validate_data(request.data)
-		if error:
-			return error
+	def patch(self, request: Request, *args, **kwargs) -> Response:
+		serializer = self.serializer_class(data=request.data)
+		serializer.is_valid(raise_exception=True)
 		user_timezone = request.data.get("timezone")
 		response = Response({"updated": True}, status=status.HTTP_200_OK)
 		user = request.user
@@ -299,3 +293,26 @@ class UpdateView(APIView):
 		else:
 			self._clearing_user_training_data(user)
 		return response
+
+
+@extend_schema_view(
+	patch=extend_schema(
+		responses={200: BoolSerializer()},
+		summary="Очищает данные по тренировкам и ачивки пользователя",
+		description="Очищает данные по тренировкам и ачивки пользователя",
+		tags=("System",),
+	),
+)
+class UserDefaultView(APIView):
+	def patch(self, request: Request, *args, **kwargs) -> Response:
+		"""Очищает данные по тренировкам и ачивки пользователя."""
+		user: ClassUser = request.user
+		user.date_last_skips = None
+		user.amount_of_skips = DEFAULT_AMOUNT_OF_SKIPS
+		user.total_m_run = 0
+		user.save()
+		user_history: QuerySet[History] = user.user_history.all()
+		user_history.delete()
+		user_achievements: QuerySet[UserAchievement] = user.user_achievements.all()
+		user_achievements.delete()
+		return Response({"updated": True}, status=status.HTTP_200_OK)

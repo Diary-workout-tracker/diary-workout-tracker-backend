@@ -34,11 +34,7 @@ paths:
       - {}
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                Health: OK
-          description: ''
+          description: No response body
   /api/v1/history/:
     get:
       operationId: api_v1_history_list
@@ -136,14 +132,32 @@ paths:
   /api/v1/resend_code/:
     post:
       operationId: api_v1_resend_code_create
+      description: Повторная отправка кода
+      summary: Повторная отправка кода
       tags:
       - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
       security:
       - jwtAuth: []
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
   /api/v1/token/refresh/:
     post:
       operationId: api_v1_token_refresh_create
@@ -190,12 +204,23 @@ paths:
                   $ref: '#/components/schemas/Training'
           description: ''
   /api/v1/update/:
-    post:
-      operationId: api_v1_update_create
+    patch:
+      operationId: api_v1_update_partial_update
       description: Обновляет заморозки у пользователя и сохраняет часовой пояс
       summary: Обновляет заморозки у пользователя и сохраняет часовой пояс
       tags:
       - System
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserTimezone'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserTimezone'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserTimezone'
       security:
       - jwtAuth: []
       responses:
@@ -203,7 +228,7 @@ paths:
           content:
             application/json:
               schema:
-                updated: true
+                $ref: '#/components/schemas/Bool'
           description: ''
   /api/v1/user/:
     post:
@@ -231,6 +256,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/user-default/:
+    patch:
+      operationId: api_v1_user_default_partial_update
+      description: Очищает данные по тренировкам и ачивки пользователя
+      summary: Очищает данные по тренировкам и ачивки пользователя
+      tags:
+      - System
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bool'
           description: ''
 components:
   schemas:
@@ -288,6 +329,14 @@ components:
       required:
       - icon
       - title
+    Bool:
+      type: object
+      description: Сериализатор bool значения.
+      properties:
+        updated:
+          type: boolean
+      required:
+      - updated
     CustomTokenObtain:
       type: object
       properties:
@@ -471,6 +520,15 @@ components:
           type: string
           format: uri
           nullable: true
+    PatchedUserTimezone:
+      type: object
+      description: Сериализатор timezone пользователя.
+      properties:
+        timezone:
+          type: string
+          nullable: true
+          title: Часовой пояс пользователя
+          maxLength: 100
     Training:
       type: object
       description: Сериализатор тренировок.
