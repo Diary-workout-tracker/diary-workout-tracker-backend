@@ -72,7 +72,7 @@ services:
       - MINIO_SERVER_URL=https://running.myddns.me:9000
     volumes:
       - ./minio:/minio_files
-      - /home/web/diary-training/minio/certs/:/opt/minio/certs
+      - /home/tssdr/diary-training/minio/certs/:/opt/minio/certs
     env_file: .env
     command: 'minio server --certs-dir /opt/minio/certs /minio_files --console-address ":9001"'
     ports:

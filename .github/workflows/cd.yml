@@ -61,7 +61,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
+          password: ${{ secrets.PASSWORD }}
           source: "docker-compose.production.yml"
           target: "/home/${{ secrets.USER }}/diary-training"
       - name: Executing remote ssh commands to deploy
@@ -69,7 +69,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
+          password: ${{ secrets.PASSWORD  }}
           script: |
             cd /home/${{ secrets.USER }}/diary-training/
             sudo docker compose -f docker-compose.production.yml pull
