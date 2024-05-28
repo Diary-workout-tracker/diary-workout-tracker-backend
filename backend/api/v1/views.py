@@ -21,7 +21,8 @@ from utils.achievements import AchievementUpdater
 from .serializers import (
 	AchievementEndTrainingSerializer,
 	AchievementSerializer,
-	BoolSerializer,
+	ResponseUserDefaultSerializer,
+	ResponseUpdateSerializer,
 	CustomTokenObtainSerializer,
 	HistorySerializer,
 	MeSerializer,
@@ -230,7 +231,7 @@ class HistoryView(generics.ListCreateAPIView):
 
 @extend_schema_view(
 	patch=extend_schema(
-		responses={200: BoolSerializer()},
+		responses={200: ResponseUpdateSerializer()},
 		summary="Обновляет заморозки у пользователя и сохраняет часовой пояс",
 		description="Обновляет заморозки у пользователя и сохраняет часовой пояс",
 		tags=("System",),
@@ -254,12 +255,10 @@ class UpdateView(APIView):
 		user.date_last_skips = date_day_ago
 		user.save()
 
-	def _clearing_user_training_data(self, user: ClassUser) -> None:
-		"""Очищает данные по тренировка пользователя."""
-		user.amount_of_skips = DEFAULT_AMOUNT_OF_SKIPS
-		user.date_last_skips = None
+	def _set_null_amount_of_skip(self, user: ClassUser) -> None:
+		"""Устанавливает значение заморозок у пользователя равное нулю."""
+		user.amount_of_skips = 0
 		user.save()
-		History.objects.filter(user_id=user).delete()
 
 	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
 		"""Обновляет timezone ползователя."""
@@ -271,7 +270,7 @@ class UpdateView(APIView):
 		serializer = self.serializer_class(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		user_timezone = request.data.get("timezone")
-		response = Response({"updated": True}, status=status.HTTP_200_OK)
+		response = Response({"enough": True}, status=status.HTTP_200_OK)
 		user = request.user
 		last_traning = user.last_completed_training
 
@@ -290,14 +289,14 @@ class UpdateView(APIView):
 		user.timezone = user_timezone
 		if amount_of_skips >= days_missed:
 			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
-		else:
-			self._clearing_user_training_data(user)
-		return response
+			return response
+		self._set_null_amount_of_skip(user)
+		return Response({"enough": False}, status=status.HTTP_200_OK)
 
 
 @extend_schema_view(
 	patch=extend_schema(
-		responses={200: BoolSerializer()},
+		responses={200: ResponseUserDefaultSerializer()},
 		summary="Очищает данные по тренировкам и ачивки пользователя",
 		description="Очищает данные по тренировкам и ачивки пользователя",
 		tags=("System",),
@@ -315,4 +314,4 @@ class UserDefaultView(APIView):
 		user_history.delete()
 		user_achievements: QuerySet[UserAchievement] = user.user_achievements.all()
 		user_achievements.delete()
-		return Response({"updated": True}, status=status.HTTP_200_OK)
+		return Response({"default": True}, status=status.HTTP_200_OK)

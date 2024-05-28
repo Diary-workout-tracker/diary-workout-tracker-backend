@@ -314,7 +314,13 @@ class HistorySerializer(serializers.ModelSerializer):
 		return super().create(validated_data)
 
 
-class BoolSerializer(serializers.Serializer):
-	"""Сериализатор bool значения."""
+class ResponseUserDefaultSerializer(serializers.Serializer):
+	"""Сериализатор возвращаемого значения UserDefaultView."""
 
-	updated = serializers.BooleanField()
+	default = serializers.BooleanField()
+
+
+class ResponseUpdateSerializer(serializers.Serializer):
+	"""Сериализатор взрващаемого значения UpdateView."""
+
+	enough = serializers.BooleanField()

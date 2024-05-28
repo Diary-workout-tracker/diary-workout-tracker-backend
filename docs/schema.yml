@@ -228,7 +228,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Bool'
+                $ref: '#/components/schemas/ResponseUpdate'
           description: ''
   /api/v1/user/:
     post:
@@ -271,7 +271,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Bool'
+                $ref: '#/components/schemas/ResponseUserDefault'
           description: ''
 components:
   schemas:
@@ -329,14 +329,6 @@ components:
       required:
       - icon
       - title
-    Bool:
-      type: object
-      description: Сериализатор bool значения.
-      properties:
-        updated:
-          type: boolean
-      required:
-      - updated
     CustomTokenObtain:
       type: object
       properties:
@@ -529,6 +521,22 @@ components:
           nullable: true
           title: Часовой пояс пользователя
           maxLength: 100
+    ResponseUpdate:
+      type: object
+      description: Сериализатор взрващаемого значения UpdateView.
+      properties:
+        enough:
+          type: boolean
+      required:
+      - enough
+    ResponseUserDefault:
+      type: object
+      description: Сериализатор возвращаемого значения UserDefaultView.
+      properties:
+        default:
+          type: boolean
+      required:
+      - default
     Training:
       type: object
       description: Сериализатор тренировок.
