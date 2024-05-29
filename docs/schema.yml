@@ -25,7 +25,7 @@ paths:
   /api/v1/health/:
     get:
       operationId: api_v1_health_retrieve
-      description: Проверка работы АПИ
+      description: Проверка работы API
       summary: Проверка работы
       tags:
       - System
@@ -34,7 +34,11 @@ paths:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseHealthCheck'
+          description: ''
   /api/v1/history/:
     get:
       operationId: api_v1_history_list
@@ -85,8 +89,10 @@ paths:
   /api/v1/me/:
     get:
       operationId: api_v1_me_retrieve
+      description: Отдаёт данные по пользователю
+      summary: Отдаёт данные по пользователю
       tags:
-      - api
+      - User
       security:
       - jwtAuth: []
       responses:
@@ -98,8 +104,10 @@ paths:
           description: ''
     patch:
       operationId: api_v1_me_partial_update
+      description: Обновляет данные пользователя
+      summary: Обновляет данные пользователя
       tags:
-      - api
+      - User
       requestBody:
         content:
           application/json:
@@ -122,20 +130,26 @@ paths:
           description: ''
     delete:
       operationId: api_v1_me_destroy
+      description: Удаляет пользователя
+      summary: Удаляет пользователя
       tags:
-      - api
+      - User
       security:
       - jwtAuth: []
       responses:
         '204':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
   /api/v1/resend_code/:
     post:
       operationId: api_v1_resend_code_create
       description: Повторная отправка кода
       summary: Повторная отправка кода
       tags:
-      - api
+      - User
       requestBody:
         content:
           application/json:
@@ -152,17 +166,19 @@ paths:
       - jwtAuth: []
       - {}
       responses:
-        '200':
+        '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/ResponseResendCode'
           description: ''
   /api/v1/token/refresh/:
     post:
       operationId: api_v1_token_refresh_create
+      description: Обновление токена
+      summary: Обновление токена
       tags:
-      - api
+      - User
       requestBody:
         content:
           application/json:
@@ -183,7 +199,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomTokenObtain'
+                $ref: '#/components/schemas/TokenRefresh'
           description: ''
   /api/v1/training/:
     get:
@@ -209,7 +225,7 @@ paths:
       description: Обновляет заморозки у пользователя и сохраняет часовой пояс
       summary: Обновляет заморозки у пользователя и сохраняет часовой пояс
       tags:
-      - System
+      - User
       requestBody:
         content:
           application/json:
@@ -233,8 +249,10 @@ paths:
   /api/v1/user/:
     post:
       operationId: api_v1_user_create
+      description: Создание пользователя
+      summary: Создание пользователя
       tags:
-      - api
+      - User
       requestBody:
         content:
           application/json:
@@ -251,7 +269,7 @@ paths:
       - jwtAuth: []
       - {}
       responses:
-        '200':
+        '201':
           content:
             application/json:
               schema:
@@ -263,7 +281,7 @@ paths:
       description: Очищает данные по тренировкам и ачивки пользователя
       summary: Очищает данные по тренировкам и ачивки пользователя
       tags:
-      - System
+      - User
       security:
       - jwtAuth: []
       responses:
@@ -521,9 +539,23 @@ components:
           nullable: true
           title: Часовой пояс пользователя
           maxLength: 100
+    ResponseHealthCheck:
+      type: object
+      description: Сериализатор возрващаемого значения HealthCheckView.
+      properties:
+        Health:
+          type: string
+          default: OK
+    ResponseResendCode:
+      type: object
+      description: Сериализатор возрващаемого значения ResendCodeView.
+      properties:
+        result:
+          type: string
+          default: Код создан и отправлен
     ResponseUpdate:
       type: object
-      description: Сериализатор взрващаемого значения UpdateView.
+      description: Сериализатор возрващаемого значения UpdateView.
       properties:
         enough:
           type: boolean
@@ -537,6 +569,18 @@ components:
           type: boolean
       required:
       - default
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
     Training:
       type: object
       description: Сериализатор тренировок.

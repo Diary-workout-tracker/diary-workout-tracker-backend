@@ -12,6 +12,7 @@ from users.constants import GENDER_CHOICES, MAX_LEN_NAME
 from users.models import User as ClassUser
 from utils.authcode import AuthCode
 from utils.users import get_user_by_email_or_404
+from utils.amount_skips import counts_missed_days
 
 from .constants import FORMAT_DATE, FORMAT_DATETIME, FORMAT_TIME
 from .fields import Base64ImageField
@@ -36,6 +37,13 @@ class UserTimezoneSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
 		fields = ("timezone",)
+		extra_kwargs = {"timezone": {"required": True}}
+
+	def validate_timezone(self, value: str) -> str:
+		"""Валидация timezone пользователя."""
+		if value in pytz.all_timezones_set:
+			return value
+		raise serializers.ValidationError("Несуществующая timezone.")
 
 
 class MeSerializer(serializers.ModelSerializer):
@@ -94,18 +102,17 @@ class MeSerializer(serializers.ModelSerializer):
 		return value
 
 	def validate_date_last_skips(self, value: datetime) -> datetime:
-		user = self.context["request"].user
+		user: ClassUser = self.context["request"].user
 		date_last_skips = user.date_last_skips
 		user_timezone = pytz.timezone(user.timezone)
 		localdate = timezone.localdate(timezone=user_timezone)
 		user_timezone_value = value.astimezone(user_timezone).date()
-		if not date_last_skips:
-			if localdate != user_timezone_value:
-				raise serializers.ValidationError("День заморозки должен быть равен текущему дню.")
-			return value
-		date_last_skips = date_last_skips.astimezone(user_timezone).date()
-		if date_last_skips >= user_timezone_value:
-			raise serializers.ValidationError(f"День заморозки должен быть больше {date_last_skips}.")
+		if localdate != user_timezone_value:
+			raise serializers.ValidationError("День заморозки должен быть равен текущему дню.")
+		if date_last_skips:
+			date_last_skips = date_last_skips.astimezone(user_timezone).date()
+			if date_last_skips == user_timezone_value:
+				raise serializers.ValidationError("Тренировка уже заморожена.")
 		return value
 
 	def create(self, validated_data: dict) -> ClassUser:
@@ -142,7 +149,7 @@ class CustomTokenObtainSerializer(serializers.Serializer):
 		authcode = AuthCode(user)
 		if authcode.code_is_valid(attrs["code"]):
 			return attrs
-		raise serializers.ValidationError({"code": ["Неверный или устаревший код"]})
+		raise serializers.ValidationError({"code": ["Неверный или устаревший код."]})
 
 	def create(self, validated_data):
 		user = User.objects.get(email=validated_data["email"])
@@ -260,7 +267,7 @@ class HistorySerializer(serializers.ModelSerializer):
 	def validate(self, data: OrderedDict) -> OrderedDict:
 		if data["training_start"] >= data["training_end"]:
 			raise serializers.ValidationError(
-				{"training_start_training_end": ["Время начала тренировки должно быть раньше конца"]}
+				{"training_start_training_end": ["Время начала тренировки должно быть раньше конца."]}
 			)
 		return data
 
@@ -276,7 +283,18 @@ class HistorySerializer(serializers.ModelSerializer):
 			raise serializers.ValidationError("Дата должна быть больше прошлой тренировки.")
 		return value
 
+	def _check_lock_training(self, value: datetime) -> None:
+		"""Проверка блокировки челленджа."""
+		user: ClassUser = self.context["request"].user
+		if not user.last_completed_training:
+			return
+		now = value.astimezone(pytz.timezone(user.timezone))
+		days_missed, *_ = counts_missed_days(user, user.timezone, now)
+		if user.amount_of_skips < days_missed:
+			raise serializers.ValidationError("Невозможно сохранить тренировку при заблокированном челлендже.")
+
 	def validate_training_start(self, value: datetime) -> datetime:
+		self._check_lock_training(value)
 		return self._validate_date(value, "training_start")
 
 	def validate_training_end(self, value: datetime) -> datetime:
@@ -284,7 +302,7 @@ class HistorySerializer(serializers.ModelSerializer):
 
 	def validate_motivation_phrase(self, value: str) -> str:
 		if not MotivationalPhrase.objects.filter(text=value).exists():
-			raise serializers.ValidationError("Данной мотивационной фразы не существует")
+			raise serializers.ValidationError("Данной мотивационной фразы не существует.")
 		return value
 
 	def validate_training_day(self, value: Day) -> Day:
@@ -292,14 +310,14 @@ class HistorySerializer(serializers.ModelSerializer):
 		if last_completed_training:
 			day_number_last_training = last_completed_training.training_day.day_number
 			if value.day_number - 1 != day_number_last_training:
-				raise serializers.ValidationError(f"День тренировки должен быть равен {day_number_last_training+1}")
+				raise serializers.ValidationError(f"День тренировки должен быть равен {day_number_last_training+1}.")
 		elif value.day_number != 1:
-			raise serializers.ValidationError("День тренировки должен быть равен 1")
+			raise serializers.ValidationError("День тренировки должен быть равен 1.")
 		return value
 
 	def validate_achievements(self, value: list) -> list:
 		if value and len(value) > Achievement.objects.filter(id__in=value).count():
-			raise serializers.ValidationError("Некорректные ачивки")
+			raise serializers.ValidationError("Некорректные ачивки.")
 		return value
 
 	def get_time(self, obj: History) -> int:
@@ -321,6 +339,18 @@ class ResponseUserDefaultSerializer(serializers.Serializer):
 
 
 class ResponseUpdateSerializer(serializers.Serializer):
-	"""Сериализатор взрващаемого значения UpdateView."""
+	"""Сериализатор возрващаемого значения UpdateView."""
 
 	enough = serializers.BooleanField()
+
+
+class ResponseResendCodeSerializer(serializers.Serializer):
+	"""Сериализатор возрващаемого значения ResendCodeView."""
+
+	result = serializers.CharField(default="Код создан и отправлен")
+
+
+class ResponseHealthCheckSerializer(serializers.Serializer):
+	"""Сериализатор возрващаемого значения HealthCheckView."""
+
+	Health = serializers.CharField(default="OK")
