@@ -46,9 +46,7 @@ def get_users_token(client, user):
 def test_correct_code_yields_token(get_users_token):
 	response = get_users_token
 	assert response.status_code == status.HTTP_200_OK
-	assert "refresh" in response.data
 	assert "access" in response.data
-	assert response.data["refresh"] != ""
 	assert response.data["access"] != ""
 
 

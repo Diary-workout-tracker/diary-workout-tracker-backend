@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pytz
 from django.contrib.auth import get_user_model
@@ -11,20 +11,24 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from running.models import Achievement, Day, History, UserAchievement
 from users.constants import DEFAULT_AMOUNT_OF_SKIPS
 from users.models import User as ClassUser
 from utils import authcode, mailsender, motivation_phrase, users
 from utils.achievements import AchievementUpdater
+from utils.amount_skips import counts_missed_days
 
 from .serializers import (
 	AchievementEndTrainingSerializer,
 	AchievementSerializer,
-	BoolSerializer,
 	CustomTokenObtainSerializer,
 	HistorySerializer,
 	MeSerializer,
+	ResponseHealthCheckSerializer,
+	ResponseResendCodeSerializer,
+	ResponseUpdateSerializer,
+	ResponseUserDefaultSerializer,
 	TrainingSerializer,
 	UserSerializer,
 	UserTimezoneSerializer,
@@ -44,14 +48,23 @@ class HealthCheckView(APIView):
 	permission_classes = (AllowAny,)
 
 	@extend_schema(
+		responses={200: ResponseHealthCheckSerializer()},
 		summary="Проверка работы",
-		description="Проверка работы АПИ",
+		description="Проверка работы API",
 		tags=("System",),
 	)
 	def get(self, request):
 		return Response({"Health": "OK"})
 
 
+@extend_schema_view(
+	post=extend_schema(
+		responses={201: UserSerializer()},
+		summary="Создание пользователя",
+		description="Создание пользователя",
+		tags=("User",),
+	),
+)
 class RegisterUserView(APIView):
 	serializer_class = UserSerializer
 	permission_classes = (AllowAny,)
@@ -67,9 +80,10 @@ class RegisterUserView(APIView):
 
 @extend_schema_view(
 	post=extend_schema(
+		responses={201: ResponseResendCodeSerializer()},
 		summary="Повторная отправка кода",
 		description="Повторная отправка кода",
-		tags=("api",),
+		tags=("User",),
 	),
 )
 class ResendCodeView(APIView):
@@ -83,6 +97,14 @@ class ResendCodeView(APIView):
 		return Response({"result": "Код создан и отправлен"}, status=status.HTTP_201_CREATED)
 
 
+@extend_schema_view(
+	post=extend_schema(
+		responses={200: TokenRefreshSerializer()},
+		summary="Обновление токена",
+		description="Обновление токена",
+		tags=("User",),
+	),
+)
 class TokenRefreshView(APIView):
 	serializer_class = CustomTokenObtainSerializer
 	throttle_classes = (DurationCooldownRequestThrottle,)
@@ -91,31 +113,39 @@ class TokenRefreshView(APIView):
 	def post(self, request, format=None):
 		serializer = self.serializer_class(data=request.data)
 		if serializer.is_valid():
-			token_data = serializer.save()
+			token_data: dict = serializer.save()
+			token_data.pop("refresh")
 			return Response(token_data, status=status.HTTP_200_OK)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MyInfoView(APIView):
+@extend_schema_view(
+	get=extend_schema(
+		responses={200: MeSerializer()},
+		summary="Отдаёт данные по пользователю",
+		description="Отдаёт данные по пользователю",
+		tags=("User",),
+	),
+	patch=extend_schema(
+		responses={200: MeSerializer()},
+		summary="Обновляет данные пользователя",
+		description="Обновляет данные пользователя",
+		tags=("User",),
+	),
+	put=extend_schema(exclude=True),
+	delete=extend_schema(
+		responses={204: MeSerializer()},
+		summary="Удаляет пользователя",
+		description="Удаляет пользователя",
+		tags=("User",),
+	),
+)
+class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
 	serializer_class = MeSerializer
 
-	def get(self, request, *args, **kwargs):
-		user = request.user
-		serializer = self.serializer_class(user, context={"request": request})
-		return Response(serializer.data)
-
-	def patch(self, request, *args, **kwargs):
-		user = request.user
-		serializer = self.serializer_class(user, data=request.data, context={"request": request}, partial=True)
-		if serializer.is_valid():
-			serializer.save()
-			return Response(serializer.data)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-	def delete(self, request, *args, **kwargs):
-		user = request.user
-		user.delete()
-		return Response(status=status.HTTP_204_NO_CONTENT)
+	def get_object(self):
+		"""Отдаёт объект пользователя."""
+		return self.request.user
 
 
 @extend_schema_view(
@@ -230,21 +260,14 @@ class HistoryView(generics.ListCreateAPIView):
 
 @extend_schema_view(
 	patch=extend_schema(
-		responses={200: BoolSerializer()},
+		responses={200: ResponseUpdateSerializer()},
 		summary="Обновляет заморозки у пользователя и сохраняет часовой пояс",
 		description="Обновляет заморозки у пользователя и сохраняет часовой пояс",
-		tags=("System",),
+		tags=("User",),
 	),
 )
 class UpdateView(APIView):
 	serializer_class = UserTimezoneSerializer
-
-	def _get_date_activity(self, user: ClassUser, user_timezone: str) -> datetime:
-		"""Отдаёт дату последней активности в виде тренировки или заморозки."""
-		date_activity = max(
-			[date for date in [user.date_last_skips, user.last_completed_training.training_start] if date is not None]
-		)
-		return date_activity.astimezone(pytz.timezone(user_timezone))
 
 	def _updates_skip_data(
 		self, user: ClassUser, amount_of_skips: int, days_missed: int, date_day_ago: datetime
@@ -254,12 +277,10 @@ class UpdateView(APIView):
 		user.date_last_skips = date_day_ago
 		user.save()
 
-	def _clearing_user_training_data(self, user: ClassUser) -> None:
-		"""Очищает данные по тренировка пользователя."""
-		user.amount_of_skips = DEFAULT_AMOUNT_OF_SKIPS
-		user.date_last_skips = None
+	def _set_null_amount_of_skip(self, user: ClassUser) -> None:
+		"""Устанавливает значение заморозок у пользователя равное нулю."""
+		user.amount_of_skips = 0
 		user.save()
-		History.objects.filter(user_id=user).delete()
 
 	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
 		"""Обновляет timezone ползователя."""
@@ -271,36 +292,32 @@ class UpdateView(APIView):
 		serializer = self.serializer_class(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		user_timezone = request.data.get("timezone")
-		response = Response({"updated": True}, status=status.HTTP_200_OK)
-		user = request.user
-		last_traning = user.last_completed_training
+		response = Response({"enough": True}, status=status.HTTP_200_OK)
+		user: ClassUser = request.user
+		last_traning: History = user.last_completed_training
 
 		if not last_traning or last_traning.training_day.day_number == 100:
 			self._update_user_timezone_data(user, user_timezone)
 			return response
-
-		date_activity = self._get_date_activity(user, user_timezone)
-		amount_of_skips = user.amount_of_skips
-		date_day_ago = timezone.localtime(timezone=pytz.timezone(user_timezone)) - timedelta(days=1)
-		days_missed = (date_day_ago.date() - date_activity.date()).days
+		now = timezone.localtime(timezone=pytz.timezone(user_timezone))
+		days_missed, date_day_ago, amount_of_skips = counts_missed_days(user, user_timezone, now)
 		if days_missed <= 0:
 			self._update_user_timezone_data(user, user_timezone)
 			return response
-
 		user.timezone = user_timezone
 		if amount_of_skips >= days_missed:
 			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
-		else:
-			self._clearing_user_training_data(user)
-		return response
+			return response
+		self._set_null_amount_of_skip(user)
+		return Response({"enough": False}, status=status.HTTP_200_OK)
 
 
 @extend_schema_view(
 	patch=extend_schema(
-		responses={200: BoolSerializer()},
+		responses={200: ResponseUserDefaultSerializer()},
 		summary="Очищает данные по тренировкам и ачивки пользователя",
 		description="Очищает данные по тренировкам и ачивки пользователя",
-		tags=("System",),
+		tags=("User",),
 	),
 )
 class UserDefaultView(APIView):
@@ -315,4 +332,4 @@ class UserDefaultView(APIView):
 		user_history.delete()
 		user_achievements: QuerySet[UserAchievement] = user.user_achievements.all()
 		user_achievements.delete()
-		return Response({"updated": True}, status=status.HTTP_200_OK)
+		return Response({"default": True}, status=status.HTTP_200_OK)
