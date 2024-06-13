@@ -483,6 +483,9 @@ components:
         last_completed_training:
           type: integer
           readOnly: true
+        blocked_training:
+          type: boolean
+          readOnly: true
         date_last_skips:
           type: string
           format: date-time
@@ -493,6 +496,7 @@ components:
           format: uri
           nullable: true
       required:
+      - blocked_training
       - email
       - last_completed_training
     PatchedMe:
@@ -520,6 +524,9 @@ components:
           nullable: true
         last_completed_training:
           type: integer
+          readOnly: true
+        blocked_training:
+          type: boolean
           readOnly: true
         date_last_skips:
           type: string
@@ -559,8 +566,11 @@ components:
       properties:
         enough:
           type: boolean
+        skip:
+          type: boolean
       required:
       - enough
+      - skip
     ResponseUserDefault:
       type: object
       description: Сериализатор возвращаемого значения UserDefaultView.

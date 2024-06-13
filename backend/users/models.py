@@ -35,6 +35,7 @@ class User(AbstractUser):
 		null=True,
 		blank=True,
 	)
+	blocked_training = models.BooleanField(_("Блокировка тренировок"), default=False)
 	date_last_skips = models.DateTimeField(_("Дата последнего пропуска"), null=True, blank=True)
 	amount_of_skips = models.PositiveSmallIntegerField(
 		_("Количество доступных пропусков/заморозок"), default=DEFAULT_AMOUNT_OF_SKIPS

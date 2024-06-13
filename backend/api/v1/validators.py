@@ -3,4 +3,6 @@ from rest_framework.validators import UniqueValidator
 
 
 class CustomUniqueValidator(UniqueValidator):
+	"""Кастомный валидатор уникальности email."""
+
 	message = _("Такой email уже существует.")

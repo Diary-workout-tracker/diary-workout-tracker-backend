@@ -1,4 +1,5 @@
 import pytest
+import pytz
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
@@ -20,5 +21,5 @@ def test_all_achievments_returns_correct(user_client, achievements) -> None:
 	assert response.status_code == status.HTTP_200_OK
 	assert len(response.data) == 3
 	achievement = response.data[0]
-	assert achievement["achievement_date"] == date.strftime(FORMAT_DATE)
+	assert achievement["achievement_date"] == date.astimezone(pytz.timezone(user.timezone)).strftime(FORMAT_DATE)
 	assert achievement["received"] is not None

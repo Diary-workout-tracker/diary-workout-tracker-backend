@@ -57,6 +57,7 @@ class MeSerializer(serializers.ModelSerializer):
 	last_completed_training = serializers.IntegerField(
 		source="last_completed_training.training_day.day_number", read_only=True
 	)
+	blocked_training = serializers.BooleanField(read_only=True)
 	date_last_skips = serializers.DateTimeField(required=False)
 	amount_of_skips = serializers.IntegerField(required=False)
 	avatar = Base64ImageField(allow_null=True, required=False)
@@ -70,6 +71,7 @@ class MeSerializer(serializers.ModelSerializer):
 			"height_cm",
 			"weight_kg",
 			"last_completed_training",
+			"blocked_training",
 			"date_last_skips",
 			"amount_of_skips",
 			"avatar",
@@ -290,7 +292,7 @@ class HistorySerializer(serializers.ModelSerializer):
 			return
 		now = value.astimezone(pytz.timezone(user.timezone))
 		days_missed, *_ = counts_missed_days(user, user.timezone, now)
-		if user.amount_of_skips < days_missed:
+		if user.blocked_training or user.amount_of_skips < days_missed:
 			raise serializers.ValidationError("Невозможно сохранить тренировку при заблокированном челлендже.")
 
 	def validate_training_start(self, value: datetime) -> datetime:
@@ -342,6 +344,7 @@ class ResponseUpdateSerializer(serializers.Serializer):
 	"""Сериализатор возрващаемого значения UpdateView."""
 
 	enough = serializers.BooleanField()
+	skip = serializers.BooleanField()
 
 
 class ResponseResendCodeSerializer(serializers.Serializer):

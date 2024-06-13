@@ -25,6 +25,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 			{
 				"fields": (
 					"last_completed_training",
+					"blocked_training",
 					"date_last_skips",
 					"amount_of_skips",
 					"avatar",
@@ -53,6 +54,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 	if not DEBUG:
 		readonly_fields = (
 			"last_completed_training",
+			"blocked_training",
 			"date_last_skips",
 			"timezone",
 			"email",

@@ -38,7 +38,7 @@ from .throttling import DurationCooldownRequestThrottle
 User = get_user_model()
 
 
-def send_auth_code(user) -> None:
+def send_auth_code(user: ClassUser) -> None:
 	auth_code = authcode.AuthCode(user)
 	auth_code.set_sender(mailsender.DefaultMailSender())
 	auth_code.create_code()
@@ -53,7 +53,7 @@ class HealthCheckView(APIView):
 		description="Проверка работы API",
 		tags=("System",),
 	)
-	def get(self, request):
+	def get(self, request: Request) -> Response:
 		return Response({"Health": "OK"})
 
 
@@ -69,7 +69,7 @@ class RegisterUserView(APIView):
 	serializer_class = UserSerializer
 	permission_classes = (AllowAny,)
 
-	def post(self, request, format=None):
+	def post(self, request: Request) -> Response:
 		serializer = self.serializer_class(data=request.data, context={"request": request})
 		if serializer.is_valid():
 			serializer.save()
@@ -91,7 +91,7 @@ class ResendCodeView(APIView):
 	throttle_classes = (DurationCooldownRequestThrottle,)
 	serializer_class = UserSerializer
 
-	def post(self, request):
+	def post(self, request: Request) -> Response:
 		user = users.get_user_by_email_or_404(request.data.get("email"))
 		send_auth_code(user)
 		return Response({"result": "Код создан и отправлен"}, status=status.HTTP_201_CREATED)
@@ -110,7 +110,7 @@ class TokenRefreshView(APIView):
 	throttle_classes = (DurationCooldownRequestThrottle,)
 	permission_classes = (AllowAny,)
 
-	def post(self, request, format=None):
+	def post(self, request: Request) -> Response:
 		serializer = self.serializer_class(data=request.data)
 		if serializer.is_valid():
 			token_data: dict = serializer.save()
@@ -143,7 +143,7 @@ class TokenRefreshView(APIView):
 class MyInfoView(generics.RetrieveUpdateDestroyAPIView):
 	serializer_class = MeSerializer
 
-	def get_object(self):
+	def get_object(self) -> ClassUser:
 		"""Отдаёт объект пользователя."""
 		return self.request.user
 
@@ -160,7 +160,7 @@ class TrainingView(generics.ListAPIView):
 	queryset = Day.objects.all()
 	serializer_class = TrainingSerializer
 
-	def get_queryset(self) -> QuerySet:
+	def get_queryset(self) -> QuerySet[History]:
 		"""
 		Формирует список тренировок с динамическими фразами
 		и флагом завершения тренировки.
@@ -189,7 +189,7 @@ class TrainingView(generics.ListAPIView):
 class AchievementView(generics.ListAPIView):
 	serializer_class = AchievementSerializer
 
-	def get_queryset(self) -> QuerySet:
+	def get_queryset(self) -> QuerySet[Achievement]:
 		"""Формирует список ачивок c флагом получения и датой."""
 		user = self.request.user
 		sub_queryset = UserAchievement.objects.filter(user_id=user).values("achievement_id", "achievement_date")
@@ -226,7 +226,7 @@ class AchievementView(generics.ListAPIView):
 class HistoryView(generics.ListCreateAPIView):
 	serializer_class = HistorySerializer
 
-	def get_queryset(self) -> QuerySet:
+	def get_queryset(self) -> QuerySet[History]:
 		"""Формирует список историй тренировок пользователя."""
 		return self.request.user.user_history.order_by("training_day")
 
@@ -278,8 +278,12 @@ class UpdateView(APIView):
 		user.save()
 
 	def _set_null_amount_of_skip(self, user: ClassUser) -> None:
-		"""Устанавливает значение заморозок у пользователя равное нулю."""
+		"""
+		Устанавливает значение заморозок у пользователя равное нулю
+		и блокирует тренировки.
+		"""
 		user.amount_of_skips = 0
+		user.blocked_training = True
 		user.save()
 
 	def _update_user_timezone_data(self, user: ClassUser, user_timezone: str) -> None:
@@ -289,27 +293,40 @@ class UpdateView(APIView):
 			user.save()
 
 	def patch(self, request: Request, *args, **kwargs) -> Response:
+		"""Обновляет timezone пользователя и просчитывает пропуски тренировок."""
 		serializer = self.serializer_class(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		user_timezone = request.data.get("timezone")
-		response = Response({"enough": True}, status=status.HTTP_200_OK)
+		response_data = {
+			"data": {
+				"enough": True,
+				"skip": False,
+			},
+			"status": status.HTTP_200_OK,
+		}
 		user: ClassUser = request.user
 		last_traning: History = user.last_completed_training
-
+		if user.blocked_training:
+			response_data["data"]["enough"] = False
+			self._update_user_timezone_data(user, user_timezone)
+			return Response(**response_data)
 		if not last_traning or last_traning.training_day.day_number == 100:
 			self._update_user_timezone_data(user, user_timezone)
-			return response
+			return Response(**response_data)
 		now = timezone.localtime(timezone=pytz.timezone(user_timezone))
 		days_missed, date_day_ago, amount_of_skips = counts_missed_days(user, user_timezone, now)
 		if days_missed <= 0:
 			self._update_user_timezone_data(user, user_timezone)
-			return response
+			return Response(**response_data)
 		user.timezone = user_timezone
 		if amount_of_skips >= days_missed:
 			self._updates_skip_data(user, amount_of_skips, days_missed, date_day_ago)
-			return response
+			response_data["data"]["skip"] = True
+			return Response(**response_data)
 		self._set_null_amount_of_skip(user)
-		return Response({"enough": False}, status=status.HTTP_200_OK)
+		response_data["data"]["enough"] = False
+		response_data["data"]["skip"] = True
+		return Response(**response_data)
 
 
 @extend_schema_view(
@@ -327,6 +344,7 @@ class UserDefaultView(APIView):
 		user.date_last_skips = None
 		user.amount_of_skips = DEFAULT_AMOUNT_OF_SKIPS
 		user.total_m_run = 0
+		user.blocked_training = False
 		user.save()
 		user_history: QuerySet[History] = user.user_history.all()
 		user_history.delete()
